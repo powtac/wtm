@@ -346,6 +346,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-SCN-012 (P0):** Beim App-Start baut WTM zuerst die UI auf und startet danach den vollständigen Launch-Scan. Bis zu den ersten Ergebnissen bleibt ein erklärender Scan-/Empty State sichtbar; Modell- und Artefaktresultate aus früheren App-Sitzungen werden nicht geladen.
 - **FR-SCN-013 (P0):** Adapterergebnisse MUST während des Scans in begrenzten Batches in den flüchtigen normalisierten Graphen und die sichtbare Liste übernommen werden. Neue oder aktualisierte Einträge erscheinen ohne Warten auf den Gesamtscan; Auswahl, Sortierung und Scrollposition dürfen durch Batch-Updates nicht unnötig springen.
 - **FR-SCN-014 (P0):** Automatischer Launch-Scan, manueller `Scan Now` und manueller `Rescan` verwenden denselben Coordinator, dieselben Scope- und Read-only-Garantien sowie dieselbe Cancel-/Fehlersemantik. Gleichzeitige Scans derselben Quelle werden zusammengeführt oder abgewiesen, nicht parallel dupliziert.
+- **FR-SCN-015 (P0):** Überlappt eine generische manuelle Quelle eine erkannte Providerquelle, MUST die providerseitig belegte Installation die generische Sicht auf dieselben Artefaktpfade ersetzen. Physisch oder pfadseitig getrennte Installationen bleiben getrennt; bloß gleiche Namen oder Digests dürfen keine Installation entfernen.
 
 ### 9.4 Inventar und Navigation
 
@@ -718,6 +719,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - UI-Tests für Ablehnen, späteres Erlauben, falschen Ordner, Widerruf und erneute Freigabe.
 - UI- und Integrationstests für ersten Start ohne vorzeitigen Scan, unmittelbaren Scan nach `Start Scan`, automatischen Folgestart-Scan und deaktiviertes `Scan on Launch`.
 - Tests für deterministische Standardquellen-Reihenfolge und die Invariante, dass `~`, `~/.cache`, `~/Library` und andere breite Elternpfade nicht als automatische Scanwurzeln verwendet werden.
+- Tests für überlappende Provider-/manuelle Quellen: kanonischer Providerfund statt generischem `local`-Duplikat, aber Erhalt tatsächlich getrennter Installationspfade.
 - UI-Tests für fortlaufende Batch-Ergebnisse bei stabiler Auswahl sowie die dauerhafte Trennung von globalem Scan und kontextbezogenem `Reveal in Finder`.
 - UI-Tests für sichtbaren Scan-Aktivitätsstatus, aktuelle gekürzte Scan-Wurzel, unbestimmten und bestimmten Fortschritt, separaten Abbruch sowie Abschluss- und Abbruchzusammenfassung.
 - Präsentations- und UI-Tests für `0 Artifacts`, `1 Artifact` und pluralisierte Artefaktanzahlen sowie unveränderte `Shared`-/`Unknown`-Kennzeichnung.
@@ -840,7 +842,7 @@ Die erste nutzbare Beta ist bewusst klein und scan-only. Sie ist fertig, wenn al
 2. Ausgewählte interne sowie zusätzliche HDDs/SSDs werden getrennt inventarisiert und anhand gespeicherter Quellenmetadaten nach erneutem Mounten wiedererkannt. Offline-Quellen erscheinen ohne sitzungsübergreifend gespeicherten Modellbestand und werden nach Mount neu gescannt.
 3. Scan-Zweck und einzelne Quellen werden vor dem Zugriff verständlich erklärt; Ablehnung, falsche Auswahl, Widerruf und erneute Freigabe sind ohne Sackgasse testbar.
 4. Der ausgelieferte Phase-1-Build enthält keinen erreichbaren Schreib-, Lösch- oder Prozessstartpfad; Quelldateien werden ausschließlich lesend geöffnet.
-5. ModelIdentity, ModelVariant, ModelInstallation und Artifact bleiben im flüchtigen normalisierten Graphen getrennt; gleiche Varianten auf mehreren Volumes werden nicht zu einer Installation zusammengezogen. WTM schreibt in Phase 1 keinen Modellindex auf Disk.
+5. ModelIdentity, ModelVariant, ModelInstallation und Artifact bleiben im flüchtigen normalisierten Graphen getrennt; gleiche Varianten auf mehreren Volumes werden nicht zu einer Installation zusammengezogen. Überlappende manuelle Scanwurzeln erzeugen keine generischen `local`-Duplikate kanonischer Providerfunde. WTM schreibt in Phase 1 keinen Modellindex auf Disk.
 6. Geteilte HF-/Ollama-Artefakte werden nicht naiv mehrfach gezählt; unsichere Zuordnung erscheint als `Shared` oder `Unknown`.
 7. Mindestens ein realer und ein Fixture-basierter Teildownload werden korrekt erkannt.
 8. Zeitstempel zeigen ihre Herkunft; `Stored`, `Old`, `Age Unknown` und `Incomplete` sind getrennt sichtbar. Runtimezustände sind nicht Teil der Phase-1-Abnahme.

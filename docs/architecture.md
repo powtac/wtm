@@ -17,6 +17,9 @@ WTM app
 `WTMDomain` owns provider-neutral identities, variants, installations, artifacts,
 timestamps, sources, and issues. `WTMAdapterContracts` defines the storage-provider
 boundary and immutable registry. Concrete provider targets do not depend on each other.
+Provider sources are scanned before generic manual sources. The coordinator reconciles
+overlapping artifact paths so provider-backed identity replaces a generic cache view,
+while distinct installation paths and volumes remain separate.
 
 The app target is the only composition root. It constructs the registry and injects it
 into `InventoryCoordinator`. Views never enumerate the file system directly.

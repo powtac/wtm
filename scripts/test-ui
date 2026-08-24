@@ -4,18 +4,32 @@ set -euo pipefail
 repository_root="${0:A:h:h}"
 cd "$repository_root"
 
+derived_data="$(mktemp -d /tmp/wtm-ui-tests.XXXXXX)"
+trap '/bin/rm -rf -- "$derived_data"' EXIT
+
 if /usr/sbin/DevToolsSecurity -status 2>&1 | rg -q 'disabled'; then
   echo "UI tests require macOS Developer Tools security to be enabled." >&2
   echo "Enable it through Xcode or run: sudo DevToolsSecurity -enable" >&2
   exit 2
 fi
 
+signing_arguments=()
+if ! security find-identity -v -p codesigning 2>/dev/null | rg -q '"Apple Development:'; then
+  # Hosted CI runners have no personal development identity. The UI behavior smoke still
+  # runs ad-hoc; the XCTest contrast audit remains a signed local/release gate.
+  signing_arguments=(
+    CODE_SIGN_STYLE=Manual
+    CODE_SIGN_IDENTITY=-
+    DEVELOPMENT_TEAM=
+    ENABLE_HARDENED_RUNTIME=NO
+  )
+fi
+
 xcodebuild \
   -project WTM.xcodeproj \
   -scheme WTM \
+  -derivedDataPath "$derived_data" \
   -destination 'platform=macOS,arch=arm64' \
-  CODE_SIGN_STYLE=Manual \
-  CODE_SIGN_IDENTITY=- \
-  DEVELOPMENT_TEAM= \
+  "${signing_arguments[@]}" \
   -only-testing:WTMAppUITests \
   test

@@ -9,8 +9,8 @@ What The Model is a native macOS inventory for locally stored LLMs. It explains 
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-The project is currently implementing the Phase 1 read-only beta. It cannot delete
-files, change model configuration, or start external processes.
+The Phase 1 read-only beta cannot delete files, change model configuration, or start
+external processes.
 
 ## Current scope
 
@@ -45,8 +45,8 @@ Command-line verification:
 ./scripts/test
 ```
 
-The UI smoke test additionally requires macOS Developer Tools security and runs with a
-local ad-hoc signature:
+The labeled-control UI smoke test additionally requires macOS Developer Tools security.
+Hosted CI falls back to ad-hoc test-runner signing without hardened runtime:
 
 ```sh
 sudo DevToolsSecurity -enable

@@ -60,6 +60,28 @@ extension TimestampKind {
   }
 }
 
+extension InventoryIssue {
+  var localizedSummary: String {
+    switch code {
+    case "HF_CACHE_ENUMERATION_FAILED", "HF_REPOSITORY_INVALID", "HF_DOWNLOAD_INCOMPLETE":
+      String(localized: "issue.hugging-face")
+    case "OLLAMA_ENUMERATION_FAILED", "OLLAMA_MANIFEST_INVALID", "OLLAMA_MANIFEST_PATH_INVALID",
+      "OLLAMA_BLOB_MISSING", "OLLAMA_BLOB_REFERENCE_INVALID":
+      String(localized: "issue.ollama")
+    case "MANUAL_ENUMERATION_FAILED":
+      String(localized: "issue.manual")
+    case "SOURCE_OFFLINE":
+      String(localized: "issue.source-offline")
+    case "SOURCE_NOT_READABLE", "SOURCE_ACCESS_STALE", "SOURCE_NOT_ALLOWED":
+      String(localized: "issue.source-access")
+    case "SOURCE_SETTINGS_LOAD_FAILED", "SOURCE_SETTINGS_SAVE_FAILED":
+      String(localized: "issue.source-settings")
+    default:
+      String(localized: "issue.generic")
+    }
+  }
+}
+
 extension ModelInstallation {
   var inventorySortName: String { identity.displayName }
   var inventorySortProvider: String { providerID.localizedName }
@@ -81,14 +103,25 @@ enum StorageDisplayMode: String, CaseIterable {
 struct InventoryTableRow: Identifiable {
   let installation: ModelInstallation
   let displayedByteCount: Int64
+  let reclaimableByteCount: Int64
 
   var id: ModelInstallation.ID { installation.id }
   var sortName: String { installation.inventorySortName }
   var sortProvider: String { installation.inventorySortProvider }
-  var sortFormat: String { installation.inventorySortFormat }
+  var sortFormat: String {
+    [installation.inventorySortFormat, installation.variant.quantization]
+      .compactMap { $0 }
+      .joined(separator: " ")
+  }
   var sortState: String { installation.inventorySortState }
   var sortSize: Int64 { displayedByteCount }
+  var sortReclaimableSize: Int64 { reclaimableByteCount }
   var sortAge: TimeInterval { installation.inventorySortAge }
+  var sortDate: TimeInterval {
+    installation.earliestChangeTimestamp?.value.timeIntervalSinceReferenceDate
+      ?? -.greatestFiniteMagnitude
+  }
+  var sortSource: String { installation.sourceID }
   var sortPath: String { installation.inventorySortPath }
 }
 
@@ -102,9 +135,23 @@ func inventoryTableRows(
       installation: installation,
       displayedByteCount: mode == .absolute
         ? installation.allocatedByteCount
-        : breakdown.exclusiveByteCount(for: installation.id)
+        : breakdown.exclusiveByteCount(for: installation.id),
+      reclaimableByteCount: breakdown.exclusiveByteCount(for: installation.id)
     )
   }
+}
+
+func formatAndQuantizationText(_ installation: ModelInstallation) -> String {
+  [installation.variant.format.localizedName, installation.variant.quantization]
+    .compactMap { $0 }
+    .joined(separator: " · ")
+}
+
+func firstChangeText(_ installation: ModelInstallation) -> String {
+  guard let timestamp = installation.earliestChangeTimestamp else {
+    return String(localized: "value.unknown")
+  }
+  return timestamp.value.formatted(date: .abbreviated, time: .omitted)
 }
 
 func percentageText(_ byteCount: Int64, of totalByteCount: Int64) -> String {

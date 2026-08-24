@@ -21,3 +21,12 @@ first public release is tagged.
 - Catalogued `~/.unsloth` discovery, deduplicated scan storage totals, whole-unit allocated
   sizes, sortable model age with explicit timestamp provenance, configurable old-model
   thresholds, and separate `Old`/`Age Unknown` filters.
+- Provider-first reconciliation that removes generic `local` duplicates from overlapping
+  manual and Hugging Face sources while preserving distinct installation paths, plus
+  rejection of Finder metadata as a synthetic Hugging Face revision.
+- Source permission recovery and revocation, external-volume identity/remount handling,
+  incremental adapter batches, storage-share breakdowns, column customization, and
+  English-only catalog validation.
+- First-run labeled-control UI smoke tests for local and ad-hoc CI signing.
+- Phase 1 acceptance evidence, including an arm64 Developer ID app verified by Apple
+  notarization, stapling, and Gatekeeper.

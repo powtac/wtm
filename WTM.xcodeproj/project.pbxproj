@@ -327,7 +327,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000C /* Debug.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				ENABLE_TESTABILITY = YES;
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
@@ -338,7 +337,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000D /* Release.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD)";
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
 			};

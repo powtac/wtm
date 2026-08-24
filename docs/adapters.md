@@ -15,7 +15,9 @@ storage adapters.
 ### Manual folder adapter
 
 Conservative recognition of GGUF, Safetensors, and related configuration files in a
-user-selected folder. It must not claim provider-specific semantics.
+user-selected folder. It must not claim provider-specific semantics. If its scan root
+overlaps a provider cache, WTM keeps the provider-backed installation for identical
+artifact paths and suppresses only the generic duplicate.
 
 ### Storage action adapter
 

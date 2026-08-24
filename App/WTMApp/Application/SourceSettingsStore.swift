@@ -139,7 +139,7 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
       providerID: source.providerID,
       rootURL: resolvedURL.standardizedFileURL,
       volumeIdentity: source.volumeIdentity,
-      accessState: source.accessState,
+      accessState: isStale ? .stale : source.accessState,
       isEnabled: source.isEnabled
     )
   }

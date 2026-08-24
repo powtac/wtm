@@ -22,6 +22,7 @@
 | Symlink escapes the selected root | Resolve and validate every candidate against the configured root; skip rejected entries |
 | Malformed provider manifest stops all scans | Adapter-local decoding failures become issues; other sources continue |
 | Shared data is counted repeatedly | Preserve physical identifiers and deduplicate allocated bytes |
+| A broad manual source duplicates provider cache revisions | Reconcile identical artifact paths in favor of provider evidence; preserve distinct paths and volumes |
 | A partial download is shown as usable | Provider markers such as `.incomplete` and missing Ollama blobs produce an incomplete state |
 | A scan mutates source data | No action/runtime target; architecture check blocks known mutation and process APIs in scan targets |
 | Secrets appear in UI or logs | Do not preview secret-like configuration; OSLog treats dynamic local data as private |

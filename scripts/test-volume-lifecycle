@@ -1,0 +1,48 @@
+#!/bin/zsh
+set -euo pipefail
+
+test_root="$(mktemp -d /tmp/wtm-volume-test.XXXXXX)"
+image_path="$test_root/WTMPhase1.dmg"
+first_mount="$test_root/first-mount"
+second_mount="$test_root/second-mount"
+active_mount=""
+
+cleanup() {
+  if [[ -n "$active_mount" ]]; then
+    hdiutil detach "$active_mount" -force >/dev/null 2>&1 || true
+  fi
+  /bin/rm -rf -- "$test_root"
+}
+trap cleanup EXIT
+
+mkdir "$first_mount" "$second_mount"
+hdiutil create \
+  -quiet \
+  -size 64m \
+  -fs APFS \
+  -volname WTMPhase1 \
+  -type UDIF \
+  "$image_path"
+
+hdiutil attach -quiet -nobrowse -mountpoint "$first_mount" "$image_path"
+active_mount="$first_mount"
+first_uuid="$(diskutil info -plist "$first_mount" | plutil -extract VolumeUUID raw -o - -)"
+mkdir "$first_mount/Models"
+mkfile 1m "$first_mount/Models/volume-test-Q4_K_M.gguf"
+hdiutil detach "$first_mount" >/dev/null
+active_mount=""
+
+hdiutil attach -quiet -nobrowse -mountpoint "$second_mount" "$image_path"
+active_mount="$second_mount"
+second_uuid="$(diskutil info -plist "$second_mount" | plutil -extract VolumeUUID raw -o - -)"
+
+if [[ "$first_uuid" != "$second_uuid" ]]; then
+  echo "Mounted volume UUID changed after remount." >&2
+  exit 1
+fi
+if [[ ! -r "$second_mount/Models/volume-test-Q4_K_M.gguf" ]]; then
+  echo "Model path was not readable after remount." >&2
+  exit 1
+fi
+
+echo "External-volume lifecycle validated: stable UUID and readable relative model path."

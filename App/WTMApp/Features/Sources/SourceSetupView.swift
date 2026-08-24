@@ -9,10 +9,8 @@ struct SourceSetupView: View {
         Text("source.setup.title")
           .font(.title2.bold())
         Text("source.setup.description")
-          .foregroundStyle(.secondary)
         Label("source.setup.no-media-access", systemImage: "mic.slash")
           .font(.callout)
-          .foregroundStyle(.secondary)
           .padding(.top, 6)
       }
 
@@ -28,10 +26,8 @@ struct SourceSetupView: View {
               Text(source.displayName)
               Text(source.rootURL.path)
                 .font(.caption)
-                .foregroundStyle(.secondary)
               Text(source.accessState.localizedName)
                 .font(.caption)
-                .foregroundStyle(source.accessState == .allowed ? Color.secondary : Color.orange)
             }
           }
         }

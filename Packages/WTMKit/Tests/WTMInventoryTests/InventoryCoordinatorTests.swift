@@ -25,6 +25,31 @@ func disabledSourceIsRejected() async throws {
   #expect(result.issues.map(\.code) == ["SOURCE_NOT_ALLOWED"])
 }
 
+@Test("Source access failures remain explicit and do not reach adapters")
+func sourceAccessFailuresAreExplicit() async throws {
+  let registry = try AdapterRegistry(adapters: [FixtureAdapter()])
+  let coordinator = InventoryCoordinator(registry: registry)
+  let expectations: [(SourceAccessState, String)] = [
+    (.offline, "SOURCE_OFFLINE"),
+    (.denied, "SOURCE_NOT_READABLE"),
+    (.stale, "SOURCE_ACCESS_STALE"),
+  ]
+
+  for (accessState, expectedCode) in expectations {
+    let source = ScanSource(
+      id: accessState.rawValue,
+      displayName: accessState.rawValue,
+      providerID: FixtureAdapter.providerID,
+      rootURL: URL(filePath: "/tmp"),
+      accessState: accessState,
+      isEnabled: true
+    )
+    let result = await coordinator.scan(source: source)
+    #expect(result.installations.isEmpty)
+    #expect(result.issues.map(\.code) == [expectedCode])
+  }
+}
+
 @Test("Physical artifacts are counted only once")
 func sharedAllocatedBytesAreDeduplicated() {
   let artifactA = fixtureArtifact(id: "a", physicalIdentifier: "inode-1")

@@ -1,0 +1,22 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+catalog="$repository_root/App/WTMApp/Resources/Localizable.xcstrings"
+
+source_language="$(/usr/bin/plutil -extract sourceLanguage raw -o - "$catalog")"
+if [[ "$source_language" != "en" ]]; then
+  echo "Localizable.xcstrings must use English as its source language." >&2
+  exit 1
+fi
+
+unexpected_languages="$({
+  /usr/bin/plutil -convert json -o - "$catalog" \
+    | jq -r '[.strings[]? | (.localizations? // {}) | keys[]] | unique | .[] | select(. != "en")'
+})"
+if [[ -n "$unexpected_languages" ]]; then
+  echo "Phase 1 ships English product strings only; found: $unexpected_languages" >&2
+  exit 1
+fi
+
+echo "Language catalog validated: English only."

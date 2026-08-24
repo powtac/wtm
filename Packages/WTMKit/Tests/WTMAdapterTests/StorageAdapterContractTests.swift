@@ -70,6 +70,36 @@ func manualFixtureIsInventoried() async throws {
   #expect(result.installations.first?.variant.quantization == "Q4_K_M")
 }
 
+@Test("Hugging Face ignores Finder metadata at the snapshots root")
+func huggingFaceIgnoresSnapshotRootMetadata() async throws {
+  let root = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  defer { try? FileManager.default.removeItem(at: root) }
+  let repository = root.appending(path: "models--acme--model", directoryHint: .isDirectory)
+  let revision = repository.appending(
+    path: "snapshots/revision-1",
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: revision, withIntermediateDirectories: true)
+  try Data("finder metadata".utf8).write(
+    to: repository.appending(path: "snapshots/.DS_Store")
+  )
+  try Data("{}".utf8).write(to: revision.appending(path: "config.json"))
+
+  let result = await HuggingFaceStorageAdapter().scan(
+    source: allowedSource(id: "hf-metadata", provider: .huggingFace, root: root)
+  )
+
+  #expect(result.installations.count == 1)
+  #expect(
+    result.installations.first?.rootURL.resolvingSymlinksInPath()
+      == revision.resolvingSymlinksInPath()
+  )
+  #expect(result.installations.first?.artifacts.map(\.url.lastPathComponent) == ["config.json"])
+}
+
 @Test("Opt-in real Hugging Face cache has no overlapping manual installation views")
 func realHuggingFaceCacheHasNoManualDuplicates() async throws {
   guard let path = ProcessInfo.processInfo.environment["WTM_REAL_HF_CACHE"] else { return }
@@ -84,6 +114,19 @@ func realHuggingFaceCacheHasNoManualDuplicates() async throws {
   ])
 
   #expect(snapshot.installations.contains { $0.providerID == .huggingFace })
+  #expect(
+    !snapshot.installations.contains {
+      $0.providerID == .huggingFace && $0.rootURL.lastPathComponent == "snapshots"
+    }
+  )
+  if ProcessInfo.processInfo.environment["WTM_EXPECT_REAL_HF_PARTIAL"] == "1" {
+    #expect(
+      snapshot.installations.contains {
+        $0.providerID == .huggingFace && $0.state == .incomplete
+      }
+    )
+    #expect(snapshot.issues.contains { $0.code == "HF_DOWNLOAD_INCOMPLETE" })
+  }
   let huggingFaceArtifactPaths = Set(
     snapshot.installations
       .filter { $0.providerID == .huggingFace }

@@ -224,6 +224,21 @@ func returningUserScansOnLaunch() async throws {
   #expect(model.installations.map(\.id) == ["launch:model"])
   #expect(model.scanSummary?.wasCancelled == false)
   #expect(model.scanSummary?.allocatedByteCount == 4_096)
+  model.selectedProviderID = .huggingFace
+  #expect(model.visibleInstallations.isEmpty)
+  model.selectedProviderID = nil
+  model.selectedFormat = .safetensors
+  #expect(model.visibleInstallations.isEmpty)
+  model.selectedFormat = nil
+  model.selectedState = .incomplete
+  #expect(model.visibleInstallations.isEmpty)
+  model.selectedState = nil
+  model.selectedSourceID = "another-source"
+  #expect(model.visibleInstallations.isEmpty)
+  model.clearInventoryFilters()
+  model.searchText = "launch:model"
+  #expect(model.visibleInstallations.map(\.id) == ["launch:model"])
+  model.searchText = ""
   model.selectedSection = .old
   #expect(model.visibleInstallations.map(\.id) == ["launch:model"])
   model.setOldModelThresholdDays(180)
@@ -317,6 +332,78 @@ func externalSourceResolvesAfterRemount() async throws {
 
   #expect(model.sources.first?.rootURL == modelRoot.standardizedFileURL)
   #expect(model.sources.first?.accessState == .allowed)
+}
+
+@MainActor
+@Test("Unmount removes external results and remount triggers a targeted scan")
+func externalSourceUnmountAndRemountIsTargeted() async throws {
+  let volumeRoot = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  let modelRoot = volumeRoot.appending(path: "Models", directoryHint: .isDirectory)
+  try FileManager.default.createDirectory(at: modelRoot, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: volumeRoot) }
+
+  let source = ScanSource(
+    id: "external-targeted",
+    displayName: "External Models",
+    providerID: LaunchFixtureAdapter.providerID,
+    rootURL: modelRoot,
+    volumeIdentity: VolumeIdentity(identifier: "volume-targeted", relativePath: "Models"),
+    accessState: .allowed,
+    isEnabled: true
+  )
+  let volume = MountedVolumeInfo(
+    id: "volume-targeted",
+    name: "External",
+    rootURL: volumeRoot,
+    totalByteCount: 1_000,
+    availableByteCount: 500,
+    fileSystem: "APFS",
+    isReadOnly: false
+  )
+  let volumeCatalog = MutableVolumeCatalog(volumes: [volume])
+  let registry = try AdapterRegistry(adapters: [LaunchFixtureAdapter()])
+  let model = InventoryViewModel(
+    coordinator: InventoryCoordinator(registry: registry),
+    initialSources: [],
+    sourceSettingsStore: FixtureSourceSettingsStore(
+      snapshot: SourceSettingsSnapshot(
+        revision: 1,
+        sources: [source],
+        hasCompletedOnboarding: true,
+        scanOnLaunch: false
+      )
+    ),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: volumeCatalog
+  )
+
+  await model.prepareForLaunch()
+  model.startScan()
+  for _ in 0..<100 where model.lastScanDate == nil {
+    try await Task.sleep(for: .milliseconds(10))
+  }
+  #expect(model.installations.map(\.sourceID) == [source.id])
+
+  volumeCatalog.replace(with: [])
+  model.handleVolumeChange()
+  #expect(model.sources.first?.accessState == .offline)
+  #expect(model.installations.isEmpty)
+
+  let firstScanDate = try #require(model.lastScanDate)
+  volumeCatalog.replace(with: [volume])
+  model.handleVolumeChange()
+  for _ in 0..<100 where model.lastScanDate == firstScanDate {
+    try await Task.sleep(for: .milliseconds(10))
+  }
+
+  #expect(model.sources.first?.accessState == .allowed)
+  #expect(model.sources.first?.rootURL == modelRoot.standardizedFileURL)
+  #expect(model.installations.map(\.sourceID) == [source.id])
+  #expect(model.lastScanDate != firstScanDate)
 }
 
 @MainActor
@@ -481,4 +568,21 @@ private struct FixedVolumeCatalog: VolumeCataloging {
   let volumes: [MountedVolumeInfo]
 
   func mountedVolumes() -> [MountedVolumeInfo] { volumes }
+}
+
+private final class MutableVolumeCatalog: VolumeCataloging, @unchecked Sendable {
+  private let lock = NSLock()
+  private var volumes: [MountedVolumeInfo]
+
+  init(volumes: [MountedVolumeInfo]) {
+    self.volumes = volumes
+  }
+
+  func mountedVolumes() -> [MountedVolumeInfo] {
+    lock.withLock { volumes }
+  }
+
+  func replace(with volumes: [MountedVolumeInfo]) {
+    lock.withLock { self.volumes = volumes }
+  }
 }

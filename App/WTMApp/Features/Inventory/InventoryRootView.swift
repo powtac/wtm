@@ -5,27 +5,38 @@ struct InventoryRootView: View {
   @Bindable var model: InventoryViewModel
   @AppStorage("inventory.storage-display-mode") private var storageDisplayModeRaw =
     StorageDisplayMode.absolute.rawValue
+  @AppStorage("inventory.table-columns") private var columnCustomization =
+    TableColumnCustomization<InventoryTableRow>()
   @State private var sortOrder = [
     KeyPathComparator(\InventoryTableRow.sortName, order: .forward)
   ]
 
+  @ViewBuilder
   var body: some View {
-    NavigationSplitView {
-      List(InventorySection.allCases, selection: $model.selectedSection) { section in
-        Label(String(localized: section.localizedKey), systemImage: section.systemImage)
-          .tag(section)
+    if model.isPreparingSources {
+      ProgressView("source.loading")
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    } else if !model.hasCompletedOnboarding {
+      SourceSetupView(model: model)
+        .frame(minWidth: 720, minHeight: 480)
+    } else {
+      NavigationSplitView {
+        List(InventorySection.allCases, selection: $model.selectedSection) { section in
+          Label(String(localized: section.localizedKey), systemImage: section.systemImage)
+            .tag(section)
+        }
+        .navigationTitle(Text("app.name"))
+      } content: {
+        inventoryContent
+          .navigationTitle(Text("inventory.title"))
+          .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
+          .toolbar { inventoryToolbar }
+      } detail: {
+        InstallationDetailView(
+          installation: model.selectedInstallation,
+          revealAction: model.reveal
+        )
       }
-      .navigationTitle(Text("app.name"))
-    } content: {
-      inventoryContent
-        .navigationTitle(Text("inventory.title"))
-        .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
-        .toolbar { inventoryToolbar }
-    } detail: {
-      InstallationDetailView(
-        installation: model.selectedInstallation,
-        revealAction: model.reveal
-      )
     }
   }
 
@@ -45,17 +56,14 @@ struct InventoryRootView: View {
         Divider()
       }
 
-      if model.isPreparingSources {
-        ProgressView("source.loading")
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-      } else if !model.hasCompletedOnboarding {
-        SourceSetupView(model: model)
+      if model.selectedSection == .issues {
+        issueContent
       } else if model.visibleInstallations.isEmpty {
         VStack(spacing: 16) {
           ContentUnavailableView(
             model.isScanning ? "scan.status.title" : "inventory.empty.title",
             systemImage: model.isScanning
-              ? "externaldrive.badge.magnifyingglass"
+              ? "magnifyingglass"
               : "externaldrive.badge.questionmark",
             description: Text(
               model.isScanning ? "scan.status.empty-description" : "inventory.empty.description"
@@ -78,21 +86,26 @@ struct InventoryRootView: View {
             breakdown: model.storageBreakdown
           ).sorted(using: sortOrder),
           selection: $model.selectedInstallationID,
-          sortOrder: $sortOrder
+          sortOrder: $sortOrder,
+          columnCustomization: $columnCustomization
         ) {
           TableColumn("inventory.column.name", value: \.sortName) { row in
             let installation = row.installation
             Text(installation.identity.displayName)
           }
+          .customizationID("name")
           TableColumn("inventory.column.provider", value: \.sortProvider) { row in
             Text(row.installation.providerID.localizedName)
           }
+          .customizationID("provider")
           TableColumn("inventory.column.format", value: \.sortFormat) { row in
-            Text(row.installation.variant.format.localizedName)
+            Text(formatAndQuantizationText(row.installation))
           }
+          .customizationID("format")
           TableColumn("inventory.column.state", value: \.sortState) { row in
             Text(row.installation.state.localizedName)
           }
+          .customizationID("state")
           TableColumn(storageColumnTitle, value: \.sortSize) { row in
             if storageDisplayMode == .absolute {
               Text(wholeByteCount(row.displayedByteCount))
@@ -105,15 +118,63 @@ struct InventoryRootView: View {
               )
             }
           }
+          .customizationID("size")
+          TableColumn("inventory.column.reclaimable", value: \.sortReclaimableSize) { row in
+            Text(wholeByteCount(row.reclaimableByteCount))
+          }
+          .customizationID("reclaimable")
           TableColumn("inventory.column.age", value: \.sortAge) { row in
             Text(installationAgeText(row.installation))
           }
+          .customizationID("age")
+          TableColumn("inventory.column.date", value: \.sortDate) { row in
+            Text(firstChangeText(row.installation))
+          }
+          .customizationID("date")
+          .defaultVisibility(.hidden)
+          TableColumn("inventory.column.source", value: \.sortSource) { row in
+            Text(sourceName(for: row.installation.sourceID))
+          }
+          .customizationID("source")
+          .defaultVisibility(.hidden)
           TableColumn("inventory.column.path", value: \.sortPath) { row in
             Text(row.installation.rootURL.path)
               .lineLimit(1)
               .truncationMode(.middle)
           }
+          .customizationID("path")
         }
+      }
+    }
+  }
+
+  @ViewBuilder
+  private var issueContent: some View {
+    if model.issues.isEmpty {
+      ContentUnavailableView(
+        "issues.empty.title",
+        systemImage: "checkmark.shield",
+        description: Text("issues.empty.description")
+      )
+    } else {
+      List(model.issues) { issue in
+        VStack(alignment: .leading, spacing: 4) {
+          HStack {
+            Text(issue.localizedSummary)
+            Spacer()
+            Text(issue.code)
+              .font(.caption.monospaced())
+              .foregroundStyle(.secondary)
+          }
+          if let affectedURL = issue.affectedURL {
+            Text(affectedURL.path)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .truncationMode(.middle)
+          }
+        }
+        .accessibilityElement(children: .combine)
       }
     }
   }
@@ -186,7 +247,46 @@ struct InventoryRootView: View {
           Label("scan.cancel.action", systemImage: "stop.circle")
         }
       }
+
+      Menu {
+        Picker("filter.provider", selection: $model.selectedProviderID) {
+          Text("filter.any-provider").tag(nil as ProviderID?)
+          ForEach(model.filterProviderIDs, id: \.self) { providerID in
+            Text(providerID.localizedName).tag(providerID as ProviderID?)
+          }
+        }
+        Picker("filter.format", selection: $model.selectedFormat) {
+          Text("filter.any-format").tag(nil as ModelFormat?)
+          ForEach(model.filterFormats, id: \.self) { format in
+            Text(format.localizedName).tag(format as ModelFormat?)
+          }
+        }
+        Picker("filter.state", selection: $model.selectedState) {
+          Text("filter.any-state").tag(nil as InstallationState?)
+          ForEach(model.filterStates, id: \.self) { state in
+            Text(state.localizedName).tag(state as InstallationState?)
+          }
+        }
+        Picker("filter.source", selection: $model.selectedSourceID) {
+          Text("filter.any-source").tag(nil as ScanSource.ID?)
+          ForEach(model.filterSources) { source in
+            Text(source.displayName).tag(source.id as ScanSource.ID?)
+          }
+        }
+        Divider()
+        Button("filter.clear") {
+          model.clearInventoryFilters()
+        }
+        .disabled(!model.hasActiveInventoryFilter)
+      } label: {
+        Label("filter.action", systemImage: "line.3.horizontal.decrease.circle")
+      }
+      .disabled(model.installations.isEmpty)
     }
+  }
+
+  private func sourceName(for sourceID: ScanSource.ID) -> String {
+    model.sources.first(where: { $0.id == sourceID })?.displayName ?? sourceID
   }
 
   private func activeScanStatus(_ state: ActiveScanState) -> some View {

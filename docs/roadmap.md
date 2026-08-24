@@ -6,7 +6,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | Phase | Status | Gate |
 |---|---|---|
 | 0 — Foundation | Completed | Architecture, fixtures, CI including UI smoke, GitHub structure, Developer ID signing, hardened runtime, notarization, stapling, and Gatekeeper smoke are verified |
-| 1 — Read-only Beta | In progress | First-run/launch scanning, bounded source-result updates, source/bookmark settings, scan status, catalogued Unsloth discovery, whole-unit storage totals, sortable age with provenance, configurable old-model thresholds/filters, and core toolbar UX exist; permission recovery, source removal, volume remount handling, intra-adapter streaming, storage percentages, and real-cache tests remain open |
+| 1 — Read-only Beta | Completed | Read-only discovery, permission recovery, external-volume lifecycle, bounded streaming, storage accounting, partial-download detection, age/state presentation, configurable inventory UI, real-cache coverage, and notarized Developer ID app are verified |
 | 2 — Safe Actions | Not started | No deletion capability is linked |
 | 3 — Runtimes | Not started | No process capability is linked |
 | 4 — Integrations | Not started | No client adapters or menu bar UI are linked |

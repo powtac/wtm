@@ -417,6 +417,196 @@
         }
       }
     },
+    "filter.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filters"
+          }
+        }
+      }
+    },
+    "filter.any-format" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Format"
+          }
+        }
+      }
+    },
+    "filter.any-provider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Provider"
+          }
+        }
+      }
+    },
+    "filter.any-source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Source"
+          }
+        }
+      }
+    },
+    "filter.any-state" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any State"
+          }
+        }
+      }
+    },
+    "filter.clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Filters"
+          }
+        }
+      }
+    },
+    "filter.format" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        }
+      }
+    },
+    "filter.provider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        }
+      }
+    },
+    "filter.source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
+    "filter.state" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "State"
+          }
+        }
+      }
+    },
+    "issue.generic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory data could not be read."
+          }
+        }
+      }
+    },
+    "issue.hugging-face" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face cache data is incomplete or invalid."
+          }
+        }
+      }
+    },
+    "issue.manual" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected folder could not be inventoried."
+          }
+        }
+      }
+    },
+    "issue.ollama" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama inventory data is incomplete or invalid."
+          }
+        }
+      }
+    },
+    "issue.source-access" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This source needs renewed read access."
+          }
+        }
+      }
+    },
+    "issue.source-offline" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This source is offline."
+          }
+        }
+      }
+    },
+    "issue.source-settings" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source settings could not be read or saved."
+          }
+        }
+      }
+    },
+    "issues.empty.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The latest scan reported no inventory issues."
+          }
+        }
+      }
+    },
+    "issues.empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Issues"
+          }
+        }
+      }
+    },
     "inventory.column.age" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -435,6 +625,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Format"
+          }
+        }
+      }
+    },
+    "inventory.column.date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First Change"
           }
         }
       }
@@ -472,6 +672,16 @@
         }
       }
     },
+    "inventory.column.reclaimable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exclusive Size"
+          }
+        }
+      }
+    },
     "inventory.column.share" : {
       "localizations" : {
         "en" : {
@@ -500,6 +710,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "State"
+          }
+        }
+      }
+    },
+    "inventory.column.source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
           }
         }
       }
@@ -706,6 +926,16 @@
         }
       }
     },
+    "settings.advanced" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced"
+          }
+        }
+      }
+    },
     "settings.age.presets" : {
       "localizations" : {
         "en" : {
@@ -748,6 +978,76 @@
         }
       }
     },
+    "settings.extension.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage adapters are compiled and reviewed. Data-only definitions cannot add executable code or new file-system capabilities."
+          }
+        }
+      }
+    },
+    "settings.extension.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Extending WTM"
+          }
+        }
+      }
+    },
+    "settings.general" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "General"
+          }
+        }
+      }
+    },
+    "settings.integration.built-in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in · Read-only"
+          }
+        }
+      }
+    },
+    "settings.integrations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integrations"
+          }
+        }
+      }
+    },
+    "settings.inventory.ephemeral" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM stores source settings, not model inventory. Every scan rebuilds the visible inventory from the enabled sources."
+          }
+        }
+      }
+    },
+    "settings.inventory.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory Data"
+          }
+        }
+      }
+    },
     "settings.old-after" : {
       "localizations" : {
         "en" : {
@@ -765,6 +1065,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Scan on Launch"
+          }
+        }
+      }
+    },
+    "settings.scanning.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanning"
           }
         }
       }
@@ -819,6 +1129,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enabled Sources"
+          }
+        }
+      }
+    },
+    "settings.storage-providers.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage Providers"
           }
         }
       }

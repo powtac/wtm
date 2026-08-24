@@ -39,6 +39,10 @@ final class InventoryViewModel {
   var selectedSection = InventorySection.all
   var selectedInstallationID: ModelInstallation.ID?
   var searchText = ""
+  var selectedProviderID: ProviderID?
+  var selectedFormat: ModelFormat?
+  var selectedState: InstallationState?
+  var selectedSourceID: ScanSource.ID?
 
   private let coordinator: InventoryCoordinator?
   private let defaultSources: [ScanSource]
@@ -91,10 +95,26 @@ final class InventoryViewModel {
         matchesSection = installation.state == .issue
       }
 
-      guard matchesSection, !searchText.isEmpty else { return matchesSection }
+      guard matchesSection else { return false }
+      guard selectedProviderID == nil || installation.providerID == selectedProviderID else {
+        return false
+      }
+      guard selectedFormat == nil || installation.variant.format == selectedFormat else {
+        return false
+      }
+      guard selectedState == nil || installation.state == selectedState else {
+        return false
+      }
+      guard selectedSourceID == nil || installation.sourceID == selectedSourceID else {
+        return false
+      }
+      guard !searchText.isEmpty else { return true }
       let searchableValues = [
+        installation.id,
+        installation.identity.id,
         installation.identity.displayName,
         installation.identity.family ?? "",
+        installation.variant.id,
         installation.variant.format.rawValue,
         installation.variant.quantization ?? "",
         installation.rootURL.path,
@@ -112,6 +132,47 @@ final class InventoryViewModel {
 
   var storageBreakdown: InventoryStorageBreakdown {
     InventoryStorageBreakdown(installations: installations)
+  }
+
+  var filterProviderIDs: [ProviderID] {
+    Array(Set(installations.map(\.providerID))).sorted { left, right in
+      left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+    }
+  }
+
+  var filterFormats: [ModelFormat] {
+    Array(Set(installations.map(\.variant.format))).sorted { left, right in
+      left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+    }
+  }
+
+  var filterStates: [InstallationState] {
+    Array(Set(installations.map(\.state))).sorted { left, right in
+      left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+    }
+  }
+
+  var filterSources: [ScanSource] {
+    let installationSourceIDs = Set(installations.map(\.sourceID))
+    return sources.filter { installationSourceIDs.contains($0.id) }
+  }
+
+  var availableStorageProviderIDs: [ProviderID] {
+    Array(Set(sources.map(\.providerID))).sorted { left, right in
+      left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+    }
+  }
+
+  var hasActiveInventoryFilter: Bool {
+    selectedProviderID != nil || selectedFormat != nil || selectedState != nil
+      || selectedSourceID != nil
+  }
+
+  func clearInventoryFilters() {
+    selectedProviderID = nil
+    selectedFormat = nil
+    selectedState = nil
+    selectedSourceID = nil
   }
 
   var compactCurrentScanPath: String? {
@@ -426,6 +487,7 @@ final class InventoryViewModel {
     guard source.isEnabled else {
       return source.replacing(accessState: .notSetUp)
     }
+    guard source.accessState != .stale else { return source }
 
     var rootURL = source.rootURL.standardizedFileURL
     if let volumeIdentity = source.volumeIdentity {

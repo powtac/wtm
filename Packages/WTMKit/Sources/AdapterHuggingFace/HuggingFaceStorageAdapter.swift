@@ -94,8 +94,14 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
 
     let snapshotRoot = repositoryURL.appending(path: "snapshots", directoryHint: .isDirectory)
     let snapshotPrefix = snapshotRoot.path + "/"
-    let snapshotFiles = entries.filter {
-      ($0.isRegularFile || $0.isSymbolicLink) && $0.url.path.hasPrefix(snapshotPrefix)
+    let snapshotFiles = entries.filter { entry in
+      guard (entry.isRegularFile || entry.isSymbolicLink),
+        entry.url.path.hasPrefix(snapshotPrefix),
+        entry.url.lastPathComponent != ".DS_Store"
+      else { return false }
+
+      let relativeComponents = entry.url.path.dropFirst(snapshotPrefix.count).split(separator: "/")
+      return relativeComponents.count >= 2 && !relativeComponents[0].hasPrefix(".")
     }
     let groupedByRevision = Dictionary(grouping: snapshotFiles) { entry in
       let remainder = entry.url.path.dropFirst(snapshotPrefix.count)
