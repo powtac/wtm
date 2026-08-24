@@ -2,8 +2,8 @@
 
 | Feld | Wert |
 |---|---|
-| Status | **Proposed** |
-| Version | 0.1.7 |
+| Status | **Accepted Baseline** |
+| Version | 0.1.8 |
 | Datum | 2026-08-24 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
@@ -12,7 +12,7 @@
 | Öffentliche Inhalte | Englisch; einzige Ausnahme ist dieses normative deutsche `REQUIREMENTS.md` |
 | Normativer Stil | MUST / SHOULD / MAY gemäß RFC 2119 und RFC 8174 |
 
-> Arbeitsname: **WTM — What The Model**. Produktkategorie und Untertitel: **Local LLM Inventory for macOS**. Name, Marke, Domain und GitHub-Verfügbarkeit sind vor Veröffentlichung zu prüfen.
+> Akzeptierter Entwicklungsname: **What The Model**. **WTM** ist der Kurzname; Produktkategorie und Untertitel: **Local LLM Inventory for macOS**. Der Entwicklungsname ist keine markenrechtliche Freigabe. Der Public-Release-Name bleibt vom Gate in Abschnitt 11.7 abhängig.
 
 > **Sprachentscheidung:** Dieses deutschsprachige `REQUIREMENTS.md` ist die normative Produktspezifikation und wird im GitHub-Repository versioniert. App, Website, README, technische Dokumentation, ADRs, Issues, Pull Requests, Releases und Community-Kommunikation bleiben vollständig Englisch. Eine zweite normative englische Requirements-Kopie wird nicht gepflegt.
 
@@ -539,6 +539,14 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 - Häufige, taskbezogene Aktionen wie Scan, Reveal, Test, Start, Stop oder Delete bleiben im Hauptfenster beziehungsweise Inspector und werden nicht in Settings versteckt.
 - `How to extend this list` ist eine sekundäre Infoaktion mit Textlabel und Accessibility-Label, kein unbeschriftetes, schwer auffindbares Symbol.
 
+### 11.7 Name und Marke
+
+- **BRAND-001:** Der akzeptierte Entwicklungsname ist **What The Model**. **WTM** darf als Kurzname verwendet werden, aber nicht ohne den ausgeschriebenen Namen als alleinige schutzfähige Produktidentität vorausgesetzt werden.
+- **BRAND-002:** Der technische Vorcheck vom 24.08.2026 ergab in TMview keinen exakten Wortlauttreffer für `WHAT THE MODEL`, jedoch 136 exakte Treffer für `WTM`. Dies ist keine rechtliche Kollisions- oder Eintragungsprüfung.
+- **BRAND-003:** Das aktive, thematisch benachbarte AI-Produkt `WhatModel` unter `whatmodel.app` erzeugt ein relevantes Verwechslungs-, Suchmaschinen- und Auffindbarkeitsrisiko. Logo, Untertitel und öffentliche Kommunikation MUST deshalb den ausgeschriebenen Namen plus `Local LLM Inventory for macOS` verwenden.
+- **BRAND-004:** Vor Public Release MUST eine professionelle Ähnlichkeitsrecherche mindestens für EU, Deutschland, USA sowie Nizza-Klassen 9 und 42 erfolgen. Sie umfasst Wortlaut, ähnliche Schreibweisen, Aussprache, App-Namen, Domains und relevante Repository-/Social-Handles. Ein verbleibendes hohes Kollisionsrisiko erzwingt die Umbenennung vor dem ersten öffentlichen Tag.
+- **BRAND-005:** Der technische Verfügbarkeitscheck ist zeitgebunden und reserviert nichts. Am 24.08.2026 lieferten `whatthemodel.com` und `whatthemodel.app` keinen RDAP-Registrierungstreffer; `wtm.app` war registriert und der Repositoryname `wtm` war unter dem aktuell angemeldeten GitHub-Owner noch nicht belegt.
+
 ## 12. Security und Privacy
 
 - **SEC-001:** Alle Inventardaten bleiben standardmäßig lokal.
@@ -727,7 +735,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 Das Repository MUST enthalten:
 
 - `README.md` mit Problem, Screenshots, Status, Support-Matrix, Installation, Sicherheitsmodell, Grenzen und Roadmap-Link.
-- `LICENSE` — Empfehlung: Apache-2.0; finale Wahl vor öffentlicher Veröffentlichung.
+- `LICENSE` — verbindlich Apache License 2.0 (`Apache-2.0`).
 - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SUPPORT.md`, `SECURITY.md`, `CHANGELOG.md` und `CITATION.cff`.
 - `docs/architecture.md`, `docs/adapters.md`, `docs/threat-model.md`, `docs/github-configuration.md` und `docs/decisions/`.
 - `docs/adapters.md` MUST die Rollen `StorageProviderAdapter`, `StorageActionAdapter`, `RuntimeAdapter`, `ClientAdapter`, `ManualFolderAdapter`, datenbasierte Tool-/Source-/Linkdefinitionen sowie deren Capability- und Sicherheitsgrenzen erklären.
