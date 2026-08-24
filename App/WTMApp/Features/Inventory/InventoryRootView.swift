@@ -79,12 +79,28 @@ struct InventoryRootView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
+        let rows = inventoryTableRows(
+          installations: model.visibleInstallations,
+          mode: storageDisplayMode,
+          breakdown: model.storageBreakdown
+        )
+        let allRows = inventoryTableRows(
+          installations: model.installations,
+          mode: storageDisplayMode,
+          breakdown: model.storageBreakdown
+        )
+        let sourceNames = Dictionary(
+          uniqueKeysWithValues: model.sources.map { ($0.id, $0.displayName) }
+        )
+        let columnWidths = inventoryTableColumnWidths(
+          rows: allRows,
+          mode: storageDisplayMode,
+          totalByteCount: model.storageBreakdown.totalByteCount,
+          sourceName: { sourceNames[$0] ?? $0 }
+        )
+
         Table(
-          inventoryTableRows(
-            installations: model.visibleInstallations,
-            mode: storageDisplayMode,
-            breakdown: model.storageBreakdown
-          ).sorted(using: sortOrder),
+          rows.sorted(using: sortOrder),
           selection: $model.selectedInstallationID,
           sortOrder: $sortOrder,
           columnCustomization: $columnCustomization
@@ -93,18 +109,38 @@ struct InventoryRootView: View {
             let installation = row.installation
             Text(installation.identity.displayName)
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.name,
+            max: .infinity
+          )
           .customizationID("name")
           TableColumn("inventory.column.provider", value: \.sortProvider) { row in
             Text(row.installation.providerID.localizedName)
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.provider,
+            max: .infinity
+          )
           .customizationID("provider")
           TableColumn("inventory.column.format", value: \.sortFormat) { row in
             Text(formatAndQuantizationText(row.installation))
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.format,
+            max: .infinity
+          )
           .customizationID("format")
           TableColumn("inventory.column.state", value: \.sortState) { row in
             Text(row.installation.state.localizedName)
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.state,
+            max: .infinity
+          )
           .customizationID("state")
           TableColumn(storageColumnTitle, value: \.sortSize) { row in
             if storageDisplayMode == .absolute {
@@ -118,23 +154,48 @@ struct InventoryRootView: View {
               )
             }
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.size,
+            max: .infinity
+          )
           .customizationID("size")
           TableColumn("inventory.column.reclaimable", value: \.sortReclaimableSize) { row in
             Text(wholeByteCount(row.reclaimableByteCount))
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.reclaimableSize,
+            max: .infinity
+          )
           .customizationID("reclaimable")
           TableColumn("inventory.column.age", value: \.sortAge) { row in
             Text(installationAgeText(row.installation))
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.age,
+            max: .infinity
+          )
           .customizationID("age")
           TableColumn("inventory.column.date", value: \.sortDate) { row in
             Text(firstChangeText(row.installation))
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.date,
+            max: .infinity
+          )
           .customizationID("date")
           .defaultVisibility(.hidden)
           TableColumn("inventory.column.source", value: \.sortSource) { row in
             Text(sourceName(for: row.installation.sourceID))
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.source,
+            max: .infinity
+          )
           .customizationID("source")
           .defaultVisibility(.hidden)
           TableColumn("inventory.column.path", value: \.sortPath) { row in
@@ -142,6 +203,11 @@ struct InventoryRootView: View {
               .lineLimit(1)
               .truncationMode(.middle)
           }
+          .width(
+            min: InventoryTableColumnWidths.minimum,
+            ideal: columnWidths.path,
+            max: .infinity
+          )
           .customizationID("path")
         }
       }

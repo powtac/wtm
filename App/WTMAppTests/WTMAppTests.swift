@@ -89,6 +89,42 @@ func inventoryRowsSupportColumnSorting() {
   #expect(installations.sorted(using: descending).map(\.identity.displayName) == ["Zeta", "Alpha"])
 }
 
+@Test("Inventory column widths use cell content and ignore headers")
+func inventoryColumnWidthsUseCellContent() {
+  let names = ["M", "A substantially wider model"]
+  let rows = names.map { name in
+    let identity = ModelIdentity(id: name, displayName: name)
+    let variant = ModelVariant(id: "\(name):variant", identityID: identity.id, format: .gguf)
+    let installation = ModelInstallation(
+      id: name,
+      identity: identity,
+      variant: variant,
+      sourceID: "s",
+      providerID: .manual,
+      rootURL: URL(filePath: "/tmp/\(name)"),
+      state: .stored,
+      artifacts: []
+    )
+    return InventoryTableRow(
+      installation: installation,
+      displayedByteCount: 0,
+      reclaimableByteCount: 0
+    )
+  }
+
+  let widths = inventoryTableColumnWidths(
+    rows: rows,
+    mode: .absolute,
+    totalByteCount: 0,
+    sourceName: { _ in "S" },
+    measureText: { CGFloat($0.count) }
+  )
+
+  #expect(widths.name == CGFloat("A substantially wider model".count + 16))
+  #expect(widths.reclaimableSize == InventoryTableColumnWidths.minimum)
+  #expect(widths.reclaimableSize < CGFloat("Reclaimable".count + 16))
+}
+
 @Test("Allocated sizes are rounded to whole display units")
 func allocatedSizesUseWholeUnits() {
   let value = wholeByteCount(1_490_000_000, locale: Locale(identifier: "en_US"))

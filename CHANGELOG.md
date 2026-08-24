@@ -30,3 +30,5 @@ first public release is tagged.
 - First-run labeled-control UI smoke tests for local and ad-hoc CI signing.
 - Phase 1 acceptance evidence, including an arm64 Developer ID app verified by Apple
   notarization, stapling, and Gatekeeper.
+- Content-derived initial table-column widths that ignore longer column headers while
+  preserving native resizing and persisted column customization.

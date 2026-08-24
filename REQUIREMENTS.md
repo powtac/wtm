@@ -352,7 +352,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 
 - **FR-INV-001 (P0):** Die Hauptansicht MUST Modelle nach Provider, Format, Zustand, Quelle und Runtime filtern können.
 - **FR-INV-002 (P0):** Die Tabelle MUST mindestens Name, Provider, Format/Quantisierung, Zustand, Größe, freigebbare Größe, Datum und Pfad zeigen.
-- **FR-INV-003 (P0):** Nutzer MUST Spalten sortieren, ein-/ausblenden und ihre Breite persistent speichern können.
+- **FR-INV-003 (P0):** Nutzer MUST Spalten sortieren, ein-/ausblenden und ihre Breite persistent speichern können. Die initiale Idealbreite jeder Spalte MUST aus dem breitesten Zellwert des gesamten aktuell geladenen Inventars berechnet werden; Tabellenfilter verändern sie nicht. Der Spaltentitel fließt nicht in die Berechnung ein und darf deshalb abgeschnitten erscheinen.
 - **FR-INV-004 (P0):** Eine Detailansicht MUST Artefakte, Configs, Abhängigkeiten, Zeitstempelquellen, Kompatibilität und letzte Prüfungen zeigen.
 - **FR-INV-005 (P0):** Die Seitenleiste MUST mindestens `All Models`, `Providers`, `Incomplete`, `Issues`, `Usable` und `Running` enthalten.
 - **FR-INV-006 (P0):** Suche MUST Namen, IDs, Familie, Quantisierung, Format und Pfad abdecken.

@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import WTMDomain
 import WTMInventory
@@ -123,6 +124,62 @@ struct InventoryTableRow: Identifiable {
   }
   var sortSource: String { installation.sourceID }
   var sortPath: String { installation.inventorySortPath }
+}
+
+struct InventoryTableColumnWidths: Equatable {
+  static let minimum: CGFloat = 24
+
+  let name: CGFloat
+  let provider: CGFloat
+  let format: CGFloat
+  let state: CGFloat
+  let size: CGFloat
+  let reclaimableSize: CGFloat
+  let age: CGFloat
+  let date: CGFloat
+  let source: CGFloat
+  let path: CGFloat
+}
+
+func inventoryTableColumnWidths(
+  rows: [InventoryTableRow],
+  mode: StorageDisplayMode,
+  totalByteCount: Int64,
+  sourceName: (ScanSource.ID) -> String,
+  relativeTo referenceDate: Date = .now,
+  measureText: (String) -> CGFloat = inventoryTableTextWidth
+) -> InventoryTableColumnWidths {
+  func width(for values: [String]) -> CGFloat {
+    let contentWidth = values.map(measureText).max() ?? 0
+    return max(InventoryTableColumnWidths.minimum, ceil(contentWidth) + 16)
+  }
+
+  return InventoryTableColumnWidths(
+    name: width(for: rows.map(\.installation.identity.displayName)),
+    provider: width(for: rows.map(\.installation.providerID.localizedName)),
+    format: width(for: rows.map { formatAndQuantizationText($0.installation) }),
+    state: width(for: rows.map(\.installation.state.localizedName)),
+    size: width(
+      for: rows.map { row in
+        mode == .absolute
+          ? wholeByteCount(row.displayedByteCount)
+          : percentageText(row.displayedByteCount, of: totalByteCount)
+      }
+    ),
+    reclaimableSize: width(for: rows.map { wholeByteCount($0.reclaimableByteCount) }),
+    age: width(
+      for: rows.map { installationAgeText($0.installation, relativeTo: referenceDate) }
+    ),
+    date: width(for: rows.map { firstChangeText($0.installation) }),
+    source: width(for: rows.map { sourceName($0.installation.sourceID) }),
+    path: width(for: rows.map(\.installation.rootURL.path))
+  )
+}
+
+func inventoryTableTextWidth(_ text: String) -> CGFloat {
+  (text as NSString).size(
+    withAttributes: [.font: NSFont.systemFont(ofSize: NSFont.systemFontSize)]
+  ).width
 }
 
 func inventoryTableRows(
