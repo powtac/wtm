@@ -1,9 +1,7 @@
 # Phase 2 Acceptance
 
-Phase 2 is Safe Actions. Its code and UI gates are accepted against Requirements 0.2.0.
-The roadmap remains `In progress` until a fresh artifact from the final Phase 2 source
-commit passes Developer ID signing, hardened runtime, notarization, stapling, and
-Gatekeeper.
+Phase 2 is Safe Actions. Its code, UI, and distribution gates are accepted against
+Requirements 0.2.0.
 
 | Gate | Evidence |
 |---|---|
@@ -42,6 +40,21 @@ directories only; they never target the user's model stores.
 
 ## Distribution evidence
 
-Pending a fresh Developer ID archive from the final Phase 2 source commit. Phase 2 is not
-marked complete until that exact artifact lineage passes notarization, stapling, and
-Gatekeeper validation.
+- Build source commit: `93a298c`
+- Archive: `WTM Phase 2 2026-08-24 191300.xcarchive`
+- Export: `/path/to/local/home/Desktop/WTM-0.2.0-Phase2.app`
+- Version: `0.2.0 (2)`; bundle identifier: `de.powtac.whatthemodel`
+- Architecture: Apple Silicon (`arm64`)
+- Signing: `Developer ID signed (signer omitted)` with hardened runtime
+- Entitlements: empty; App Sandbox remains disabled by accepted architecture decision
+- Apple notarization: accepted on 2026-08-24; submission
+  `AAE0C8AD-32A3-4FF4-B2D9-1777E1807C61`
+- Stapler: ticket validation succeeded
+- Gatekeeper: accepted, source `Notarized Developer ID`
+- Launch smoke: notarized export remained running until controlled termination
+- Code-directory hash: `7dc43fdfa519aeb92b1c9518b0cf780afa89d598`
+- Executable SHA-256:
+  `8f7735ba10ea02b7a6e5799a5fdf69199194ecd702dd1eabe4b4e41940ea1de6`
+
+The distributable DMG and public release automation remain Phase 5 scope. All Phase 2
+findings are closed; Phase 2 is complete.

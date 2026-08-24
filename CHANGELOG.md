@@ -46,6 +46,8 @@ first public release is tagged.
 - Bounded, paths-free local cleanup audit with explicit user clearing in Settings.
 - Best-effort macOS open-file detection, Ollama loaded-model blocking, read-only-volume
   rejection, and native cleanup-preview UI coverage on isolated fixtures.
+- Phase 2 acceptance evidence for version `0.2.0 (2)`, including Developer ID signing,
+  hardened runtime, Apple notarization, stapling, Gatekeeper, and launch smoke.
 
 ### Changed
 
