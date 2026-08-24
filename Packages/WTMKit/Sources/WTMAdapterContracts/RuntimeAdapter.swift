@@ -15,11 +15,18 @@ public struct RuntimeLaunchContext: Hashable, Sendable {
   public let now: Date
   public let port: UInt16?
   public let toolDefinition: ToolDefinition?
+  public let toolApproval: ToolExecutionApproval?
 
-  public init(now: Date = .now, port: UInt16? = nil, toolDefinition: ToolDefinition? = nil) {
+  public init(
+    now: Date = .now,
+    port: UInt16? = nil,
+    toolDefinition: ToolDefinition? = nil,
+    toolApproval: ToolExecutionApproval? = nil
+  ) {
     self.now = now
     self.port = port
     self.toolDefinition = toolDefinition
+    self.toolApproval = toolApproval
   }
 }
 

@@ -154,6 +154,35 @@ func ownedProcessLifecycle() async throws {
   #expect(await launcher.handle.wasTerminated())
 }
 
+@Test("A failed inference remains distinct from a healthy runtime")
+func inferenceFailureDoesNotEraseHealthEvidence() async throws {
+  let adapter = FakeRuntimeAdapter(
+    id: .llamaCpp,
+    healthSucceeds: true,
+    inferenceSucceeds: false
+  )
+  let launcher = FakeProcessLauncher()
+  let broker = RuntimeBroker(
+    registry: try RuntimeAdapterRegistry(adapters: [adapter]),
+    launcher: launcher
+  )
+  let installation = runtimeInstallation()
+  let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
+
+  let started = try await broker.start(
+    plan: executablePlan(installation: installation, identity: identity),
+    installation: installation,
+    verifyInference: true,
+    timeout: .seconds(1),
+    pollInterval: .milliseconds(1)
+  )
+
+  #expect(started.instance.state == .running)
+  #expect(started.instance.lastHealthCheck?.value == .runtimeReachable)
+  #expect(started.instance.lastInferenceCheck?.value == .inferenceFailed)
+  _ = try await broker.stop(started.instance.id, timeout: .seconds(1))
+}
+
 @Test("Provider-managed sessions cannot be stopped by process ownership inference")
 func providerManagedStopIsBlocked() async throws {
   let adapter = FakeRuntimeAdapter(

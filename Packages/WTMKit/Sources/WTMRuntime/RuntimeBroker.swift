@@ -93,7 +93,8 @@ public actor RuntimeBroker {
     let ownership: RuntimeOwnership
     let externalIdentifier: String?
     switch plan.strategy {
-    case .providerManaged(_, let identifier):
+    case .providerManaged(let endpoint, let identifier):
+      guard endpoint == plan.endpoint else { throw RuntimeBrokerError.invalidEndpoint }
       process = nil
       ownership = .providerManaged
       externalIdentifier = identifier
@@ -147,9 +148,12 @@ public actor RuntimeBroker {
           prompt: prompt
         )
       }
-      let validationValue: ModelValidation =
-        inference?.succeeded == true
-        ? .inferenceVerified : .runtimeReachable
+      let validationValue: ModelValidation
+      if let inference {
+        validationValue = inference.succeeded ? .inferenceVerified : .inferenceFailed
+      } else {
+        validationValue = .runtimeReachable
+      }
       let checkedAt = inference?.checkedAt ?? health.checkedAt
       let runningInstance = RuntimeInstance(
         id: id,

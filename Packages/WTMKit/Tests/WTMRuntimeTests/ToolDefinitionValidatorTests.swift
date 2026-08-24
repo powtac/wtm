@@ -72,7 +72,7 @@ func argumentValuesAreNeverParsedAsShell() throws {
   let builder = ToolInvocationBuilder()
   let validation = try builder.inspect(enabledDefinition)
   let approval = ToolExecutionApproval(
-    definitionID: enabledDefinition.id,
+    definition: enabledDefinition,
     executableIdentity: validation.executableIdentity,
     approvedAt: .now
   )
@@ -96,7 +96,7 @@ func approvalCannotCrossDefinitions() throws {
   let builder = ToolInvocationBuilder()
   let validation = try builder.inspect(first)
   let approval = ToolExecutionApproval(
-    definitionID: first.id,
+    definition: first,
     executableIdentity: validation.executableIdentity,
     approvedAt: .now
   )
@@ -104,6 +104,37 @@ func approvalCannotCrossDefinitions() throws {
   #expect(throws: ToolInvocationBuilderError.executableNotApproved) {
     _ = try builder.makeInvocation(
       definition: second,
+      values: RuntimeArgumentValues(modelPath: "/tmp/model.gguf"),
+      modelFormat: .gguf,
+      approval: approval
+    )
+  }
+}
+
+@Test("Changing approved arguments requires a new confirmation")
+func approvalCannotAuthorizeChangedArguments() throws {
+  let original = definition(isEnabled: true)
+  let changed = ToolDefinition(
+    id: original.id,
+    displayName: original.displayName,
+    role: original.role,
+    origin: original.origin,
+    isEnabled: true,
+    executableURL: original.executableURL,
+    arguments: [.literal("--different"), .placeholder(.modelPath)],
+    supportedFormats: original.supportedFormats
+  )
+  let builder = ToolInvocationBuilder()
+  let validation = try builder.inspect(original)
+  let approval = ToolExecutionApproval(
+    definition: original,
+    executableIdentity: validation.executableIdentity,
+    approvedAt: .now
+  )
+
+  #expect(throws: ToolInvocationBuilderError.executableNotApproved) {
+    _ = try builder.makeInvocation(
+      definition: changed,
       values: RuntimeArgumentValues(modelPath: "/tmp/model.gguf"),
       modelFormat: .gguf,
       approval: approval
@@ -127,7 +158,7 @@ func executableSymlinkChangesRequireNewApproval() throws {
   let builder = ToolInvocationBuilder()
   let validation = try builder.inspect(enabledDefinition)
   let approval = ToolExecutionApproval(
-    definitionID: enabledDefinition.id,
+    definition: enabledDefinition,
     executableIdentity: validation.executableIdentity,
     approvedAt: .now
   )

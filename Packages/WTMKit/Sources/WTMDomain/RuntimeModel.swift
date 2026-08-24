@@ -28,6 +28,7 @@ public enum ModelIntegrity: String, Codable, CaseIterable, Sendable {
 public enum RuntimeCompatibility: String, Codable, CaseIterable, Sendable {
   case unknown
   case runtimeNotInstalled
+  case runtimeUnavailable
   case unsupportedFormat
   case unsupportedArchitecture
   case insufficientMemory
@@ -40,6 +41,7 @@ public enum ModelValidation: String, Codable, CaseIterable, Sendable {
   case staticCompatible
   case runtimeReachable
   case inferenceVerified
+  case inferenceFailed
 }
 
 public enum RuntimeState: String, Codable, CaseIterable, Sendable {
@@ -323,5 +325,38 @@ public struct ToolDefinition: Identifiable, Hashable, Codable, Sendable {
     self.currentDirectoryURL = currentDirectoryURL
     self.environment = environment
     self.lastValidation = lastValidation
+  }
+}
+
+public struct ToolExecutionApproval: Hashable, Codable, Sendable {
+  public let definitionID: ToolDefinition.ID
+  public let executableIdentity: ExecutableIdentity
+  public let arguments: [ToolArgument]
+  public let currentDirectoryURL: URL?
+  public let environment: [String: String]
+  public let localAPIBaseURL: URL?
+  public let approvedAt: Date
+
+  public init(
+    definition: ToolDefinition,
+    executableIdentity: ExecutableIdentity,
+    approvedAt: Date
+  ) {
+    definitionID = definition.id
+    self.executableIdentity = executableIdentity
+    arguments = definition.arguments
+    currentDirectoryURL = definition.currentDirectoryURL
+    environment = definition.environment
+    localAPIBaseURL = definition.localAPIBaseURL
+    self.approvedAt = approvedAt
+  }
+
+  public func matches(_ definition: ToolDefinition) -> Bool {
+    definitionID == definition.id
+      && executableIdentity.requestedURL == definition.executableURL.standardizedFileURL
+      && arguments == definition.arguments
+      && currentDirectoryURL == definition.currentDirectoryURL
+      && environment == definition.environment
+      && localAPIBaseURL == definition.localAPIBaseURL
   }
 }

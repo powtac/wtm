@@ -9,22 +9,6 @@ public enum ToolInvocationBuilderError: Error, Equatable, Sendable {
   case executableIdentityChanged
 }
 
-public struct ToolExecutionApproval: Hashable, Codable, Sendable {
-  public let definitionID: ToolDefinition.ID
-  public let executableIdentity: ExecutableIdentity
-  public let approvedAt: Date
-
-  public init(
-    definitionID: ToolDefinition.ID,
-    executableIdentity: ExecutableIdentity,
-    approvedAt: Date
-  ) {
-    self.definitionID = definitionID
-    self.executableIdentity = executableIdentity
-    self.approvedAt = approvedAt
-  }
-}
-
 public struct ToolInvocationBuilder: Sendable {
   private let validator: ToolDefinitionValidator
   private let inspector: ExecutableInspector
@@ -64,7 +48,7 @@ public struct ToolInvocationBuilder: Sendable {
     guard definition.supportedFormats.contains(modelFormat) else {
       throw ToolInvocationBuilderError.unsupportedModelFormat(modelFormat)
     }
-    guard approval.definitionID == definition.id else {
+    guard approval.matches(definition) else {
       throw ToolInvocationBuilderError.executableNotApproved
     }
 
