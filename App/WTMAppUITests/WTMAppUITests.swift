@@ -47,6 +47,22 @@ final class WTMAppUITests: XCTestCase {
 
     let modelName = application.staticTexts["Fixture-Q4_K_M"].firstMatch
     XCTAssertTrue(modelName.waitForExistence(timeout: 10))
+    XCTAssertTrue(
+      application.descendants(matching: .any)["inventory-scan-button"].exists
+    )
+    XCTAssertTrue(
+      application.descendants(matching: .any)["inventory-filter-menu"].exists
+    )
+
+    let oldSection = application.staticTexts["Old"].firstMatch
+    XCTAssertTrue(oldSection.exists)
+    oldSection.click()
+    XCTAssertTrue(
+      application.staticTexts["No Models Match This View"].waitForExistence(timeout: 5)
+    )
+    application.buttons["Show All Models"].click()
+    XCTAssertTrue(modelName.waitForExistence(timeout: 5))
+
     modelName.click()
     let review = application.buttons["Review Cleanup…"].firstMatch
     XCTAssertTrue(review.waitForExistence(timeout: 5))

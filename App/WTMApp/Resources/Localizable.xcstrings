@@ -1047,6 +1047,16 @@
         }
       }
     },
+    "filter.show-all" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All Models"
+          }
+        }
+      }
+    },
     "filter.state" : {
       "localizations" : {
         "en" : {
@@ -1282,6 +1292,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Models Found"
+          }
+        }
+      }
+    },
+    "inventory.filtered-empty.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Change the sidebar selection, search, or filters to show models already in your inventory."
+          }
+        }
+      }
+    },
+    "inventory.filtered-empty.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Models Match This View"
           }
         }
       }

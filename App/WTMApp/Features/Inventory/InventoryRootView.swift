@@ -31,7 +31,6 @@ struct InventoryRootView: View {
           inventoryContent
             .navigationTitle(Text("inventory.title"))
             .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
-            .toolbar { inventoryToolbar }
         } detail: {
           if model.selectedInstallationIDs.count > 1 {
             VStack(spacing: 14) {
@@ -46,7 +45,13 @@ struct InventoryRootView: View {
                 model.prepareDeletion()
               }
               .buttonStyle(.borderedProminent)
+              .keyboardShortcut(.delete, modifiers: [.command])
               .disabled(!model.canPrepareDeletion)
+              if model.isPreparingDeletion || model.isDeleting {
+                ProgressView()
+                  .controlSize(.small)
+                  .accessibilityLabel(Text("deletion.progress"))
+              }
             }
           } else {
             InstallationDetailView(
@@ -84,6 +89,9 @@ struct InventoryRootView: View {
   @ViewBuilder
   private var inventoryContent: some View {
     VStack(spacing: 0) {
+      inventoryListControls
+      Divider()
+
       if let activeScan = model.activeScan {
         activeScanStatus(activeScan)
         Divider()
@@ -99,26 +107,8 @@ struct InventoryRootView: View {
 
       if model.selectedSection == .issues {
         issueContent
-      } else if model.visibleInstallations.isEmpty {
-        VStack(spacing: 16) {
-          ContentUnavailableView(
-            model.isScanning ? "scan.status.title" : "inventory.empty.title",
-            systemImage: model.isScanning
-              ? "magnifyingglass"
-              : "externaldrive.badge.questionmark",
-            description: Text(
-              model.isScanning ? "scan.status.empty-description" : "inventory.empty.description"
-            )
-          )
-          if !model.isScanning {
-            Button("scan.action") {
-              model.startScan()
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(model.sources.allSatisfy { !$0.isEnabled })
-          }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else if let emptyState = model.inventoryEmptyState {
+        inventoryEmptyContent(emptyState)
       } else {
         let rows = inventoryTableRows(
           installations: model.visibleInstallations,
@@ -329,9 +319,8 @@ struct InventoryRootView: View {
     .help("storage.share.help")
   }
 
-  @ToolbarContentBuilder
-  private var inventoryToolbar: some ToolbarContent {
-    ToolbarItemGroup {
+  private var inventoryListControls: some View {
+    HStack(spacing: 10) {
       Button {
         model.startScan()
       } label: {
@@ -346,6 +335,7 @@ struct InventoryRootView: View {
         model.isPreparingSources || !model.hasCompletedOnboarding || model.isScanning
           || model.sources.allSatisfy { !$0.isEnabled }
       )
+      .accessibilityIdentifier("inventory-scan-button")
 
       if model.isScanning {
         Button(role: .cancel) {
@@ -355,19 +345,7 @@ struct InventoryRootView: View {
         }
       }
 
-      Button(role: .destructive) {
-        model.prepareDeletion()
-      } label: {
-        Label("deletion.review.action", systemImage: "trash")
-      }
-      .keyboardShortcut(.delete, modifiers: [.command])
-      .disabled(!model.canPrepareDeletion)
-
-      if model.isPreparingDeletion || model.isDeleting {
-        ProgressView()
-          .controlSize(.small)
-          .accessibilityLabel(Text("deletion.progress"))
-      }
+      Spacer()
 
       Menu {
         Picker("filter.provider", selection: $model.selectedProviderID) {
@@ -400,10 +378,56 @@ struct InventoryRootView: View {
         }
         .disabled(!model.hasActiveInventoryFilter)
       } label: {
-        Label("filter.action", systemImage: "line.3.horizontal.decrease.circle")
+        Label(
+          "filter.action",
+          systemImage: model.hasActiveInventoryFilter
+            ? "line.3.horizontal.decrease.circle.fill"
+            : "line.3.horizontal.decrease.circle"
+        )
       }
       .disabled(model.installations.isEmpty)
+      .accessibilityIdentifier("inventory-filter-menu")
     }
+    .padding(.horizontal, 14)
+    .padding(.vertical, 8)
+    .background(.bar)
+  }
+
+  @ViewBuilder
+  private func inventoryEmptyContent(_ state: InventoryEmptyState) -> some View {
+    VStack(spacing: 16) {
+      switch state {
+      case .scanning:
+        ContentUnavailableView(
+          "scan.status.title",
+          systemImage: "magnifyingglass",
+          description: Text("scan.status.empty-description")
+        )
+      case .noInventory:
+        ContentUnavailableView(
+          "inventory.empty.title",
+          systemImage: "externaldrive.badge.questionmark",
+          description: Text("inventory.empty.description")
+        )
+        Button("scan.action") {
+          model.startScan()
+        }
+        .buttonStyle(.borderedProminent)
+        .disabled(model.sources.allSatisfy { !$0.isEnabled })
+      case .noMatches:
+        ContentUnavailableView(
+          "inventory.filtered-empty.title",
+          systemImage: "line.3.horizontal.decrease.circle",
+          description: Text("inventory.filtered-empty.description")
+        )
+        Button("filter.show-all") {
+          model.showAllModels()
+        }
+        .buttonStyle(.borderedProminent)
+        .accessibilityIdentifier("inventory-show-all-button")
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity)
   }
 
   private func sourceName(for sourceID: ScanSource.ID) -> String {

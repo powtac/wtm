@@ -82,6 +82,7 @@ struct InstallationDetailView: View {
           Button("deletion.review.action", systemImage: "trash", role: .destructive) {
             deleteAction()
           }
+          .keyboardShortcut(.delete, modifiers: [.command])
           .disabled(!canDelete)
         }
       }

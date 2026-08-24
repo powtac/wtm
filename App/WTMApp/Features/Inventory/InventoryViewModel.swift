@@ -23,6 +23,12 @@ struct ScanCompletionSummary {
   let wasCancelled: Bool
 }
 
+enum InventoryEmptyState: Equatable {
+  case scanning
+  case noInventory
+  case noMatches
+}
+
 @MainActor
 @Observable
 final class InventoryViewModel {
@@ -193,11 +199,23 @@ final class InventoryViewModel {
       || selectedSourceID != nil
   }
 
+  var inventoryEmptyState: InventoryEmptyState? {
+    guard selectedSection != .issues, visibleInstallations.isEmpty else { return nil }
+    if isScanning, installations.isEmpty { return .scanning }
+    return installations.isEmpty ? .noInventory : .noMatches
+  }
+
   func clearInventoryFilters() {
     selectedProviderID = nil
     selectedFormat = nil
     selectedState = nil
     selectedSourceID = nil
+  }
+
+  func showAllModels() {
+    selectedSection = .all
+    searchText = ""
+    clearInventoryFilters()
   }
 
   var compactCurrentScanPath: String? {

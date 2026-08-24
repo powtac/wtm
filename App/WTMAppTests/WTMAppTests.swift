@@ -262,8 +262,10 @@ func returningUserScansOnLaunch() async throws {
   #expect(model.installations.map(\.id) == ["launch:model"])
   #expect(model.scanSummary?.wasCancelled == false)
   #expect(model.scanSummary?.allocatedByteCount == 4_096)
+  #expect(model.inventoryEmptyState == nil)
   model.selectedProviderID = .huggingFace
   #expect(model.visibleInstallations.isEmpty)
+  #expect(model.inventoryEmptyState == .noMatches)
   model.selectedProviderID = nil
   model.selectedFormat = .safetensors
   #expect(model.visibleInstallations.isEmpty)
@@ -281,6 +283,15 @@ func returningUserScansOnLaunch() async throws {
   #expect(model.visibleInstallations.map(\.id) == ["launch:model"])
   model.setOldModelThresholdDays(180)
   #expect(model.visibleInstallations.isEmpty)
+  #expect(model.inventoryEmptyState == .noMatches)
+  model.searchText = "missing"
+  model.selectedProviderID = .huggingFace
+  model.showAllModels()
+  #expect(model.selectedSection == .all)
+  #expect(model.searchText.isEmpty)
+  #expect(!model.hasActiveInventoryFilter)
+  #expect(model.visibleInstallations.map(\.id) == ["launch:model"])
+  #expect(model.inventoryEmptyState == nil)
 }
 
 @MainActor
@@ -317,6 +328,7 @@ func launchScanCanBeDisabled() async throws {
   #expect(!model.isScanning)
   #expect(model.lastScanDate == nil)
   #expect(model.installations.isEmpty)
+  #expect(model.inventoryEmptyState == .noInventory)
 }
 
 @MainActor
