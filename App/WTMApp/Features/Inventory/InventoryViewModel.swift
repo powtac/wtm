@@ -5,6 +5,8 @@ import WTMActions
 import WTMAdapterContracts
 import WTMDomain
 import WTMInventory
+import WTMPersistence
+import WTMRuntime
 
 struct ActiveScanState {
   let startedAt: Date
@@ -50,6 +52,15 @@ final class InventoryViewModel {
   private(set) var actionAuditEntries: [ActionAuditEntry] = []
   private(set) var isPreparingDeletion = false
   private(set) var isDeleting = false
+  private(set) var toolDefinitions: [ToolDefinition] = []
+  private(set) var toolApprovals: [ToolDefinition.ID: ToolExecutionApproval] = [:]
+  private(set) var runtimeReadiness: [RuntimeReadinessKey: RuntimeReadiness] = [:]
+  private(set) var runtimeSessions: [RuntimeInstance.ID: RuntimeSessionSnapshot] = [:]
+  private(set) var runtimePlanPreview: RuntimePlanPreview?
+  private(set) var runtimeError: RuntimeUIError?
+  private(set) var isCheckingRuntime = false
+  private(set) var isPreparingRuntime = false
+  private(set) var isRunningRuntimeAction = false
   var selectedSection = InventorySection.all
   var selectedInstallationIDs: Set<ModelInstallation.ID> = []
   var searchText = ""
@@ -65,11 +76,19 @@ final class InventoryViewModel {
   private let fileRevealer: any FileRevealing
   private let volumeCatalog: any VolumeCataloging
   private let actionExecutor: ActionExecutor?
+  private let runtimeRegistry: RuntimeAdapterRegistry?
+  private let runtimeBroker: RuntimeBroker?
+  private let toolSettingsStore: (any ToolSettingsStoring)?
+  private let initialToolDefinitions: [ToolDefinition]
+  private let executableSelector: (any ExecutableSelecting)?
+  private let invocationBuilder: ToolInvocationBuilder
   private var scanTask: Task<Void, Never>?
   private var actionTask: Task<Void, Never>?
+  private var runtimeTask: Task<Void, Never>?
   private var activeScanGenerationID: UUID?
   private var didPrepareForLaunch = false
   private var sourceSettingsRevision: UInt64 = 0
+  private var toolSettingsRevision: UInt64 = 0
   private let logger = Logger(subsystem: "de.powtac.whatthemodel", category: "inventory")
 
   init(
@@ -79,7 +98,13 @@ final class InventoryViewModel {
     folderSelector: any FolderSelecting,
     fileRevealer: any FileRevealing,
     volumeCatalog: any VolumeCataloging,
-    actionExecutor: ActionExecutor? = nil
+    actionExecutor: ActionExecutor? = nil,
+    runtimeRegistry: RuntimeAdapterRegistry? = nil,
+    runtimeBroker: RuntimeBroker? = nil,
+    toolSettingsStore: (any ToolSettingsStoring)? = nil,
+    initialToolDefinitions: [ToolDefinition] = [],
+    executableSelector: (any ExecutableSelecting)? = nil,
+    invocationBuilder: ToolInvocationBuilder = ToolInvocationBuilder()
   ) {
     self.coordinator = coordinator
     sources = initialSources
@@ -89,11 +114,19 @@ final class InventoryViewModel {
     self.fileRevealer = fileRevealer
     self.volumeCatalog = volumeCatalog
     self.actionExecutor = actionExecutor
+    self.runtimeRegistry = runtimeRegistry
+    self.runtimeBroker = runtimeBroker
+    self.toolSettingsStore = toolSettingsStore
+    self.initialToolDefinitions = initialToolDefinitions
+    self.executableSelector = executableSelector
+    self.invocationBuilder = invocationBuilder
+    toolDefinitions = initialToolDefinitions
   }
 
   isolated deinit {
     scanTask?.cancel()
     actionTask?.cancel()
+    runtimeTask?.cancel()
   }
 
   var visibleInstallations: [ModelInstallation] {
@@ -242,12 +275,262 @@ final class InventoryViewModel {
       reportSettingsIssue(code: "SOURCE_SETTINGS_LOAD_FAILED")
     }
 
+    await loadToolSettings()
+
     refreshSourceAccess()
     refreshActionAudit()
     isPreparingSources = false
     if hasCompletedOnboarding, scanOnLaunch, sources.contains(where: \.isEnabled) {
       startScan()
     }
+  }
+
+  func runtimeOptions(for installation: ModelInstallation) -> [RuntimeAdapterID] {
+    guard let runtimeRegistry else { return [] }
+    return runtimeRegistry.runtimeIDs
+      .filter {
+        runtimeRegistry.adapter(for: $0)?.supportedFormats.contains(installation.variant.format)
+          == true
+      }
+      .sorted { $0.localizedName.localizedStandardCompare($1.localizedName) == .orderedAscending }
+  }
+
+  func readiness(for installation: ModelInstallation, runtimeID: RuntimeAdapterID)
+    -> RuntimeReadiness?
+  {
+    runtimeReadiness[RuntimeReadinessKey(installationID: installation.id, adapterID: runtimeID)]
+  }
+
+  func latestRuntimeSession(for installation: ModelInstallation, runtimeID: RuntimeAdapterID)
+    -> RuntimeSessionSnapshot?
+  {
+    runtimeSessions.values
+      .filter {
+        $0.instance.installationID == installation.id && $0.instance.adapterID == runtimeID
+      }
+      .sorted { ($0.instance.startedAt ?? .distantPast) > ($1.instance.startedAt ?? .distantPast) }
+      .first
+  }
+
+  func checkRuntimeReadiness(_ runtimeID: RuntimeAdapterID, for installation: ModelInstallation) {
+    guard let adapter = runtimeRegistry?.adapter(for: runtimeID) else {
+      runtimeError = .runtimeUnavailable
+      return
+    }
+    isCheckingRuntime = true
+    runtimeError = nil
+    runtimeTask?.cancel()
+    let environment = runtimeEnvironment(for: runtimeID)
+    runtimeTask = Task { [weak self, adapter] in
+      let readiness = await adapter.readiness(for: installation, environment: environment)
+      guard let self, !Task.isCancelled else { return }
+      self.runtimeReadiness[
+        RuntimeReadinessKey(installationID: installation.id, adapterID: runtimeID)
+      ] = readiness
+      self.isCheckingRuntime = false
+      self.runtimeTask = nil
+    }
+  }
+
+  func prepareRuntimeTest(_ runtimeID: RuntimeAdapterID, for installation: ModelInstallation) {
+    guard let adapter = runtimeRegistry?.adapter(for: runtimeID) else {
+      runtimeError = .runtimeUnavailable
+      return
+    }
+    let definition = toolDefinition(for: runtimeID)
+    if let definition, !definition.isEnabled {
+      runtimeError = .toolDisabled
+      return
+    }
+    isPreparingRuntime = true
+    runtimeError = nil
+    runtimeTask?.cancel()
+    runtimeTask = Task { [weak self, adapter, invocationBuilder] in
+      guard let self else { return }
+      do {
+        var validation: ToolValidationRecord?
+        var approval = definition.flatMap { self.toolApprovals[$0.id] }
+        var approvalToPersist: ToolExecutionApproval?
+        if let definition {
+          let currentValidation = try invocationBuilder.inspect(definition)
+          validation = currentValidation
+          if approval?.matches(definition) != true
+            || approval?.executableIdentity != currentValidation.executableIdentity
+          {
+            let replacement = ToolExecutionApproval(
+              definition: definition,
+              executableIdentity: currentValidation.executableIdentity,
+              approvedAt: .now
+            )
+            approval = replacement
+            approvalToPersist = replacement
+          }
+        }
+        let plan = try await adapter.makeTestPlan(
+          for: installation,
+          context: RuntimeLaunchContext(
+            toolDefinition: definition,
+            toolApproval: approval
+          )
+        )
+        guard !Task.isCancelled else { return }
+        self.runtimePlanPreview = RuntimePlanPreview(
+          installation: installation,
+          runtimeName: adapter.displayName,
+          plan: plan,
+          validation: validation,
+          approvalToPersist: approvalToPersist
+        )
+      } catch let error as ToolInvocationBuilderError {
+        self.runtimeError = error == .executableIdentityChanged ? .executableChanged : .toolInvalid
+      } catch {
+        self.runtimeError = .planFailed
+      }
+      self.isPreparingRuntime = false
+      self.runtimeTask = nil
+    }
+  }
+
+  func cancelRuntimePreview() {
+    runtimePlanPreview = nil
+  }
+
+  func executeRuntimeTest() {
+    guard let preview = runtimePlanPreview, let runtimeBroker else {
+      runtimeError = .runtimeUnavailable
+      return
+    }
+    if let approval = preview.approvalToPersist {
+      toolApprovals[approval.definitionID] = approval
+      persistToolSettings()
+    }
+    runtimePlanPreview = nil
+    isRunningRuntimeAction = true
+    runtimeError = nil
+    runtimeTask?.cancel()
+    runtimeTask = Task { [weak self, runtimeBroker] in
+      do {
+        let snapshot = try await runtimeBroker.start(
+          plan: preview.plan,
+          installation: preview.installation,
+          verifyInference: true
+        )
+        guard let self, !Task.isCancelled else { return }
+        self.runtimeSessions[snapshot.instance.id] = snapshot
+        self.runtimeReadiness[
+          RuntimeReadinessKey(
+            installationID: snapshot.instance.installationID,
+            adapterID: snapshot.instance.adapterID
+          )
+        ] = self.readiness(from: snapshot, installation: preview.installation)
+      } catch {
+        self?.runtimeError = .launchFailed
+      }
+      self?.isRunningRuntimeAction = false
+      self?.runtimeTask = nil
+    }
+  }
+
+  func refreshRuntimeSession(_ instanceID: RuntimeInstance.ID) {
+    guard let runtimeBroker else { return }
+    runtimeTask?.cancel()
+    runtimeTask = Task { [weak self, runtimeBroker] in
+      do {
+        let snapshot = try await runtimeBroker.snapshot(for: instanceID)
+        self?.runtimeSessions[instanceID] = snapshot
+      } catch {
+        self?.runtimeError = .runtimeUnavailable
+      }
+      self?.runtimeTask = nil
+    }
+  }
+
+  func stopRuntimeSession(_ instanceID: RuntimeInstance.ID) {
+    guard let runtimeBroker else { return }
+    isRunningRuntimeAction = true
+    runtimeError = nil
+    runtimeTask?.cancel()
+    runtimeTask = Task { [weak self, runtimeBroker] in
+      do {
+        let snapshot = try await runtimeBroker.stop(instanceID)
+        self?.runtimeSessions[instanceID] = snapshot
+      } catch {
+        self?.runtimeError = .stopFailed
+      }
+      self?.isRunningRuntimeAction = false
+      self?.runtimeTask = nil
+    }
+  }
+
+  func dismissRuntimeError() {
+    runtimeError = nil
+  }
+
+  func setToolEnabled(_ definitionID: ToolDefinition.ID, enabled: Bool) {
+    guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
+    if enabled {
+      do {
+        _ = try invocationBuilder.inspect(definition)
+      } catch {
+        runtimeError = .toolInvalid
+        return
+      }
+    }
+    replaceToolDefinition(copy(definition, isEnabled: enabled))
+  }
+
+  func validateTool(_ definitionID: ToolDefinition.ID) {
+    guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
+    do {
+      let validation = try invocationBuilder.inspect(definition)
+      let updated = copy(definition, lastValidation: validation)
+      if let approval = toolApprovals[definition.id],
+        approval.executableIdentity != validation.executableIdentity || !approval.matches(updated)
+      {
+        toolApprovals.removeValue(forKey: definition.id)
+      }
+      replaceToolDefinition(updated)
+    } catch {
+      runtimeError = .toolInvalid
+    }
+  }
+
+  func chooseLlamaCppExecutable() {
+    guard
+      let executableURL = executableSelector?.chooseExecutable(
+        startingAt: toolDefinition(for: .llamaCpp)?.executableURL
+      )
+    else { return }
+    let definition = ToolDefinition(
+      id: llamaCppDefinitionID,
+      displayName: "llama.cpp Server",
+      role: .runtime,
+      runtimeAdapterID: .llamaCpp,
+      origin: .userCreated,
+      isEnabled: false,
+      executableURL: executableURL.standardizedFileURL,
+      arguments: [
+        .literal("--model"), .placeholder(.modelPath),
+        .literal("--host"), .literal("127.0.0.1"),
+        .literal("--port"), .placeholder(.port),
+      ],
+      supportedFormats: [.gguf]
+    )
+    toolApprovals.removeValue(forKey: definition.id)
+    replaceToolDefinition(definition)
+    validateTool(definition.id)
+  }
+
+  func revealTool(_ definitionID: ToolDefinition.ID) {
+    guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
+    fileRevealer.reveal(definition.executableURL)
+  }
+
+  func isToolApproved(_ definition: ToolDefinition) -> Bool {
+    guard let approval = toolApprovals[definition.id], approval.matches(definition),
+      let validation = definition.lastValidation
+    else { return false }
+    return approval.executableIdentity == validation.executableIdentity
   }
 
   func setSourceEnabled(_ sourceID: ScanSource.ID, enabled: Bool) {
@@ -701,6 +984,156 @@ final class InventoryViewModel {
     guard let plan = deletionPlan else { return }
     deletionPlan = nil
     Task { [actionExecutor] in await actionExecutor?.cancel(planID: plan.id) }
+  }
+
+  private var llamaCppDefinitionID: UUID {
+    UUID(
+      uuid: (
+        0x77, 0x74, 0x6D, 0x00, 0x6C, 0x6C, 0x61, 0x6D,
+        0x61, 0x63, 0x70, 0x70, 0x00, 0x00, 0x00, 0x01
+      )
+    )
+  }
+
+  private func toolDefinition(for runtimeID: RuntimeAdapterID) -> ToolDefinition? {
+    toolDefinitions.first { $0.runtimeAdapterID == runtimeID }
+  }
+
+  private func runtimeEnvironment(for runtimeID: RuntimeAdapterID) -> RuntimeEnvironment {
+    let definition = toolDefinition(for: runtimeID)
+    return RuntimeEnvironment(
+      architecture: currentArchitecture,
+      memoryCapacityByteCount: Int64(clamping: ProcessInfo.processInfo.physicalMemory),
+      toolDefinition: definition,
+      toolApproval: definition.flatMap { toolApprovals[$0.id] }
+    )
+  }
+
+  private var currentArchitecture: String {
+    #if arch(arm64)
+      "arm64"
+    #elseif arch(x86_64)
+      "x86_64"
+    #else
+      "unknown"
+    #endif
+  }
+
+  private func readiness(
+    from snapshot: RuntimeSessionSnapshot,
+    installation: ModelInstallation
+  ) -> RuntimeReadiness {
+    let adapterVersion =
+      runtimeRegistry?.adapter(for: snapshot.instance.adapterID)?.version ?? "unknown"
+    let checkedAt = snapshot.inference?.checkedAt ?? snapshot.health?.checkedAt ?? .now
+    let validation: ModelValidation
+    if let inference = snapshot.inference {
+      validation = inference.succeeded ? .inferenceVerified : .inferenceFailed
+    } else {
+      validation = snapshot.health?.succeeded == true ? .runtimeReachable : .blocked
+    }
+    func observation<Value: Hashable & Codable & Sendable>(
+      _ value: Value,
+      evidence: String
+    ) -> RuntimeObservation<Value> {
+      RuntimeObservation(
+        value: value,
+        adapterID: snapshot.instance.adapterID,
+        adapterVersion: adapterVersion,
+        checkedAt: checkedAt,
+        evidence: evidence
+      )
+    }
+    return RuntimeReadiness(
+      installationID: installation.id,
+      adapterID: snapshot.instance.adapterID,
+      integrity: observation(
+        installation.state == .stored ? ModelIntegrity.complete : ModelIntegrity.unknown,
+        evidence: "Inventory state"
+      ),
+      compatibility: observation(.compatible, evidence: "Runtime plan completed"),
+      validation: observation(
+        validation, evidence: snapshot.inference?.summary ?? snapshot.health?.summary ?? "No probe"),
+      runtime: observation(snapshot.instance.state, evidence: "Runtime broker session"),
+      estimatedMemory: nil,
+      blockers: snapshot.inference?.succeeded == false
+        ? [snapshot.inference?.summary ?? "Inference failed"] : []
+    )
+  }
+
+  private func copy(
+    _ definition: ToolDefinition,
+    isEnabled: Bool? = nil,
+    lastValidation: ToolValidationRecord? = nil
+  ) -> ToolDefinition {
+    ToolDefinition(
+      schemaVersion: definition.schemaVersion,
+      id: definition.id,
+      displayName: definition.displayName,
+      role: definition.role,
+      runtimeAdapterID: definition.runtimeAdapterID,
+      origin: definition.origin,
+      isEnabled: isEnabled ?? definition.isEnabled,
+      executableURL: definition.executableURL,
+      arguments: definition.arguments,
+      supportedFormats: definition.supportedFormats,
+      localAPIBaseURL: definition.localAPIBaseURL,
+      currentDirectoryURL: definition.currentDirectoryURL,
+      environment: definition.environment,
+      lastValidation: lastValidation ?? definition.lastValidation
+    )
+  }
+
+  private func replaceToolDefinition(_ definition: ToolDefinition) {
+    if let index = toolDefinitions.firstIndex(where: { $0.id == definition.id }) {
+      toolDefinitions[index] = definition
+    } else {
+      toolDefinitions.append(definition)
+    }
+    toolDefinitions.sort {
+      $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
+    }
+    persistToolSettings()
+  }
+
+  private func loadToolSettings() async {
+    guard let toolSettingsStore else { return }
+    do {
+      guard let snapshot = try await toolSettingsStore.load() else { return }
+      toolSettingsRevision = snapshot.revision
+      let validator = ToolDefinitionValidator()
+      let storedDefinitions = snapshot.definitions.filter {
+        (try? validator.validate($0)) != nil
+      }
+      var merged = storedDefinitions
+      let storedIDs = Set(storedDefinitions.map(\.id))
+      merged.append(contentsOf: initialToolDefinitions.filter { !storedIDs.contains($0.id) })
+      toolDefinitions = merged.sorted {
+        $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
+      }
+      toolApprovals = Dictionary(
+        uniqueKeysWithValues: snapshot.approvals.map { ($0.definitionID, $0) }
+      )
+    } catch {
+      runtimeError = .settingsFailed
+    }
+  }
+
+  private func persistToolSettings() {
+    guard let toolSettingsStore else { return }
+    toolSettingsRevision += 1
+    let snapshot = ToolSettingsSnapshot(
+      revision: toolSettingsRevision,
+      definitions: toolDefinitions,
+      approvals: Array(toolApprovals.values)
+    )
+    Task { [weak self, toolSettingsStore] in
+      do {
+        try await toolSettingsStore.save(snapshot)
+      } catch {
+        self?.runtimeError = .settingsFailed
+      }
+    }
   }
 }
 

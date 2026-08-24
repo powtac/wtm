@@ -22,6 +22,7 @@ public struct LlamaCppToolConvention: Sendable {
       id: Self.definitionID,
       displayName: "llama.cpp Server",
       role: .runtime,
+      runtimeAdapterID: .llamaCpp,
       origin: .builtIn,
       isEnabled: false,
       executableURL: executableURL,

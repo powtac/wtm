@@ -18,6 +18,9 @@
 		A00000000000000000000029 /* ActionOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000019 /* ActionOllama */; };
 		A0000000000000000000002A /* ActionHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001A /* ActionHuggingFace */; };
 		A0000000000000000000002B /* ActionManual in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001B /* ActionManual */; };
+		A0000000000000000000002C /* WTMRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001C /* WTMRuntime */; };
+		A0000000000000000000002D /* RuntimeOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001D /* RuntimeOllama */; };
+		A0000000000000000000002E /* RuntimeLlamaCpp in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001E /* RuntimeLlamaCpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +83,9 @@
 				A00000000000000000000029 /* ActionOllama in Frameworks */,
 				A0000000000000000000002A /* ActionHuggingFace in Frameworks */,
 				A0000000000000000000002B /* ActionManual in Frameworks */,
+				A0000000000000000000002C /* WTMRuntime in Frameworks */,
+				A0000000000000000000002D /* RuntimeOllama in Frameworks */,
+				A0000000000000000000002E /* RuntimeLlamaCpp in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,6 +168,9 @@
 				A00000000000000000000019 /* ActionOllama */,
 				A0000000000000000000001A /* ActionHuggingFace */,
 				A0000000000000000000001B /* ActionManual */,
+				A0000000000000000000001C /* WTMRuntime */,
+				A0000000000000000000001D /* RuntimeOllama */,
+				A0000000000000000000001E /* RuntimeLlamaCpp */,
 			);
 			productName = WTM;
 			productReference = A00000000000000000000008 /* WTM.app */;
@@ -506,6 +515,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = ActionManual;
+		};
+		A0000000000000000000001C /* WTMRuntime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = WTMRuntime;
+		};
+		A0000000000000000000001D /* RuntimeOllama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = RuntimeOllama;
+		};
+		A0000000000000000000001E /* RuntimeLlamaCpp */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = RuntimeLlamaCpp;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

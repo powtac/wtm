@@ -287,6 +287,7 @@ public struct ToolDefinition: Identifiable, Hashable, Codable, Sendable {
   public let id: UUID
   public let displayName: String
   public let role: ToolRole
+  public let runtimeAdapterID: RuntimeAdapterID?
   public let origin: ToolDefinitionOrigin
   public let isEnabled: Bool
   public let executableURL: URL
@@ -302,6 +303,7 @@ public struct ToolDefinition: Identifiable, Hashable, Codable, Sendable {
     id: UUID,
     displayName: String,
     role: ToolRole,
+    runtimeAdapterID: RuntimeAdapterID? = nil,
     origin: ToolDefinitionOrigin,
     isEnabled: Bool,
     executableURL: URL,
@@ -316,6 +318,7 @@ public struct ToolDefinition: Identifiable, Hashable, Codable, Sendable {
     self.id = id
     self.displayName = displayName
     self.role = role
+    self.runtimeAdapterID = runtimeAdapterID
     self.origin = origin
     self.isEnabled = isEnabled
     self.executableURL = executableURL
@@ -331,6 +334,7 @@ public struct ToolDefinition: Identifiable, Hashable, Codable, Sendable {
 public struct ToolExecutionApproval: Hashable, Codable, Sendable {
   public let definitionID: ToolDefinition.ID
   public let executableIdentity: ExecutableIdentity
+  public let runtimeAdapterID: RuntimeAdapterID?
   public let arguments: [ToolArgument]
   public let currentDirectoryURL: URL?
   public let environment: [String: String]
@@ -344,6 +348,7 @@ public struct ToolExecutionApproval: Hashable, Codable, Sendable {
   ) {
     definitionID = definition.id
     self.executableIdentity = executableIdentity
+    runtimeAdapterID = definition.runtimeAdapterID
     arguments = definition.arguments
     currentDirectoryURL = definition.currentDirectoryURL
     environment = definition.environment
@@ -354,6 +359,7 @@ public struct ToolExecutionApproval: Hashable, Codable, Sendable {
   public func matches(_ definition: ToolDefinition) -> Bool {
     definitionID == definition.id
       && executableIdentity.requestedURL == definition.executableURL.standardizedFileURL
+      && runtimeAdapterID == definition.runtimeAdapterID
       && arguments == definition.arguments
       && currentDirectoryURL == definition.currentDirectoryURL
       && environment == definition.environment

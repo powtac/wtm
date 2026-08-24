@@ -21,6 +21,26 @@ struct MacFolderSelector: FolderSelecting {
   }
 }
 
+@MainActor
+protocol ExecutableSelecting {
+  func chooseExecutable(startingAt url: URL?) -> URL?
+}
+
+@MainActor
+struct MacExecutableSelector: ExecutableSelecting {
+  func chooseExecutable(startingAt url: URL? = nil) -> URL? {
+    let panel = NSOpenPanel()
+    panel.canChooseDirectories = false
+    panel.canChooseFiles = true
+    panel.allowsMultipleSelection = false
+    panel.canCreateDirectories = false
+    panel.prompt = String(localized: "tool.choose.action")
+    panel.message = String(localized: "tool.choose.message")
+    panel.directoryURL = url?.deletingLastPathComponent()
+    return panel.runModal() == .OK ? panel.url : nil
+  }
+}
+
 struct MountedVolumeInfo: Identifiable, Hashable, Sendable {
   let id: String
   let name: String
