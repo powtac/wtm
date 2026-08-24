@@ -12,8 +12,9 @@ A workflow that uploads before every gate finishes can expose an incomplete or u
 
 ## Decision
 
-- A stable release starts only from an exact `vMAJOR.MINOR.PATCH` tag in `powtac/wtm` and a
-  protected GitHub Environment named `release`. The tag must match `MARKETING_VERSION`.
+- A stable release starts only after repository visibility is public, from an exact
+  `vMAJOR.MINOR.PATCH` tag in `powtac/wtm` and a protected GitHub Environment named
+  `release`. The tag must match `MARKETING_VERSION`.
 - Developer ID and App Store Connect credentials exist only as Environment secrets. The
   certificate is imported into an ephemeral runner keychain and the keychain is deleted in
   an unconditional cleanup step.
@@ -37,8 +38,10 @@ A workflow that uploads before every gate finishes can expose an incomplete or u
 
 - A failed build can leave logs or a workflow artifact, but cannot publish a non-draft
   release or update `latest`.
-- GitHub Environment setup and five Apple secrets are required before a release tag can
-  succeed. Forks and other repositories cannot enter the release job.
+- GitHub Environment setup and five Apple secrets are required after public launch and
+  before a release tag can succeed. Private repositories, forks, and other repositories
+  cannot enter the release job. GitHub Free does not expose protected Environment secrets
+  to this repository while it is private.
 - The pipeline consumes macOS Actions minutes and performs two notarization submissions.
 - Public Pages, attestations, Discussions, and security features still require a deliberate
   repository-visibility launch step; committed workflows do not imply remote activation.

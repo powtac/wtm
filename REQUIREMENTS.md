@@ -850,6 +850,7 @@ Das Repository MUST enthalten:
 - **GH-REL-007:** Kein Signing- oder Notarisierungssecret ist für Fork-PRs verfügbar. Releases aus nicht vertrauenswürdigem Code sind technisch ausgeschlossen.
 - **GH-REL-008:** Ein fehlgeschlagenes Release darf weder `latest` noch Update-Feed verändern; Veröffentlichung erfolgt erst nach allen Gates atomar.
 - **GH-REL-009:** Release-Metadaten dokumentieren Commit-SHA, SemVer, macOS-/Xcode-/Swift-Version, Dependency-Lockfile, Workflow-Run, Checksummen und Notarisierungsergebnis. Ein unsigned App-Payload MAY separat auf Reproduzierbarkeit geprüft werden.
+- **GH-REL-010:** Unter GitHub Free MUST der Release-Job im privaten Repository hart deaktiviert bleiben, da Environment-Secrets und Required Reviewers dort nicht verfügbar sind. Nach dem Public-Schalten werden das geschützte Environment und seine Secrets vor dem ersten Release-Tag eingerichtet.
 
 ### 16.5 GitHub Pages Website
 

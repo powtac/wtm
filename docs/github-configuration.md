@@ -14,8 +14,10 @@ The repository starts private and is designed to become public without rewriting
 
 ## Release environment
 
-Create a protected Environment named `release` with required reviewer approval. Store only
-these Environment secrets:
+On GitHub Free, private repositories cannot use Environment secrets or required reviewers.
+Do not create a release tag while the repository is private. Immediately after the public
+launch audit, create a protected Environment named `release` with required reviewer approval
+and store only these Environment secrets:
 
 - `DEVELOPER_ID_APPLICATION_P12_BASE64`
 - `DEVELOPER_ID_APPLICATION_P12_PASSWORD`
@@ -23,7 +25,8 @@ these Environment secrets:
 - `APPLE_TEAM_ID`
 - `APPLE_APP_PASSWORD`
 
-`release.yml` accepts only a stable SemVer tag matching the Xcode project version. It uses
+The release job is hard-disabled unless repository visibility is `public`. `release.yml`
+accepts only a stable SemVer tag matching the Xcode project version. It uses
 an ephemeral keychain and publishes a draft only after signing, notarization, DMG, SBOM,
 checksum, secret-pattern, and start-smoke gates pass. Artifact attestation is enabled only
 after the repository is public.

@@ -15,7 +15,9 @@ permissions:
 jobs:
   release:
     name: Sign, notarize, verify, and publish
-    if: github.repository == 'powtac/wtm'
+    if: >-
+      github.repository == 'powtac/wtm' &&
+      github.event.repository.visibility == 'public'
     runs-on: macos-15
     timeout-minutes: 60
     environment: release

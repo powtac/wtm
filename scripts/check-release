@@ -30,7 +30,14 @@ echo '{"schemaVersion":1}' > "$asset_fixture/release-metadata.json"
 
 workflow="$repository_root/.github/workflows/release.yml"
 [[ -f "$workflow" ]] || { echo "Missing release workflow." >&2; exit 1; }
-for gate in 'environment: release' 'build-distribution' 'audit-release-artifacts' 'actions/attest@' 'gh release create'; do
+for gate in \
+  'environment: release' \
+  "github.event.repository.visibility == 'public'" \
+  'build-distribution' \
+  'audit-release-artifacts' \
+  'actions/attest@' \
+  'gh release create'
+do
   /usr/bin/grep -Fq "$gate" "$workflow" || { echo "Missing release gate: $gate" >&2; exit 1; }
 done
 for gate in 'notarytool' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts'; do
