@@ -55,7 +55,20 @@ remain separate facts.
 
 ### Client adapter
 
-Handoff to a consuming application or endpoint. This capability starts in Phase 4.
+Handoff to a consuming application or endpoint. Phase 4 ships two compiled client
+adapters. Both create expiring, fully previewed plans; `ClientHandoffBroker` revalidates the
+executable, interpreter, and script identities immediately before direct process launch.
+
+- OpenClaw currently accepts only a stored Ollama installation with fresh inference evidence
+  from WTM. It uses the provider-qualified `ollama/<model>:<tag>` reference for one local
+  inference request and does not rewrite OpenClaw configuration.
+- Unsloth starts its reviewed Studio command in API-only mode on numeric loopback with tools
+  and Cloudflare disabled. It does not install packages, orchestrate training, or expose a
+  public endpoint.
+
+Client adapters receive no shell or Terminal authority. Their processes are WTM-owned,
+bounded, redacted, ephemeral, and terminated during bounded app shutdown. See
+[ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
 
 ## How to extend this list
 
@@ -80,4 +93,6 @@ Compiled adapters become available only through a normal signed WTM release. WTM
 not load third-party runtime plugins. The capability boundary is defined by
 [ADR-007](decisions/ADR-007-compiled-adapters-only.md),
 [ADR-009](decisions/ADR-009-capability-separated-adapters.md), and
-[ADR-012](decisions/ADR-012-data-only-extension-manifests.md).
+[ADR-012](decisions/ADR-012-data-only-extension-manifests.md). Menu and client handoff
+constraints are defined by
+[ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).

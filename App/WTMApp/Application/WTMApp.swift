@@ -36,7 +36,7 @@ struct WTMApp: App {
     MenuBarExtra(
       "app.name",
       systemImage: "externaldrive.badge.checkmark",
-      isInserted: $isMenuBarEnabled
+      isInserted: menuBarInsertion
     ) {
       MenuBarInventoryView(model: model)
     }
@@ -46,5 +46,14 @@ struct WTMApp: App {
       SettingsRootView(model: model)
         .frame(width: 620, height: 440)
     }
+  }
+
+  private var menuBarInsertion: Binding<Bool> {
+    Binding(
+      get: {
+        ProcessInfo.processInfo.environment["XCTestBundlePath"] == nil && isMenuBarEnabled
+      },
+      set: { isMenuBarEnabled = $0 }
+    )
   }
 }

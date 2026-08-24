@@ -1,8 +1,28 @@
 import AppKit
 import Foundation
+import ServiceManagement
 import UniformTypeIdentifiers
 import WTMDomain
 import WTMPersistence
+
+@MainActor
+protocol LaunchAtLoginManaging {
+  var isEnabled: Bool { get }
+  func setEnabled(_ enabled: Bool) throws
+}
+
+@MainActor
+struct MacLaunchAtLoginManager: LaunchAtLoginManaging {
+  var isEnabled: Bool { SMAppService.mainApp.status == .enabled }
+
+  func setEnabled(_ enabled: Bool) throws {
+    if enabled {
+      try SMAppService.mainApp.register()
+    } else {
+      try SMAppService.mainApp.unregister()
+    }
+  }
+}
 
 @MainActor
 protocol FolderSelecting {

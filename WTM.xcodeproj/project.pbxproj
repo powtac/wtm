@@ -21,6 +21,8 @@
 		A0000000000000000000002C /* WTMRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001C /* WTMRuntime */; };
 		A0000000000000000000002D /* RuntimeOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001D /* RuntimeOllama */; };
 		A0000000000000000000002E /* RuntimeLlamaCpp in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001E /* RuntimeLlamaCpp */; };
+		A0000000000000000000002F /* ClientOpenClaw in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001F /* ClientOpenClaw */; };
+		A00000000000000000000081 /* ClientUnsloth in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000080 /* ClientUnsloth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +88,8 @@
 				A0000000000000000000002C /* WTMRuntime in Frameworks */,
 				A0000000000000000000002D /* RuntimeOllama in Frameworks */,
 				A0000000000000000000002E /* RuntimeLlamaCpp in Frameworks */,
+				A0000000000000000000002F /* ClientOpenClaw in Frameworks */,
+				A00000000000000000000081 /* ClientUnsloth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,6 +175,8 @@
 				A0000000000000000000001C /* WTMRuntime */,
 				A0000000000000000000001D /* RuntimeOllama */,
 				A0000000000000000000001E /* RuntimeLlamaCpp */,
+				A0000000000000000000001F /* ClientOpenClaw */,
+				A00000000000000000000080 /* ClientUnsloth */,
 			);
 			productName = WTM;
 			productReference = A00000000000000000000008 /* WTM.app */;
@@ -530,6 +536,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = RuntimeLlamaCpp;
+		};
+		A0000000000000000000001F /* ClientOpenClaw */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = ClientOpenClaw;
+		};
+		A00000000000000000000080 /* ClientUnsloth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = ClientUnsloth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

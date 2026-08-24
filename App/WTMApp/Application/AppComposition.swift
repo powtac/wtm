@@ -4,6 +4,8 @@ import ActionOllama
 import AdapterHuggingFace
 import AdapterManual
 import AdapterOllama
+import ClientOpenClaw
+import ClientUnsloth
 import Foundation
 import RuntimeLlamaCpp
 import RuntimeOllama
@@ -71,6 +73,11 @@ enum AppComposition {
     }
     let runtimeRegistry = try? RuntimeAdapterRegistry(adapters: runtimeAdapters)
     let runtimeBroker = runtimeRegistry.map { RuntimeBroker(registry: $0) }
+    let clientRegistry = try? ClientAdapterRegistry(adapters: [
+      OpenClawClientAdapter.discovered(homeDirectory: homeDirectory),
+      UnslothClientAdapter.discovered(homeDirectory: homeDirectory),
+    ])
+    let clientBroker = clientRegistry.map { _ in ClientHandoffBroker() }
     let llamaCppConvention = LlamaCppToolConvention()
     let discoveredLlamaCppDefinition: ToolDefinition?
     #if DEBUG
@@ -113,6 +120,9 @@ enum AppComposition {
       actionExecutor: actionExecutor,
       runtimeRegistry: runtimeRegistry,
       runtimeBroker: runtimeBroker,
+      clientRegistry: clientRegistry,
+      clientBroker: clientBroker,
+      launchAtLoginManager: MacLaunchAtLoginManager(),
       toolSettingsStore: JSONToolSettingsStore(
         settingsURL: applicationSupportDirectory.appending(
           path: "tool-settings.json",

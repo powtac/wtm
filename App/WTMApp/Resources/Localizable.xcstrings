@@ -1965,6 +1965,116 @@
         }
       }
     },
+    "client.error.launch-failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The client could not be started. Review its installation and try again."
+          }
+        }
+      }
+    },
+    "client.error.plan-failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A safe client handoff could not be prepared."
+          }
+        }
+      }
+    },
+    "client.error.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client Handoff Failed"
+          }
+        }
+      }
+    },
+    "client.error.unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This client integration is unavailable."
+          }
+        }
+      }
+    },
+    "client.execute.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Handoff"
+          }
+        }
+      }
+    },
+    "client.prepare.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Handoff…"
+          }
+        }
+      }
+    },
+    "client.preview.client" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client"
+          }
+        }
+      }
+    },
+    "client.preview.detail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will execute this exact argument vector without a shell. The client may load the model into memory."
+          }
+        }
+      }
+    },
+    "client.preview.model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model reference"
+          }
+        }
+      }
+    },
+    "client.preview.warning" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Client Handoff"
+          }
+        }
+      }
+    },
+    "client.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clients"
+          }
+        }
+      }
+    },
     "menu.incomplete" : {
       "localizations" : {
         "en" : {
@@ -2328,6 +2438,46 @@
         }
       }
     },
+    "settings.login-item.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start WTM after login. This is independent of the menu bar item."
+          }
+        }
+      }
+    },
+    "settings.login-item.enabled" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Login"
+          }
+        }
+      }
+    },
+    "settings.login-item.error" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS did not accept the login item change. Check System Settings > General > Login Items."
+          }
+        }
+      }
+    },
+    "settings.login-item.error-title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Login"
+          }
+        }
+      }
+    },
     "settings.menu-bar.description" : {
       "localizations" : {
         "en" : {
@@ -2354,6 +2504,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Menu Bar"
+          }
+        }
+      }
+    },
+    "settings.client.reviewed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in · Reviewed handoff"
+          }
+        }
+      }
+    },
+    "settings.clients.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client launches require an explicit preview. WTM never opens Terminal or changes a client's persistent model configuration."
+          }
+        }
+      }
+    },
+    "settings.clients.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clients"
           }
         }
       }

@@ -14,6 +14,8 @@ let package = Package(
     .library(name: "WTMRuntime", targets: ["WTMRuntime"]),
     .library(name: "RuntimeOllama", targets: ["RuntimeOllama"]),
     .library(name: "RuntimeLlamaCpp", targets: ["RuntimeLlamaCpp"]),
+    .library(name: "ClientOpenClaw", targets: ["ClientOpenClaw"]),
+    .library(name: "ClientUnsloth", targets: ["ClientUnsloth"]),
     .library(name: "WTMPersistence", targets: ["WTMPersistence"]),
     .library(name: "AdapterOllama", targets: ["AdapterOllama"]),
     .library(name: "AdapterHuggingFace", targets: ["AdapterHuggingFace"]),
@@ -41,6 +43,14 @@ let package = Package(
     ),
     .target(
       name: "RuntimeLlamaCpp",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
+    ),
+    .target(
+      name: "ClientOpenClaw",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
+    ),
+    .target(
+      name: "ClientUnsloth",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
     ),
     .target(name: "WTMPersistence", dependencies: ["WTMDomain", "WTMActions"]),
@@ -108,6 +118,13 @@ let package = Package(
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMRuntime", "RuntimeOllama",
         "RuntimeLlamaCpp",
+      ]
+    ),
+    .testTarget(
+      name: "WTMClientAdapterTests",
+      dependencies: [
+        "WTMDomain", "WTMAdapterContracts", "WTMRuntime", "ClientOpenClaw",
+        "ClientUnsloth",
       ]
     ),
     .testTarget(

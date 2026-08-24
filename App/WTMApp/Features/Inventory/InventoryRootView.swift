@@ -103,6 +103,15 @@ struct InventoryRootView: View {
         )
       }
     }
+    .sheet(isPresented: clientPlanIsPresented) {
+      if let preview = model.clientPlanPreview {
+        ClientPlanPreviewView(
+          preview: preview,
+          cancelAction: model.cancelClientPreview,
+          executeAction: model.executeClientHandoff
+        )
+      }
+    }
     .alert("deletion.error.title", isPresented: deletionErrorIsPresented) {
       Button("action.ok") { model.dismissDeletionError() }
     } message: {
@@ -117,6 +126,11 @@ struct InventoryRootView: View {
       Button("action.ok") { model.dismissRuntimeError() }
     } message: {
       if let error = model.runtimeError { Text(error.message) }
+    }
+    .alert("client.error.title", isPresented: clientErrorIsPresented) {
+      Button("action.ok") { model.dismissClientError() }
+    } message: {
+      if let error = model.clientError { Text(error.message) }
     }
   }
 
@@ -543,6 +557,20 @@ struct InventoryRootView: View {
     Binding(
       get: { model.deletionReport != nil },
       set: { if !$0 { model.dismissDeletionReport() } }
+    )
+  }
+
+  private var clientPlanIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.clientPlanPreview != nil },
+      set: { if !$0 { model.cancelClientPreview() } }
+    )
+  }
+
+  private var clientErrorIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.clientError != nil },
+      set: { if !$0 { model.dismissClientError() } }
     )
   }
 

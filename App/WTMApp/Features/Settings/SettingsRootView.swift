@@ -67,6 +67,11 @@ struct SettingsRootView: View {
     } message: {
       if let error = model.runtimeError { Text(error.message) }
     }
+    .alert("settings.login-item.error-title", isPresented: launchAtLoginErrorIsPresented) {
+      Button("action.ok") { model.dismissLaunchAtLoginError() }
+    } message: {
+      if let error = model.launchAtLoginError { Text(error) }
+    }
   }
 
   private var generalSettings: some View {
@@ -84,6 +89,16 @@ struct SettingsRootView: View {
       Section("settings.menu-bar.section") {
         Toggle("settings.menu-bar.enabled", isOn: $isMenuBarEnabled)
         Text("settings.menu-bar.description")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        Toggle(
+          "settings.login-item.enabled",
+          isOn: Binding(
+            get: { model.isLaunchAtLoginEnabled },
+            set: { model.setLaunchAtLogin($0) }
+          )
+        )
+        Text("settings.login-item.description")
           .font(.caption)
           .foregroundStyle(.secondary)
       }
@@ -272,6 +287,19 @@ struct SettingsRootView: View {
         }
         adapterGuideLink
       }
+
+      Section("settings.clients.section") {
+        ForEach(model.availableClientIDs, id: \.self) { clientID in
+          LabeledContent(clientID.displayName) {
+            Text("settings.client.reviewed")
+              .foregroundStyle(.secondary)
+          }
+        }
+        Text("settings.clients.description")
+          .font(.caption)
+          .foregroundStyle(.secondary)
+        adapterGuideLink
+      }
     }
   }
 
@@ -380,6 +408,13 @@ struct SettingsRootView: View {
     Binding(
       get: { model.runtimeError != nil },
       set: { if !$0 { model.dismissRuntimeError() } }
+    )
+  }
+
+  private var launchAtLoginErrorIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.launchAtLoginError != nil },
+      set: { if !$0 { model.dismissLaunchAtLoginError() } }
     )
   }
 }

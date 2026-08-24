@@ -27,11 +27,12 @@ unrelated tools or public-tunnel behaviour.
   client's persistent default model or claim runtime ownership.
 - Native app bundles are opened with `NSWorkspace`. CLI clients use the centralized,
   identity-bound process launcher with typed arguments and no shell or Terminal automation.
-- OpenClaw handoff uses its provider-qualified model reference and a previously validated
-  loopback endpoint. WTM does not store OpenClaw credentials or rewrite its configuration.
-- Unsloth is presented as a Studio integration. WTM may open an already configured local
-  Studio endpoint or reviewed app bundle, but does not orchestrate training, install Python
-  packages, enable tools, or create public tunnels.
+- OpenClaw handoff uses its provider-qualified model reference and fresh inference evidence
+  from a previously validated Ollama loopback runtime. WTM executes one reviewed local
+  inference command; it does not store OpenClaw credentials or rewrite its configuration.
+- Unsloth is presented as a Studio integration. WTM may start its reviewed API-only Studio
+  command on numeric loopback or open an already configured local Studio endpoint. The plan
+  disables tools and Cloudflare; WTM does not orchestrate training or install Python packages.
 - Data-only client definitions can narrow an existing compiled capability; they cannot add
   executable code, shell syntax, unreviewed endpoint schemes, or arbitrary environment keys.
 

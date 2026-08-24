@@ -119,6 +119,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-023](docs/decisions/ADR-023-revalidated-deletion-transactions.md) | Löschungen sind kurzlebige, unmittelbar revalidierte Transaktionen | Vorschau und Bestätigung ersetzen keine Revalidierung von Identität, Scope, Referenzen und Providerzustand. |
 | [ADR-024](docs/decisions/ADR-024-pane-scoped-inventory-actions.md) | Inventar- und Auswahlaktionen folgen dem Scope ihres Split-View-Bereichs | Leere Filterergebnisse dürfen weder ein leeres Inventar behaupten noch einen Scan als falsche Abhilfe anbieten. |
 | [ADR-025](docs/decisions/ADR-025-owned-runtime-sessions.md) | Laufzeitsitzungen sind eigentumsgebunden und Verifikation bleibt evidenzgestuft | Providerzustand, WTM-eigene Prozesse, Healthcheck und echte Inferenz dürfen keine gemeinsame Wahrheitsaussage vortäuschen. |
+| [ADR-026](docs/decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md) | Menüleiste ist eine passive Projektion; Client-Handoffs sind kurzlebig und reviewt | Kein zweiter Scanner, keine implizite Clientkonfiguration und keine ungeprüfte Skript- oder Interpreterausführung. |
 
 ### 5.1 Entscheidungs- und Requirements-Governance
 

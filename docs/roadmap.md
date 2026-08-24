@@ -9,7 +9,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | 1 — Read-only Beta | Completed | Requirements 0.2.0 code gates and fresh Developer ID distribution evidence are verified |
 | 2 — Safe Actions | Completed | Revalidated plans, provider actions, Trash, audit, targeted verification, recovery tests, and fresh notarized distribution are verified |
 | 3 — Runtimes | Completed | Evidence-gated runtime checks, owned process lifecycle, tool definitions, automated gates, and fresh notarized distribution are verified |
-| 4 — Integrations | In progress | Native menu bar projection implemented; reviewed client handoffs pending |
+| 4 — Integrations | Implemented | Native menu bar, separate login item, reviewed OpenClaw/Unsloth handoffs, automated gates, and manual release evidence pending |
 | 5 — Stable Public Release | Not started | DMG release, Pages, and public community activation |
 | 6 — Optional Downloads | Not started | Separate architecture and security decision required |
 

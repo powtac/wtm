@@ -59,6 +59,11 @@ final class InventoryViewModel {
   private(set) var runtimePlanPreview: RuntimePlanPreview?
   private(set) var toolImportPreview: ToolDefinitionImportPreview?
   private(set) var runtimeError: RuntimeUIError?
+  private(set) var clientPlanPreview: ClientPlanPreview?
+  private(set) var clientError: ClientUIError?
+  private(set) var clientSessions: [UUID: ClientHandoffSnapshot] = [:]
+  private(set) var isLaunchAtLoginEnabled = false
+  private(set) var launchAtLoginError: String?
   private(set) var isCheckingRuntime = false
   private(set) var isPreparingRuntime = false
   private(set) var isRunningRuntimeAction = false
@@ -79,6 +84,9 @@ final class InventoryViewModel {
   private let actionExecutor: ActionExecutor?
   private let runtimeRegistry: RuntimeAdapterRegistry?
   private let runtimeBroker: RuntimeBroker?
+  private let clientRegistry: ClientAdapterRegistry?
+  private let clientBroker: ClientHandoffBroker?
+  private let launchAtLoginManager: (any LaunchAtLoginManaging)?
   private let toolSettingsStore: (any ToolSettingsStoring)?
   private let initialToolDefinitions: [ToolDefinition]
   private let runtimeToolTemplates: [RuntimeToolTemplate]
@@ -88,6 +96,7 @@ final class InventoryViewModel {
   private var scanTask: Task<Void, Never>?
   private var actionTask: Task<Void, Never>?
   private var runtimeTask: Task<Void, Never>?
+  private var clientTask: Task<Void, Never>?
   private var activeScanGenerationID: UUID?
   private var didPrepareForLaunch = false
   private var sourceSettingsRevision: UInt64 = 0
@@ -104,6 +113,9 @@ final class InventoryViewModel {
     actionExecutor: ActionExecutor? = nil,
     runtimeRegistry: RuntimeAdapterRegistry? = nil,
     runtimeBroker: RuntimeBroker? = nil,
+    clientRegistry: ClientAdapterRegistry? = nil,
+    clientBroker: ClientHandoffBroker? = nil,
+    launchAtLoginManager: (any LaunchAtLoginManaging)? = nil,
     toolSettingsStore: (any ToolSettingsStoring)? = nil,
     initialToolDefinitions: [ToolDefinition] = [],
     runtimeToolTemplates: [RuntimeToolTemplate] = [],
@@ -121,6 +133,9 @@ final class InventoryViewModel {
     self.actionExecutor = actionExecutor
     self.runtimeRegistry = runtimeRegistry
     self.runtimeBroker = runtimeBroker
+    self.clientRegistry = clientRegistry
+    self.clientBroker = clientBroker
+    self.launchAtLoginManager = launchAtLoginManager
     self.toolSettingsStore = toolSettingsStore
     self.initialToolDefinitions = initialToolDefinitions
     self.runtimeToolTemplates = runtimeToolTemplates
@@ -128,12 +143,14 @@ final class InventoryViewModel {
     self.toolManifestDocument = toolManifestDocument
     self.invocationBuilder = invocationBuilder
     toolDefinitions = initialToolDefinitions
+    isLaunchAtLoginEnabled = launchAtLoginManager?.isEnabled ?? false
   }
 
   isolated deinit {
     scanTask?.cancel()
     actionTask?.cancel()
     runtimeTask?.cancel()
+    clientTask?.cancel()
   }
 
   var visibleInstallations: [ModelInstallation] {
@@ -231,6 +248,12 @@ final class InventoryViewModel {
   var availableStorageProviderIDs: [ProviderID] {
     Array(Set(sources.map(\.providerID))).sorted { left, right in
       left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+    }
+  }
+
+  var availableClientIDs: [ClientAdapterID] {
+    (clientRegistry?.clientIDs ?? []).sorted {
+      $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
     }
   }
 
@@ -475,7 +498,92 @@ final class InventoryViewModel {
 
   func stopOwnedRuntimeSessionsForTermination() async {
     runtimeTask?.cancel()
+    clientTask?.cancel()
     await runtimeBroker?.stopAllOwned()
+    await clientBroker?.stopAllOwned()
+  }
+
+  func clientOptions(for installation: ModelInstallation) -> [ClientAdapterID] {
+    guard let clientRegistry else { return [] }
+    return clientRegistry.clientIDs.sorted {
+      $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
+    }
+  }
+
+  func clientAvailability(
+    _ clientID: ClientAdapterID,
+    for installation: ModelInstallation
+  ) -> ClientAvailability {
+    guard let adapter = clientRegistry?.adapter(for: clientID) else {
+      return .unavailable(reason: String(localized: "client.error.unavailable"))
+    }
+    return adapter.availability(for: installation, context: clientContext())
+  }
+
+  func prepareClientHandoff(_ clientID: ClientAdapterID, for installation: ModelInstallation) {
+    guard let adapter = clientRegistry?.adapter(for: clientID) else {
+      clientError = .unavailable
+      return
+    }
+    do {
+      let plan = try adapter.makeHandoffPlan(for: installation, context: clientContext())
+      clientPlanPreview = ClientPlanPreview(
+        installation: installation,
+        clientName: adapter.displayName,
+        plan: plan
+      )
+    } catch {
+      clientError = .planFailed
+    }
+  }
+
+  func cancelClientPreview() {
+    clientPlanPreview = nil
+  }
+
+  func executeClientHandoff() {
+    guard let preview = clientPlanPreview, let clientBroker else {
+      clientError = .unavailable
+      return
+    }
+    clientPlanPreview = nil
+    clientTask?.cancel()
+    clientTask = Task { [weak self, clientBroker] in
+      do {
+        let snapshot = try await clientBroker.start(
+          plan: preview.plan,
+          installation: preview.installation
+        )
+        self?.clientSessions[snapshot.id] = snapshot
+      } catch {
+        self?.clientError = .launchFailed
+      }
+      self?.clientTask = nil
+    }
+  }
+
+  func dismissClientError() {
+    clientError = nil
+  }
+
+  func setLaunchAtLogin(_ enabled: Bool) {
+    guard let launchAtLoginManager else { return }
+    do {
+      try launchAtLoginManager.setEnabled(enabled)
+      isLaunchAtLoginEnabled = launchAtLoginManager.isEnabled
+      launchAtLoginError = nil
+    } catch {
+      isLaunchAtLoginEnabled = launchAtLoginManager.isEnabled
+      launchAtLoginError = String(localized: "settings.login-item.error")
+    }
+  }
+
+  func dismissLaunchAtLoginError() {
+    launchAtLoginError = nil
+  }
+
+  private func clientContext() -> ClientHandoffContext {
+    ClientHandoffContext(runtimeInstances: runtimeSessions.values.map(\.instance))
   }
 
   func setToolEnabled(_ definitionID: ToolDefinition.ID, enabled: Bool) {

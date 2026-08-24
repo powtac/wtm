@@ -90,6 +90,29 @@ func storedRuntimeOverrideSuppressesDefault() async {
 }
 
 @MainActor
+@Test("Launch at login remains independent and uses the injected system service")
+func launchAtLoginUsesSystemService() {
+  let manager = FixtureLaunchAtLoginManager()
+  let model = InventoryViewModel(
+    coordinator: nil,
+    initialSources: [],
+    sourceSettingsStore: FixtureSourceSettingsStore(snapshot: nil),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog(),
+    launchAtLoginManager: manager
+  )
+
+  #expect(!model.isLaunchAtLoginEnabled)
+  model.setLaunchAtLogin(true)
+  #expect(model.isLaunchAtLoginEnabled)
+  #expect(manager.isEnabled)
+  model.setLaunchAtLogin(false)
+  #expect(!model.isLaunchAtLoginEnabled)
+  #expect(!manager.isEnabled)
+}
+
+@MainActor
 @Test("Artifact headings include zero, singular, and plural counts")
 func artifactHeadingsIncludeCounts() {
   #expect(artifactSectionTitle(count: 0) == "0 Artifacts")
@@ -864,6 +887,15 @@ private func ageFixture(timestamp: Date?) -> ModelInstallation {
       [ObservedTimestamp(value: $0, kind: .fileCreation, confidence: .derived)]
     } ?? []
   )
+}
+
+@MainActor
+private final class FixtureLaunchAtLoginManager: LaunchAtLoginManaging {
+  var isEnabled = false
+
+  func setEnabled(_ enabled: Bool) {
+    isEnabled = enabled
+  }
 }
 
 @MainActor

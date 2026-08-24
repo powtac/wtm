@@ -80,6 +80,7 @@ struct InstallationDetailView: View {
         }
 
         RuntimeSectionView(model: model, installation: installation)
+        ClientSectionView(model: model, installation: installation)
 
         Section {
           Button("deletion.review.action", systemImage: "trash", role: .destructive) {
