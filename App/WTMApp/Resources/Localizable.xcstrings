@@ -1506,6 +1506,16 @@
         }
       }
     },
+    "settings.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
+          }
+        }
+      }
+    },
     "settings.age.presets" : {
       "localizations" : {
         "en" : {

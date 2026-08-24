@@ -2,6 +2,7 @@ import SwiftUI
 import WTMDomain
 
 struct InventoryRootView: View {
+  @Environment(\.openSettings) private var openSettings
   @Bindable var model: InventoryViewModel
   @AppStorage("inventory.storage-display-mode") private var storageDisplayModeRaw =
     StorageDisplayMode.absolute.rawValue
@@ -25,6 +26,24 @@ struct InventoryRootView: View {
           List(InventorySection.allCases, selection: $model.selectedSection) { section in
             Label(String(localized: section.localizedKey), systemImage: section.systemImage)
               .tag(section)
+              .accessibilityIdentifier("sidebar-section-\(section.rawValue)")
+          }
+          .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(spacing: 0) {
+              Divider()
+              Button {
+                openSettings()
+              } label: {
+                Label("settings.action", systemImage: "gearshape")
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .contentShape(Rectangle())
+              }
+              .buttonStyle(.plain)
+              .padding(.horizontal, 12)
+              .padding(.vertical, 10)
+              .accessibilityIdentifier("sidebar-settings-button")
+            }
+            .background(.bar)
           }
           .navigationTitle(Text("app.name"))
         } content: {

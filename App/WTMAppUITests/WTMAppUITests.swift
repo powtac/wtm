@@ -54,8 +54,8 @@ final class WTMAppUITests: XCTestCase {
       application.descendants(matching: .any)["inventory-filter-menu"].exists
     )
 
-    let oldSection = application.staticTexts["Old"].firstMatch
-    XCTAssertTrue(oldSection.exists)
+    let oldSection = application.staticTexts["sidebar-section-old"]
+    XCTAssertTrue(oldSection.waitForExistence(timeout: 15))
     oldSection.click()
     XCTAssertTrue(
       application.staticTexts["No Models Match This View"].waitForExistence(timeout: 5)
@@ -74,5 +74,12 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(FileManager.default.fileExists(atPath: modelURL.path))
     application.buttons["Cancel"].click()
     XCTAssertTrue(FileManager.default.fileExists(atPath: modelURL.path))
+
+    let settings = application.buttons["sidebar-settings-button"]
+    XCTAssertTrue(settings.waitForExistence(timeout: 15))
+    settings.click()
+    XCTAssertTrue(
+      application.descendants(matching: .any)["Scan on Launch"].waitForExistence(timeout: 5)
+    )
   }
 }
