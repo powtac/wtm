@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="How to extend What The Model with reviewed adapters and safe data definitions.">
+    <title>Extend WTM — What The Model</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>What The Model</span></a><nav aria-label="Primary navigation"><a href="index.html">Product</a><a aria-current="page" href="extend.html">Extend WTM</a><a href="https://github.com/powtac/wtm">GitHub</a></nav></header>
+    <main id="main" class="article">
+      <p class="eyebrow">Contributor guide</p>
+      <h1>Extend the list, preserve the boundary.</h1>
+      <p class="lead">WTM uses convention over configuration for known locations, versioned data definitions for narrow overrides, and compiled Swift adapters for new capabilities. It never loads third-party code plugins.</p>
+
+      <section><h2 id="choose">Choose the smallest extension type</h2><div class="cards compact">
+        <article><h3>Settings override</h3><p>Change a folder, executable path, safe argument token, or enabled state. No code and no new capability.</p></article>
+        <article><h3>Data manifest</h3><p>Share schema-validated labels, paths, typed arguments, aliases, or safe HTTPS templates. Imports remain disabled until reviewed.</p></article>
+        <article><h3>Compiled adapter</h3><p>Add a parser, provider API, deletion semantic, runtime lifecycle, or client handoff. Requires Swift, fixtures, tests, and review.</p></article>
+      </div></section>
+
+      <section><h2 id="adapter-types">Adapter types</h2>
+        <h3 id="storage-provider-adapter">StorageProviderAdapter</h3><p>Read-only discovery of provider identities, manifests, artifacts, configs, completeness, and evidence. It cannot delete or execute.</p>
+        <h3 id="manual-folder-adapter">ManualFolderAdapter</h3><p>Conservative format recognition inside a user-enabled folder. It cannot invent provider ownership.</p>
+        <h3 id="storage-action-adapter">StorageActionAdapter</h3><p>Provider-aware cleanup planning. A central executor revalidates scope and identity and owns Trash or provider mutation.</p>
+        <h3 id="runtime-adapter">RuntimeAdapter</h3><p>Compatibility, immutable launch plans, loopback health, and minimal inference. A central broker owns processes.</p>
+        <h3 id="client-adapter">ClientAdapter</h3><p>Short-lived, explicit handoff to a consumer such as OpenClaw or Unsloth. It cannot silently rewrite client defaults or claim runtime ownership.</p>
+      </section>
+
+      <section><h2 id="proposal">From proposal to release</h2><ol class="steps"><li><strong>Proposal issue</strong><span>State role, versions, paths or API, capabilities, risks, and test plan.</span></li><li><strong>Implementation</strong><span>Create the smallest separate SwiftPM target. Do not add provider branches to core UI.</span></li><li><strong>Fixtures and contract tests</strong><span>Use synthetic or redistributable evidence, malformed-input tests, and path-boundary cases.</span></li><li><strong>Review</strong><span>Update architecture, threat model, support matrix, and docs. Security-sensitive roles need explicit review.</span></li><li><strong>Signed release</strong><span>Compiled adapters ship only inside a normal Developer-ID-signed, notarized WTM release.</span></li></ol>
+        <div class="actions"><a class="button primary" href="https://github.com/powtac/wtm/issues/new?template=adapter.yml">Open an adapter proposal</a><a class="button" href="https://github.com/powtac/wtm/blob/main/docs/adapters.md">Read technical adapter docs</a></div>
+      </section>
+
+      <section class="callout"><div><h2>Hard boundaries</h2></div><div><p>No dynamic libraries, scripts embedded in manifests, shell strings, hidden network requests, credentials, new deletion behavior, or arbitrary executable capabilities.</p></div></section>
+    </main>
+    <footer><span>What The Model · Apache-2.0</span><nav aria-label="Footer navigation"><a href="index.html">Product</a><a href="https://github.com/powtac/wtm/blob/main/CONTRIBUTING.md">Contributing</a><a href="https://github.com/powtac/wtm/blob/main/SECURITY.md">Security</a></nav></footer>
+  </body>
+</html>

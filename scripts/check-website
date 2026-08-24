@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+website_root="$repository_root/website"
+
+for required_file in index.html extend.html styles.css; do
+  [[ -f "$website_root/$required_file" ]] || {
+    echo "Missing website asset: $required_file" >&2
+    exit 1
+  }
+done
+
+for html_file in "$website_root"/*.html; do
+  rg -q '<html lang="en">' "$html_file" || { echo "Missing English lang: $html_file" >&2; exit 1; }
+  rg -q '<meta name="description"' "$html_file" || { echo "Missing description: $html_file" >&2; exit 1; }
+  [[ "$(rg -c '<h1[ >]' "$html_file")" == 1 ]] || { echo "Expected one h1: $html_file" >&2; exit 1; }
+  if rg -n '<img(?![^>]*alt=)' "$html_file" --pcre2; then
+    echo "Image without alt text: $html_file" >&2
+    exit 1
+  fi
+done
+
+while IFS= read -r reference; do
+  target="${reference%%#*}"
+  anchor="${reference#*#}"
+  [[ "$reference" == *"#"* ]] || anchor=""
+  [[ -z "$target" ]] && target="index.html"
+  [[ -f "$website_root/$target" ]] || { echo "Broken local link: $reference" >&2; exit 1; }
+  if [[ -n "$anchor" ]]; then
+    rg -q "id=\"$anchor\"" "$website_root/$target" || {
+      echo "Broken local anchor: $reference" >&2
+      exit 1
+    }
+  fi
+done < <(rg -o 'href="[a-zA-Z0-9._-]+\.html(#[a-zA-Z0-9._-]+)?"' "$website_root"/*.html | sed -E 's/.*href="([^"]+)"/\1/' | sort -u)
+
+echo "Website structure, local links, and baseline accessibility are valid."

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="What The Model is a native macOS inventory for local LLM files, storage, health, and safe tool handoffs.">
+    <meta name="theme-color" content="#10131a">
+    <title>What The Model — Local LLM Inventory for macOS</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="What The Model home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>What The Model</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#features">Features</a>
+        <a href="extend.html">Extend WTM</a>
+        <a href="https://github.com/powtac/wtm">GitHub</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Local LLM Inventory for macOS</p>
+          <h1>Know which models are taking your disk space.</h1>
+          <p class="lead">WTM scans only the model sources you enable, reconciles provider metadata with physical files, and makes storage, age, completeness, and runtime evidence understandable.</p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/powtac/wtm/releases/latest">Download latest release</a>
+            <a class="button" href="https://github.com/powtac/wtm">View source</a>
+          </div>
+          <p class="fine-print">Requires Apple Silicon and macOS 15 or later. Direct distribution; not a Mac App Store product.</p>
+        </div>
+        <div class="product-preview" role="img" aria-label="Illustrated preview of the WTM model inventory showing providers, model sizes, and details">
+          <div class="window-bar"><span></span><span></span><span></span><b>What The Model</b></div>
+          <div class="preview-grid">
+            <aside><strong>Models</strong><small>All Models&nbsp; 9</small><small>Old&nbsp; 3</small><small>Incomplete&nbsp; 1</small><small>Issues&nbsp; 0</small></aside>
+            <div class="preview-list"><strong>9 Artifacts · 46 GB total</strong><span><b>gpt-oss-20b</b><em>Ollama · 13 GB</em></span><span><b>Qwen3-8B</b><em>Hugging Face · 17 GB</em></span><span><b>local-model-q4</b><em>GGUF · 6 GB</em></span></div>
+            <aside><strong>Details</strong><small>Stored</small><small>Age: 34 days</small><small>Provider: Ollama</small></aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="section">
+        <p class="eyebrow">One inventory, explicit evidence</p>
+        <h2>Built for model files, not generic disk usage.</h2>
+        <div class="cards">
+          <article><h3>Physical storage</h3><p>Separates exclusive, shared, and unknown bytes instead of double-counting cache blobs.</p></article>
+          <article><h3>Provider context</h3><p>Connects Ollama manifests and Hugging Face snapshots to weights, configs, age, and confirmed model cards.</p></article>
+          <article><h3>Safe actions</h3><p>Previews cleanup, revalidates files immediately before action, and uses Trash where recovery is possible.</p></article>
+          <article><h3>Runtime evidence</h3><p>Keeps static compatibility, loopback health, and real minimal inference as separate facts.</p></article>
+          <article><h3>Reviewed clients</h3><p>OpenClaw and Unsloth handoffs show the exact executable and argument vector. No Terminal automation.</p></article>
+          <article><h3>External volumes</h3><p>Tracks explicitly enabled internal folders and additional HDDs or SSDs without asking for Full Disk Access.</p></article>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div>
+          <p class="eyebrow">Support matrix</p>
+          <h2>Provider knowledge stays modular.</h2>
+          <table>
+            <thead><tr><th>Integration</th><th>Inventory</th><th>Cleanup</th><th>Run or handoff</th></tr></thead>
+            <tbody>
+              <tr><th>Ollama</th><td>Built in</td><td>Provider API</td><td>Verify + OpenClaw</td></tr>
+              <tr><th>Hugging Face</th><td>Built in</td><td>Trash</td><td>Unsloth</td></tr>
+              <tr><th>Manual folders</th><td>GGUF, Safetensors</td><td>Trash</td><td>llama.cpp, Unsloth</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="privacy">
+          <p class="eyebrow">Privacy and security</p>
+          <h2>Local by default.</h2>
+          <ul>
+            <li>No telemetry in initial releases.</li>
+            <li>No Full Disk Access, root helper, microphone, Apple Music, or speech access.</li>
+            <li>Inventory is rebuilt from files; model results are not persisted.</li>
+            <li>Runtime and client processes use reviewed plans without a shell.</li>
+          </ul>
+          <a href="https://github.com/powtac/wtm/blob/main/SECURITY.md">Read the security policy</a>
+        </div>
+      </section>
+
+      <section class="section callout">
+        <div><p class="eyebrow">Open architecture</p><h2>Add providers without weakening the trust boundary.</h2></div>
+        <div><p>Learn which changes are data-only, which need a compiled adapter, and how a proposal becomes part of a signed release.</p><a class="button" href="extend.html">How to extend WTM</a></div>
+      </section>
+    </main>
+
+    <footer>
+      <span>What The Model · Apache-2.0</span>
+      <nav aria-label="Footer navigation"><a href="https://github.com/powtac/wtm/blob/main/README.md">Documentation</a><a href="https://github.com/powtac/wtm/issues">Issues</a><a href="https://github.com/powtac/wtm/discussions">Discussions</a><a href="https://github.com/powtac/wtm/blob/main/REQUIREMENTS.md">Requirements (German, normative)</a></nav>
+    </footer>
+  </body>
+</html>

@@ -275,7 +275,7 @@ struct SettingsRootView: View {
         Text("tool.export.privacy")
           .font(.caption)
           .foregroundStyle(.secondary)
-        adapterGuideLink
+        adapterGuideLink(anchor: "runtime-adapter")
       }
 
       Section("settings.storage-providers.section") {
@@ -285,7 +285,7 @@ struct SettingsRootView: View {
               .foregroundStyle(.secondary)
           }
         }
-        adapterGuideLink
+        adapterGuideLink(anchor: "storage-provider-adapter")
       }
 
       Section("settings.clients.section") {
@@ -298,7 +298,7 @@ struct SettingsRootView: View {
         Text("settings.clients.description")
           .font(.caption)
           .foregroundStyle(.secondary)
-        adapterGuideLink
+        adapterGuideLink(anchor: "client-adapter")
       }
     }
   }
@@ -375,15 +375,15 @@ struct SettingsRootView: View {
       Section("settings.extension.section") {
         Text("settings.extension.description")
           .foregroundStyle(.secondary)
-        adapterGuideLink
+        adapterGuideLink(anchor: "choose")
       }
     }
   }
 
-  private var adapterGuideLink: some View {
+  private func adapterGuideLink(anchor: String) -> some View {
     Group {
       if let adapterGuideURL = URL(
-        string: "https://github.com/powtac/wtm/blob/main/docs/adapters.md"
+        string: "https://powtac.github.io/wtm/extend.html#\(anchor)"
       ) {
         Link("settings.extend.action", destination: adapterGuideURL)
       }

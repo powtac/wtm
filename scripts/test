@@ -9,6 +9,7 @@ cd "$repository_root"
 ./scripts/check-decisions
 ./scripts/validate-fixtures
 ./scripts/check-language
+./scripts/check-website
 swift test --package-path Packages/WTMKit
 xcodebuild \
   -project WTM.xcodeproj \
