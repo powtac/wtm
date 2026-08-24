@@ -3,6 +3,13 @@ import WTMAdapterContracts
 import WTMDomain
 import WTMSecurity
 
+/// Fail-closed validation errors for data-driven Hugging Face repository aliases.
+public enum HuggingFaceRepositoryAliasError: Error, Equatable, Sendable {
+  case invalidAliasKey(String)
+  case invalidRepositoryID(String)
+  case normalizedKeyCollision(String)
+}
+
 public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   public static let builtInRepositoryAliases = [
     "gpt-oss-20b": "openai/gpt-oss-20b"
@@ -17,10 +24,27 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     let evidence: String
   }
 
-  public init(repositoryAliases: [String: String] = Self.builtInRepositoryAliases) {
-    self.repositoryAliases = repositoryAliases.reduce(into: [:]) { aliases, entry in
-      aliases[entry.key.lowercased()] = entry.value
+  public init() throws {
+    try self.init(repositoryAliases: Self.builtInRepositoryAliases)
+  }
+
+  public init(repositoryAliases: [String: String]) throws {
+    var validatedAliases: [String: String] = [:]
+    for key in repositoryAliases.keys.sorted() {
+      guard Self.isValidRepositoryComponent(key) else {
+        throw HuggingFaceRepositoryAliasError.invalidAliasKey(key)
+      }
+      let normalizedKey = key.lowercased()
+      guard validatedAliases[normalizedKey] == nil else {
+        throw HuggingFaceRepositoryAliasError.normalizedKeyCollision(normalizedKey)
+      }
+      guard let repositoryID = repositoryAliases[key], Self.isValidRepositoryID(repositoryID)
+      else {
+        throw HuggingFaceRepositoryAliasError.invalidRepositoryID(repositoryAliases[key] ?? "")
+      }
+      validatedAliases[normalizedKey] = repositoryID
     }
+    self.repositoryAliases = validatedAliases
   }
 
   public func scan(source: ScanSource) async -> AdapterScanResult {
@@ -267,16 +291,27 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   private func confirmedRepository(for cacheRepositoryName: String) -> ConfirmedRepository? {
     let alias = repositoryAliases[cacheRepositoryName.lowercased()]
     let candidate = alias ?? cacheRepositoryName
-    let components = candidate.split(separator: "/", omittingEmptySubsequences: false)
-    guard components.count == 2,
-      components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
-    else { return nil }
+    guard Self.isValidRepositoryID(candidate) else { return nil }
     return ConfirmedRepository(
       id: candidate,
       evidence: alias == nil
         ? "Hugging Face cache key"
         : "WTM Hugging Face repository alias"
     )
+  }
+
+  private static func isValidRepositoryID(_ repositoryID: String) -> Bool {
+    let components = repositoryID.split(separator: "/", omittingEmptySubsequences: false)
+    return components.count == 2
+      && components.allSatisfy { component in
+        isValidRepositoryComponent(String(component))
+      }
+  }
+
+  private static func isValidRepositoryComponent(_ component: String) -> Bool {
+    guard !component.isEmpty, component != ".", component != ".." else { return false }
+    let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "._-"))
+    return component.unicodeScalars.allSatisfy(allowed.contains)
   }
 
   private func modelCard(for repository: ConfirmedRepository) -> ModelCardLink? {

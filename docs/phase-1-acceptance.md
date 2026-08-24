@@ -1,9 +1,10 @@
 # Phase 1 Acceptance
 
 Phase 1 is the read-only beta. This record originally accepted the implementation against
-Requirements 0.1.8. Requirements 0.2.0 consolidates Phase 1 learnings into ADRs and adds a
-scan-generation invariant that still needs implementation evidence. Inventory data remains
-ephemeral; only source consent, bookmarks, volume identity, and UI preferences persist.
+Requirements 0.1.8. Requirements 0.2.0 consolidates Phase 1 learnings into ADRs and adds
+stronger scan-generation and repository-alias invariants. Both code gates are now verified.
+Inventory data remains ephemeral; only source consent, bookmarks, volume identity, and UI
+preferences persist.
 
 | Gate | Evidence |
 |---|---|
@@ -18,7 +19,7 @@ ephemeral; only source consent, bookmarks, volume identity, and UI preferences p
 | Config and secret handling | Configuration allowlist, harmless-dotfile, secret-pattern, and Finder-target tests |
 | Model cards | [ADR-020](decisions/ADR-020-confirmed-external-model-links.md), confirmed HTTPS-only link validation, canonical `owner/model`, reviewed shorthand alias, and unknown-owner negative contract tests |
 | Extensibility | Immutable adapter registry, role-separated targets, data-driven Settings, and `docs/adapters.md` |
-| Scan streaming | One coordinator, deterministic order, bounded events, and cancellation tests; stale-generation rejection remains open under [ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md) |
+| Scan streaming | [ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md), one coordinator, deterministic order, bounded events, cancellation, generation gating, and cancelled/replacement race regression |
 | Product language | `scripts/check-language`; English string catalog and public documentation, with German normative requirements only |
 | UI and accessibility | Fresh first-run labeled-control smoke through the macOS accessibility tree on local and ad-hoc CI signing |
 | Distribution | Developer ID app beta, hardened runtime, notarization, stapling, and Gatekeeper evidence recorded below |
@@ -47,13 +48,13 @@ The distributable DMG and public release automation remain Phase 5 scope.
 
 ## Requirements 0.2.0 revalidation findings
 
-1. **Open:** implement and test an explicit scan-generation token so late events and task
-   cleanup from a cancelled scan cannot mutate an immediately started scan (FR-SCN-016).
-2. **Open:** reject case-normalized repository-alias collisions deterministically and add
-   negative tests for collisions and invalid targets (FR-LNK-007).
+1. **Closed:** scan-generation UUID gating and a cancelled/replacement race regression
+   satisfy FR-SCN-016.
+2. **Closed:** deterministic fail-closed alias validation and negative collision/target
+   tests satisfy FR-LNK-007.
 3. **Open:** create a new Developer ID archive from current `main`, then repeat
    notarization, stapling, and Gatekeeper validation. The recorded app export predates the
    table auto-sizing and canonical Hugging Face model-card alias commits.
 
-Until these findings are closed, Phase 1 remains historically accepted against 0.1.8 but is
-not release-ready against Requirements 0.2.0.
+Until the remaining distribution finding is closed, Phase 1 remains historically accepted
+against 0.1.8 but is not release-ready against Requirements 0.2.0.

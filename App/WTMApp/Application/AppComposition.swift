@@ -10,7 +10,7 @@ enum AppComposition {
   static func makeInventoryViewModel() -> InventoryViewModel {
     let registry = try? AdapterRegistry(adapters: [
       OllamaStorageAdapter(),
-      HuggingFaceStorageAdapter(),
+      try HuggingFaceStorageAdapter(),
       ManualFolderAdapter(),
     ])
     let coordinator = registry.map { InventoryCoordinator(registry: $0) }

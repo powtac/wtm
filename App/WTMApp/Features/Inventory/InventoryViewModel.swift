@@ -44,19 +44,20 @@ final class InventoryViewModel {
   var selectedState: InstallationState?
   var selectedSourceID: ScanSource.ID?
 
-  private let coordinator: InventoryCoordinator?
+  private let coordinator: (any InventoryScanning)?
   private let defaultSources: [ScanSource]
   private let sourceSettingsStore: any SourceSettingsStoring
   private let folderSelector: any FolderSelecting
   private let fileRevealer: any FileRevealing
   private let volumeCatalog: any VolumeCataloging
   private var scanTask: Task<Void, Never>?
+  private var activeScanGenerationID: UUID?
   private var didPrepareForLaunch = false
   private var sourceSettingsRevision: UInt64 = 0
   private let logger = Logger(subsystem: "de.powtac.whatthemodel", category: "inventory")
 
   init(
-    coordinator: InventoryCoordinator?,
+    coordinator: (any InventoryScanning)?,
     initialSources: [ScanSource],
     sourceSettingsStore: any SourceSettingsStoring,
     folderSelector: any FolderSelecting,
@@ -358,6 +359,8 @@ final class InventoryViewModel {
     }
     scanSummary = nil
     isScanning = true
+    let generationID = UUID()
+    activeScanGenerationID = generationID
     activeScan = ActiveScanState(
       startedAt: .now,
       currentSource: nil,
@@ -369,20 +372,25 @@ final class InventoryViewModel {
     scanTask = Task { [weak self] in
       guard let self else { return }
       defer {
-        if self.isScanning {
-          self.finishScan(wasCancelled: true, completedAt: .now)
+        if self.activeScanGenerationID == generationID, self.isScanning {
+          self.finishScan(
+            wasCancelled: true,
+            completedAt: .now,
+            generationID: generationID
+          )
         }
       }
 
       for await event in stream {
-        guard !Task.isCancelled else { return }
-        self.consume(event)
+        guard !Task.isCancelled, self.activeScanGenerationID == generationID else { return }
+        self.consume(event, generationID: generationID)
       }
     }
   }
 
   func cancelScan() {
     guard isScanning else { return }
+    activeScanGenerationID = nil
     scanTask?.cancel()
     scanTask = nil
     finishScan(wasCancelled: true, completedAt: .now)
@@ -397,7 +405,8 @@ final class InventoryViewModel {
     fileRevealer.reveal(url)
   }
 
-  private func consume(_ event: InventoryScanEvent) {
+  private func consume(_ event: InventoryScanEvent, generationID: UUID) {
+    guard activeScanGenerationID == generationID else { return }
     switch event {
     case .started(let sourceCount, let startedAt):
       activeScan = ActiveScanState(
@@ -421,7 +430,8 @@ final class InventoryViewModel {
       finishScan(
         wasCancelled: false,
         completedAt: scannedAt,
-        scannedSourceCount: scannedSourceIDs.count
+        scannedSourceCount: scannedSourceIDs.count,
+        generationID: generationID
       )
       logger.info(
         "Inventory scan completed with \(self.installations.count, privacy: .public) installations"
@@ -452,8 +462,10 @@ final class InventoryViewModel {
   private func finishScan(
     wasCancelled: Bool,
     completedAt: Date,
-    scannedSourceCount: Int? = nil
+    scannedSourceCount: Int? = nil,
+    generationID: UUID? = nil
   ) {
+    if let generationID, activeScanGenerationID != generationID { return }
     let completedSources = scannedSourceCount ?? activeScan?.completedSourceCount ?? 0
     scanSummary = ScanCompletionSummary(
       completedAt: completedAt,
@@ -467,6 +479,8 @@ final class InventoryViewModel {
       issueCount: issues.count,
       wasCancelled: wasCancelled
     )
+    activeScanGenerationID = nil
+    scanTask = nil
     activeScan = nil
     isScanning = false
   }

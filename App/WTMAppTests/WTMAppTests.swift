@@ -318,6 +318,53 @@ func launchScanCanBeDisabled() async throws {
 }
 
 @MainActor
+@Test("A cancelled scan generation cannot finish its replacement")
+func cancelledScanGenerationCannotMutateReplacement() async throws {
+  let source = ScanSource(
+    id: "generation",
+    displayName: "Generation",
+    providerID: .manual,
+    rootURL: URL(filePath: "/tmp"),
+    accessState: .allowed,
+    isEnabled: true
+  )
+  let scanner = ControlledInventoryScanner()
+  let model = InventoryViewModel(
+    coordinator: scanner,
+    initialSources: [source],
+    sourceSettingsStore: FixtureSourceSettingsStore(snapshot: nil),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog()
+  )
+
+  model.startScan()
+  #expect(scanner.streamCount == 1)
+  model.cancelScan()
+  model.startScan()
+  #expect(scanner.streamCount == 2)
+  #expect(model.isScanning)
+
+  await Task.yield()
+  #expect(model.isScanning)
+  #expect(model.scanSummary == nil)
+
+  let completedAt = Date.now
+  scanner.yield(
+    .finished(scannedSourceIDs: [source.id], scannedAt: completedAt),
+    toStreamAt: 1
+  )
+  scanner.finishStream(at: 1)
+  for _ in 0..<100 where model.isScanning {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+
+  #expect(!model.isScanning)
+  #expect(model.lastScanDate == completedAt)
+  #expect(model.scanSummary?.wasCancelled == false)
+}
+
+@MainActor
 @Test("A stored external source resolves by volume identity after remount")
 func externalSourceResolvesAfterRemount() async throws {
   let volumeRoot = FileManager.default.temporaryDirectory.appending(
@@ -620,5 +667,36 @@ private final class MutableVolumeCatalog: VolumeCataloging, @unchecked Sendable 
 
   func replace(with volumes: [MountedVolumeInfo]) {
     lock.withLock { self.volumes = volumes }
+  }
+}
+
+private final class ControlledInventoryScanner: InventoryScanning, @unchecked Sendable {
+  private let lock = NSLock()
+  private var continuations: [AsyncStream<InventoryScanEvent>.Continuation] = []
+
+  var streamCount: Int {
+    lock.withLock { continuations.count }
+  }
+
+  func scanEvents(sources _: [ScanSource]) -> AsyncStream<InventoryScanEvent> {
+    AsyncStream { continuation in
+      lock.withLock { continuations.append(continuation) }
+    }
+  }
+
+  func yield(_ event: InventoryScanEvent, toStreamAt index: Int) {
+    continuation(at: index)?.yield(event)
+  }
+
+  func finishStream(at index: Int) {
+    continuation(at: index)?.finish()
+  }
+
+  private func continuation(
+    at index: Int
+  ) -> AsyncStream<InventoryScanEvent>.Continuation? {
+    lock.withLock {
+      continuations.indices.contains(index) ? continuations[index] : nil
+    }
   }
 }

@@ -46,8 +46,9 @@ func ollamaRejectsInvalidDigestPath() async throws {
 func huggingFaceFixtureIsInventoried() async throws {
   let root = try #require(fixtureRoot("huggingface"))
   let source = allowedSource(id: "hf", provider: .huggingFace, root: root)
+  let adapter = try HuggingFaceStorageAdapter()
 
-  let result = await HuggingFaceStorageAdapter().scan(source: source)
+  let result = await adapter.scan(source: source)
 
   #expect(result.installations.count == 2)
   let tiny = try #require(result.installations.first { $0.identity.family == "acme/tiny" })
@@ -75,7 +76,8 @@ func huggingFaceAliasesRestoreRepositoryOwners() async throws {
     try Data("{}".utf8).write(to: snapshot.appending(path: "config.json"))
   }
 
-  let result = await HuggingFaceStorageAdapter().scan(
+  let adapter = try HuggingFaceStorageAdapter()
+  let result = await adapter.scan(
     source: allowedSource(id: "hf-alias", provider: .huggingFace, root: root)
   )
 
@@ -92,6 +94,28 @@ func huggingFaceAliasesRestoreRepositoryOwners() async throws {
   )
   #expect(unknown.identity.family == nil)
   #expect(unknown.modelCard == nil)
+}
+
+@Test("Hugging Face repository aliases reject collisions and invalid values")
+func huggingFaceRepositoryAliasesFailClosed() {
+  #expect(
+    throws: HuggingFaceRepositoryAliasError.normalizedKeyCollision("model")
+  ) {
+    _ = try HuggingFaceStorageAdapter(repositoryAliases: [
+      "MODEL": "acme/first",
+      "model": "acme/second",
+    ])
+  }
+  #expect(
+    throws: HuggingFaceRepositoryAliasError.invalidAliasKey("../model")
+  ) {
+    _ = try HuggingFaceStorageAdapter(repositoryAliases: ["../model": "acme/model"])
+  }
+  #expect(
+    throws: HuggingFaceRepositoryAliasError.invalidRepositoryID("missing-owner")
+  ) {
+    _ = try HuggingFaceStorageAdapter(repositoryAliases: ["model": "missing-owner"])
+  }
 }
 
 @Test("Manual folders detect GGUF quantization")
@@ -124,7 +148,8 @@ func huggingFaceIgnoresSnapshotRootMetadata() async throws {
   )
   try Data("{}".utf8).write(to: revision.appending(path: "config.json"))
 
-  let result = await HuggingFaceStorageAdapter().scan(
+  let adapter = try HuggingFaceStorageAdapter()
+  let result = await adapter.scan(
     source: allowedSource(id: "hf-metadata", provider: .huggingFace, root: root)
   )
 
@@ -141,7 +166,7 @@ func realHuggingFaceCacheHasNoManualDuplicates() async throws {
   guard let path = ProcessInfo.processInfo.environment["WTM_REAL_HF_CACHE"] else { return }
   let root = URL(filePath: path, directoryHint: .isDirectory)
   let registry = try AdapterRegistry(adapters: [
-    HuggingFaceStorageAdapter(),
+    try HuggingFaceStorageAdapter(),
     ManualFolderAdapter(),
   ])
   let snapshot = await InventoryCoordinator(registry: registry).scan(sources: [

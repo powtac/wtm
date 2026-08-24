@@ -44,3 +44,7 @@ first public release is tagged.
 
 - Hugging Face model-card links for reviewed shorthand cache directories now restore the
   repository owner; unknown ownerless cache names no longer produce broken confirmed URLs.
+- Scan-generation UUID gating prevents cancelled scan tasks and late events from mutating or
+  finishing an immediately started replacement scan.
+- Hugging Face repository-alias catalogs reject normalized key collisions, unsafe local
+  keys, and invalid canonical repository IDs before scanning.

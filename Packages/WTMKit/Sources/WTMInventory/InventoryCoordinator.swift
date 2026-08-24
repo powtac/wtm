@@ -46,8 +46,13 @@ public enum InventoryScanEvent: Sendable {
   case finished(scannedSourceIDs: Set<ScanSource.ID>, scannedAt: Date)
 }
 
+/// Read-only scan stream consumed by the app without exposing concrete coordinator state.
+public protocol InventoryScanning: Sendable {
+  func scanEvents(sources: [ScanSource]) -> AsyncStream<InventoryScanEvent>
+}
+
 /// Coordinates Phase-1 storage adapters without exposing actions or process execution.
-public actor InventoryCoordinator {
+public actor InventoryCoordinator: InventoryScanning {
   private let registry: AdapterRegistry
   private let installationBatchSize: Int
   private let reconciler = InstallationReconciler()

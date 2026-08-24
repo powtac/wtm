@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-24
-- Implementation: Partial; explicit stale-generation rejection is not yet verified
+- Implementation: Complete in Phase 1
 
 ## Context
 
@@ -36,8 +36,7 @@ failure, and honest progress.
 
 ## Validation
 
-Existing coordinator and app tests cover deterministic order, bounded streaming batches,
-cancellation, source failures, and incremental UI updates. They do not yet prove that a
-late event or task cleanup from a cancelled scan cannot affect an immediately started scan.
-FR-SCN-016 and its regression test are required before Phase 1 is re-accepted against
-Requirements 0.2.0.
+Coordinator and app tests cover deterministic order, bounded streaming batches,
+cancellation, source failures, incremental UI updates, and the race where cleanup from a
+cancelled scan occurs after its replacement has started. A generation UUID gates every
+event and terminal cleanup before it can mutate the active view model.

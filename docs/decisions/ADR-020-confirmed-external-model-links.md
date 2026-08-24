@@ -2,7 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-24
-- Implementation: Partial; alias collision rejection still needs a regression test
+- Implementation: Complete in Phase 1
 
 ## Context
 
@@ -36,6 +36,6 @@ behaviour, and the difference between confirmed and heuristic candidates.
 ## Validation
 
 Adapter contracts cover standard keys, the reviewed GPT-OSS alias, malformed components,
-unknown ownerless keys, and the real local Hugging Face cache. Case-normalized duplicate
-alias keys are not yet rejected explicitly; FR-LNK-007 requires this before re-acceptance
-against Requirements 0.2.0.
+unknown ownerless keys, the real local Hugging Face cache, case-normalized alias collisions,
+invalid local keys, and invalid canonical repository IDs. Alias catalog construction throws
+before scanning when any entry is invalid.
