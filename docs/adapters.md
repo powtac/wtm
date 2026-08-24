@@ -15,6 +15,8 @@ storage adapters.
 The Hugging Face adapter accepts an explicit repository-alias map for non-standard cache
 directories that omit the owner. Built-in or reviewed data aliases may restore a confirmed
 `owner/model` repository ID; an unknown short name never becomes a guessed model-card URL.
+See [ADR-020](decisions/ADR-020-confirmed-external-model-links.md) for evidence, collision,
+and fallback rules.
 
 ### Manual folder adapter
 
@@ -55,4 +57,7 @@ SwiftPM adapter:
 7. Submit a focused pull request for review.
 
 Compiled adapters become available only through a normal signed WTM release. WTM does
-not load third-party runtime plugins.
+not load third-party runtime plugins. The capability boundary is defined by
+[ADR-007](decisions/ADR-007-compiled-adapters-only.md),
+[ADR-009](decisions/ADR-009-capability-separated-adapters.md), and
+[ADR-012](decisions/ADR-012-data-only-extension-manifests.md).

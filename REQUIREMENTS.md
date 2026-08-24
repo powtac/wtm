@@ -3,7 +3,7 @@
 | Feld | Wert |
 |---|---|
 | Status | **Accepted Baseline** |
-| Version | 0.1.8 |
+| Version | 0.2.0 |
 | Datum | 2026-08-24 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
@@ -94,21 +94,36 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 
 | ID | Entscheidung | Begründung |
 |---|---|---|
-| ADR-001 | Swift 6, SwiftUI; AppKit nur für macOS-spezifische Lücken | Native UX, geringe Runtime-Komplexität, Accessibility und langfristige Wartbarkeit. |
-| ADR-002 | **Accepted:** Direkte Distribution außerhalb des Mac App Store | Vollständige Provider-Erkennung und externe Tool-Starts sind mit App Sandbox stark eingeschränkt. |
-| ADR-003 | Developer ID, Hardened Runtime, Notarisierung und Stapling | Gatekeeper-kompatible Standarddistribution. |
-| ADR-004 | Apple Silicon und macOS 15+ in der ersten Beta | Enger, testbarer Hardwarekorridor für lokale Inference. |
-| ADR-005 | **Accepted:** Flüchtiges Phase-1-Inventar; nur Quellen, Bookmarks, Zustimmung und Settings werden gespeichert | Jeder App-Start scannt neu. Das reduziert lokale Datenhaltung und Migrationskomplexität; Dateien bleiben Source of Truth. |
-| ADR-006 | **Accepted:** Feldbezogene Autoritätsmatrix statt globaler Quellenreihenfolge | Dateisystem, Provider-API, Manifest und Prozesszustand beantworten unterschiedliche Fragen; jede Aussage behält ihre Provenienz. |
-| ADR-007 | Keine dynamisch geladenen Drittanbieter-Bundles | Kein Aufweichen von Library Validation oder Hardened Runtime. |
-| ADR-008 | Tool-Definitionen als `executable + argv[]`, niemals als Shell-String | Verhindert Shell-Injection und fehlerhafte Pfadquotierung. |
-| ADR-009 | Provider-, Runtime- und Client-Adapter sind getrennte Protokolle | Ollama, HF, llama.cpp, Unsloth und OpenClaw haben verschiedene Verantwortungen. |
-| ADR-010 | **Accepted:** App Sandbox ist für die direkte Distribution deaktiviert | WTM kann ausgewählte HDD-/SSD-Wurzeln mit den Rechten des Nutzers lesen. TCC und POSIX-Rechte werden respektiert; Full Disk Access, root-Rechte und privilegierte Helper sind ausgeschlossen. Read-only ist eine WTM-Architekturgarantie, keine Kernel-Sandbox. |
-| ADR-011 | **Accepted:** `Defaults + Discovery Conventions + User Overrides` | Swift hat keine passende automatische Runtime-Discovery; explizite, testbare Konventionen bleiben nachvollziehbar. |
-| ADR-012 | **Accepted:** Keine nachladbaren Code-Plugins | Providerlogik wird als SwiftPM-Modul kompiliert; nutzerseitige Erweiterungen sind ausschließlich validierte Datenmanifeste. |
-| ADR-013 | **Accepted:** GitHub-native Entwicklung und Distribution | Issues, Discussions, Projects, Pull Requests, Actions, Releases, Security und Pages bilden den öffentlichen Projektworkflow. |
-| ADR-014 | **Accepted:** Private-first, public-ready | Das Repository startet privat unter GitHub Free, darf aber keine Architektur oder Historie erzeugen, die eine spätere Veröffentlichung blockiert. |
-| ADR-015 | **Accepted:** English-only Product mit deutscher Requirements-Ausnahme | App-UI, Website und alle öffentlichen GitHub-Inhalte sind Englisch; ausschließlich das normative `REQUIREMENTS.md` bleibt Deutsch. |
+| [ADR-001](docs/decisions/ADR-001-native-macos-stack.md) | Swift 6, SwiftUI; AppKit nur für macOS-spezifische Lücken | Native UX, geringe Runtime-Komplexität, Accessibility und langfristige Wartbarkeit. |
+| [ADR-002](docs/decisions/ADR-002-direct-distribution.md) | Direkte Distribution außerhalb des Mac App Store | Vollständige Provider-Erkennung und externe Tool-Starts sind mit App Sandbox stark eingeschränkt. |
+| [ADR-003](docs/decisions/ADR-003-release-trust-chain.md) | Developer ID, Hardened Runtime, Notarisierung und Stapling | Gatekeeper-kompatible, prüfbare Standarddistribution. |
+| [ADR-004](docs/decisions/ADR-004-platform-baseline.md) | Apple Silicon und macOS 15+ in der ersten Beta | Enger, testbarer Hardware- und Betriebssystemkorridor. |
+| [ADR-005](docs/decisions/ADR-005-ephemeral-phase-1-inventory.md) | Flüchtiges Phase-1-Inventar; nur Quellen, Bookmarks, Zustimmung und Settings werden gespeichert | Jeder App-Start scannt neu. Dateien bleiben Source of Truth. |
+| [ADR-006](docs/decisions/ADR-006-field-authority-and-provenance.md) | Feldbezogene Autoritätsmatrix statt globaler Quellenreihenfolge | Dateisystem, Provider-API, Manifest und Prozesszustand beantworten unterschiedliche Fragen. |
+| [ADR-007](docs/decisions/ADR-007-compiled-adapters-only.md) | Ausschließlich kompilierte und reviewte Codeadapter | Kein Aufweichen von Library Validation, Hardened Runtime oder Supply-Chain-Grenze. |
+| [ADR-008](docs/decisions/ADR-008-safe-process-invocation.md) | Tool-Definitionen als `executable + argv[]`, niemals als Shell-String | Verhindert Shell-Injection und unkontrollierbare Terminalprozesse. |
+| [ADR-009](docs/decisions/ADR-009-capability-separated-adapters.md) | Storage-, Action-, Runtime- und Client-Adapter sind getrennte Protokolle | Externe Produkte besitzen unterschiedliche Verantwortungen und Berechtigungen. |
+| [ADR-010](docs/decisions/ADR-010-non-sandboxed-least-privilege.md) | App Sandbox ist für die direkte Distribution deaktiviert; Least Privilege wird im Produkt erzwungen | TCC, POSIX/ACL, enger Scope und Zustimmung bleiben verbindlich; Full Disk Access, root und privilegierte Helper sind ausgeschlossen. |
+| [ADR-011](docs/decisions/ADR-011-layered-conventions-and-overrides.md) | `Defaults + Discovery Conventions + User Overrides + Session Overrides` | Explizite, testbare Konventionen bleiben erklärbar und zurücksetzbar. |
+| [ADR-012](docs/decisions/ADR-012-data-only-extension-manifests.md) | Nutzererweiterungen sind schema-validierte Daten, kein nachladbarer Code | Konfigurierbarkeit darf keine neue Capability oder Codeausführung definieren. |
+| [ADR-013](docs/decisions/ADR-013-github-native-delivery.md) | GitHub-native Entwicklung und Distribution | Issues, Discussions, Projects, Pull Requests, Actions, Releases, Security und Pages bilden den öffentlichen Projektworkflow. |
+| [ADR-014](docs/decisions/ADR-014-private-first-public-ready.md) | Private-first, public-ready | Private Historie darf eine spätere Veröffentlichung nicht blockieren. |
+| [ADR-015](docs/decisions/ADR-015-product-language-policy.md) | English-only Product mit deutscher Requirements-Ausnahme | App und öffentliche Inhalte sind Englisch; ausschließlich dieses normative Dokument bleibt Deutsch. |
+| [ADR-016](docs/decisions/ADR-016-consent-bound-sources-and-volume-identity.md) | Quellen sind zustimmungsgebunden und über Volume-ID plus relativen Pfad abgesichert | Pfadstrings allein sind weder Autorisierung noch stabile Datenträgeridentität. |
+| [ADR-017](docs/decisions/ADR-017-streaming-full-rescan-generations.md) | Launch-Scan und Rescan sind gestreamte, voneinander isolierte Full-Scan-Generationen | Frühe Ergebnisse dürfen keine Duplikate oder verspätete Events alter Scans erzeugen. |
+| [ADR-018](docs/decisions/ADR-018-evidence-first-reconciliation-and-storage.md) | Evidenzbasierte Identitätsabstimmung und physische Speicherzählung | Providerfunde ersetzen nur belegte generische Duplikate; Shared und Unknown bleiben explizit. |
+| [ADR-019](docs/decisions/ADR-019-timestamp-provenance-and-age.md) | Zeitstempel und Alter behalten Quelle und Confidence | Scanzeit, Dateizeit, Downloadzeit und Nutzung sind nicht austauschbar. |
+| [ADR-020](docs/decisions/ADR-020-confirmed-external-model-links.md) | Externe Modelllinks benötigen kanonische Provider-ID oder reviewten Alias | Ein Modellname allein darf keinen bestätigten Owner oder Link erzeugen. |
+| [ADR-021](docs/decisions/ADR-021-phase-capability-isolation.md) | Shipping-Phasen werden im Targetgraph isoliert | Versteckte UI oder Feature Flags ersetzen keine Capability-Grenze. |
+| [ADR-022](docs/decisions/ADR-022-no-unrelated-media-capabilities.md) | Keine fachfremden Media- oder Audio-Berechtigungen | Inventarisierung benötigt weder Mikrofon noch Media Library, Apple Music oder Speech. |
+
+### 5.1 Entscheidungs- und Requirements-Governance
+
+- `REQUIREMENTS.md` bleibt normativ für beobachtbares Produktverhalten, Scope und Release-Gates; ADRs dokumentieren den verbindlichen Kontext, die Architekturentscheidung und ihre Folgen.
+- Jede in diesem Dokument referenzierte ADR-ID MUST auf genau eine Datei unter `docs/decisions/` zeigen. Der [ADR-Index](docs/decisions/README.md) führt Status und Herkunft.
+- Ein Konflikt zwischen akzeptierter ADR und Requirement blockiert Implementierung und Release. Er wird durch eine explizite Requirements-Änderung und, bei geänderter Entscheidung, eine neue superseding ADR gelöst; stilles Überschreiben ist verboten.
+- Implementierungslearnings, die Scope, Datenmodell, Security-Grenze, Autorität, Persistenz oder Releaseprozess verändern, MUST vor dem nächsten Feature-Merge als neue oder superseding ADR dokumentiert werden.
+- Reine visuelle Feinabstimmungen benötigen keine ADR, solange sie keine Accessibility-, Daten-, Sicherheits- oder Plattforminvariante verändern.
 
 ## 6. Systemkontext
 
@@ -191,21 +206,21 @@ Diese Integrationsmatrix definiert Shipping Defaults, keine geschlossene Allowli
 
 #### `ModelIdentity`
 
-- Stabile interne UUID für das providerübergreifende Modellkonzept.
+- Opaque interne ID mit Adapter-Namespace. In Phase 1 ist sie innerhalb einer Scan-Generation deterministisch; sitzungsübergreifende Stabilität wird ohne persistenten Index nicht behauptet.
 - Bestätigte Upstream-ID, Familie/Architektur, Modalitäten und Fähigkeiten, jeweils mit Provenienz.
 - Lizenzname oder `unknown`; keine Lizenzannahme aus Modell- oder Dateinamen.
 - Keine lokalen Pfade, Runtimezustände oder Quantisierung.
 
 #### `ModelVariant`
 
-- Stabile UUID sowie Beziehung zu genau einer `ModelIdentity` oder zu `unknown identity`.
+- Opaque ID im selben Stabilitätsscope sowie Beziehung zu genau einer `ModelIdentity` oder zu `unknown identity`.
 - Revision, Format, Quantisierung, Parameterklasse und optionale Architekturdetails.
 - Null oder mehrere Config-, Adapter-, Tokenizer- und Projection-Beziehungen.
 - Zwei Varianten dürfen dieselben physischen Artefakte referenzieren.
 
 #### `ModelInstallation`
 
-- Stabile UUID sowie Beziehung zu genau einer `ModelVariant`.
+- Opaque ID im selben Stabilitätsscope sowie Beziehung zu genau einer `ModelVariant`.
 - Storage Provider, providerseitige ID, Source-ID, Volume-ID und Installationswurzel.
 - Eine oder mehrere `ArtifactReference`-Beziehungen.
 - Präsenz-, Integritäts- und Zeitstempelzustände einschließlich `lastUsedAt`, jeweils mit `value`, `source` und `confidence`.
@@ -347,6 +362,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-SCN-013 (P0):** Adapterergebnisse MUST während des Scans in begrenzten Batches in den flüchtigen normalisierten Graphen und die sichtbare Liste übernommen werden. Neue oder aktualisierte Einträge erscheinen ohne Warten auf den Gesamtscan; Auswahl, Sortierung und Scrollposition dürfen durch Batch-Updates nicht unnötig springen.
 - **FR-SCN-014 (P0):** Automatischer Launch-Scan, manueller `Scan Now` und manueller `Rescan` verwenden denselben Coordinator, dieselben Scope- und Read-only-Garantien sowie dieselbe Cancel-/Fehlersemantik. Gleichzeitige Scans derselben Quelle werden zusammengeführt oder abgewiesen, nicht parallel dupliziert.
 - **FR-SCN-015 (P0):** Überlappt eine generische manuelle Quelle eine erkannte Providerquelle, MUST die providerseitig belegte Installation die generische Sicht auf dieselben Artefaktpfade ersetzen. Physisch oder pfadseitig getrennte Installationen bleiben getrennt; bloß gleiche Namen oder Digests dürfen keine Installation entfernen.
+- **FR-SCN-016 (P0):** Jeder Scan MUST eine eindeutige sitzungsbezogene Generation besitzen. Nach Abbruch oder Beginn einer neueren Generation dürfen verspätete Batches, Fehler oder Abschlussereignisse der älteren Generation weder Liste, Auswahl, Zähler noch Scan-Zusammenfassung verändern. Der Coordinator MUST Single-Flight pro Quelle gewährleisten und genau einen terminalen Zustand `completed` oder `cancelled` je Generation liefern.
 
 ### 9.4 Inventar und Navigation
 
@@ -376,6 +392,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-INV-024 (P0):** Die Artefaktsektion der Modelldetailansicht MUST die Anzahl der dem ausgewählten `ModelInstallation` zugeordneten Artefaktzeilen direkt links in der Überschrift anzeigen: `1 Artifact` beziehungsweise `<n> Artifacts`. Die Zahl bezeichnet Referenzen in dieser Installation, nicht behauptete physisch eindeutige Dateien; `Shared`- und `Unknown`-Zuordnung bleiben pro Zeile sichtbar und beeinflussen die Anzahl nicht still.
 - **FR-INV-025 (P0):** Artefaktzeilen MUST nach sichtbarem Dateinamen aufsteigend und Finder-ähnlich alphabetisch beziehungsweise natürlich sortiert erscheinen; gleiche Dateinamen werden deterministisch über den vollständigen Pfad geordnet. Jede sichtbare Spaltenüberschrift der Modellliste MUST per Klick auf- und absteigend sortierbar sein und die native Sortierrichtung anzeigen.
 - **FR-INV-026 (P0):** Allokierte Größen MUST in Tabelle, Scan-Zusammenfassung und Detail-Artefaktliste ohne Dezimalstellen in einer lokalisierten, adaptiven Einheit erscheinen. Die Detailansicht MUST zusätzlich die exakte Bytezahl des ausgewählten Modells anzeigen; Rundung darf weder Summierung noch Sortierung beeinflussen.
+- **FR-INV-027 (P0):** IDs für Identität, Variante, Installation und Artefakt sind opaque und kollisionsfrei in ihrem dokumentierten Namespace. Phase 1 MUST sie innerhalb einer Scan-Generation deterministisch bilden, darf aber ohne persistenten Index keine sitzungsübergreifende Stabilität versprechen. UI-Auswahl und Batch-Reconciliation dürfen deshalb keine zufällig bei jedem Batch neu erzeugten IDs verwenden.
 
 ### 9.5 Model Cards und externe Links
 
@@ -385,6 +402,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-LNK-004 (P0):** Bei mehreren möglichen Ursprüngen MUST die App alle Kandidaten mit Provider und Confidence zeigen, statt einen Link still auszuwählen.
 - **FR-LNK-005 (P0):** Aus Dateinamen allein darf kein bestätigter Link entstehen. Für manuelle Modelle MUST ein Nutzer einen Link ergänzen oder korrigieren können.
 - **FR-LNK-006 (P0):** Externe Links MUST HTTPS verwenden, vor dem Öffnen validiert und erst nach Nutzeraktion über den Standardbrowser geöffnet werden. Die App lädt Model-Card-Inhalte in der Read-only Beta nicht automatisch.
+- **FR-LNK-007 (P0):** Repository-Aliase MUST exakte, normalisierte Zuordnungen von providerbezogenem lokalem Schlüssel zu kanonischer ID sein, als versionierte Daten mit Provenienz und Fixture gepflegt werden und bei Kollision oder ungültiger Ziel-ID geschlossen fehlschlagen. Fuzzy Matching, stiller Netzwerklookup und Ableitung des Owners aus einem alleinstehenden Modellnamen sind verboten.
 
 ### 9.6 Zeitstempel
 
@@ -608,6 +626,7 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 - **NFR-REL-003:** Quelldateien und Providerzustand bleiben alleinige Source of Truth. Ein späterer Löschplan darf niemals aus einem früheren Sitzungsinventar abgeleitet werden.
 - **NFR-REL-004:** Provideradapter haben Capability Negotiation und Versionsgrenzen; unbekannte Versionen degradieren auf read-only.
 - **NFR-REL-005:** Destruktive Aktionen sind idempotent oder liefern einen klaren partiellen Ergebnisbericht.
+- **NFR-REL-006:** Asynchrone Scanereignisse sind an ihre Scan-Generation gebunden. Abbruch und Neustart dürfen keine veralteten Ergebnisse in den aktiven Snapshot übernehmen.
 
 ### 13.3 Wartbarkeit
 
@@ -720,6 +739,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - UI- und Integrationstests für ersten Start ohne vorzeitigen Scan, unmittelbaren Scan nach `Start Scan`, automatischen Folgestart-Scan und deaktiviertes `Scan on Launch`.
 - Tests für deterministische Standardquellen-Reihenfolge und die Invariante, dass `~`, `~/.cache`, `~/Library` und andere breite Elternpfade nicht als automatische Scanwurzeln verwendet werden.
 - Tests für überlappende Provider-/manuelle Quellen: kanonischer Providerfund statt generischem `local`-Duplikat, aber Erhalt tatsächlich getrennter Installationspfade.
+- Tests für Scan-Generationen: Abbruch, sofortiger Rescan und verspätete Batches einer älteren Generation dürfen den aktiven Snapshot, Auswahl, Zähler und Abschlussstatus nicht verändern.
 - UI-Tests für fortlaufende Batch-Ergebnisse bei stabiler Auswahl sowie die dauerhafte Trennung von globalem Scan und kontextbezogenem `Reveal in Finder`.
 - UI-Tests für sichtbaren Scan-Aktivitätsstatus, aktuelle gekürzte Scan-Wurzel, unbestimmten und bestimmten Fortschritt, separaten Abbruch sowie Abschluss- und Abbruchzusammenfassung.
 - Präsentations- und UI-Tests für `0 Artifacts`, `1 Artifact` und pluralisierte Artefaktanzahlen sowie unveränderte `Shared`-/`Unknown`-Kennzeichnung.
@@ -727,6 +747,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Tests für gespeicherte/geladene Zustände, Altersquellen, unbekanntes Alter und konfigurierbare Schwellenwerte.
 - Architekturtest, dass der Phase-1-Build keinen `ActionExecutor`, `RuntimeBroker` oder schreibenden Dateiöffnungspfad enthält.
 - Tests für Config-Allowlist, ausgeschlossene Secretmuster und harmlose Dotfiles.
+- Adaptertests für kanonische Hugging-Face-IDs, exakte reviewte Repository-Aliase, Alias-Kollisionen, ungültige Ziele und unbekannte ownerlose Cache-Keys ohne bestätigten Link.
 - Falls FSEvents aktiviert wird: Tests für Dropped Events, `MustScanSubDirs`, Root-Wechsel und Unmount während des Scans.
 - Linktests zwischen Settings-Hilfe, `docs/adapters.md` und den Ankern der Website-Seite `Extend WTM`.
 - Negativer Build-Test für Mikrofon-, Audio-Capture-, Media-Library-, Apple-Music- und Spracherkennungs-Usage-Descriptions, -Entitlements sowie Frameworkimports.

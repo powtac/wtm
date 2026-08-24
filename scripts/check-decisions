@@ -1,0 +1,36 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+decision_directory="$repository_root/docs/decisions"
+requirements_file="$repository_root/REQUIREMENTS.md"
+
+for number in {001..022}; do
+  records=("$decision_directory"/ADR-"$number"-*.md(N))
+  if (( ${#records} != 1 )); then
+    echo "ADR-$number must resolve to exactly one decision record." >&2
+    exit 1
+  fi
+
+  record="${records[1]}"
+  for marker in \
+    "- Status: Accepted" \
+    "## Context" \
+    "## Decision" \
+    "## Consequences" \
+    "## Requirements impact" \
+    "## Validation"
+  do
+    if ! rg -Fq -- "$marker" "$record"; then
+      echo "${record:t} is missing required marker: $marker" >&2
+      exit 1
+    fi
+  done
+
+  if ! rg -Fq "[ADR-$number](docs/decisions/${record:t})" "$requirements_file"; then
+    echo "REQUIREMENTS.md does not link ADR-$number to ${record:t}." >&2
+    exit 1
+  fi
+done
+
+echo "ADR registry and Requirements traceability are valid."

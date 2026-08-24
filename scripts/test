@@ -6,6 +6,7 @@ cd "$repository_root"
 
 ./scripts/format --lint
 ./scripts/check-architecture
+./scripts/check-decisions
 ./scripts/validate-fixtures
 ./scripts/check-language
 swift test --package-path Packages/WTMKit

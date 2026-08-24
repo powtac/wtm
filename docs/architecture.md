@@ -42,3 +42,18 @@ The store never contains installations, artifacts, or historical scan results.
 
 `scripts/check-architecture` enforces the most important negative dependencies and
 forbidden capabilities in CI.
+
+## Recorded invariants
+
+The [ADR index](decisions/README.md) is the authoritative history for architecture choices.
+Phase 1 implementation specifically validated:
+
+- consent-bound roots and external-volume identity ([ADR-016](decisions/ADR-016-consent-bound-sources-and-volume-identity.md));
+- isolated streaming scan generations ([ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md));
+- provider-first reconciliation and physical storage accounting ([ADR-018](decisions/ADR-018-evidence-first-reconciliation-and-storage.md));
+- timestamp provenance and age semantics ([ADR-019](decisions/ADR-019-timestamp-provenance-and-age.md));
+- confirmed external model links ([ADR-020](decisions/ADR-020-confirmed-external-model-links.md)); and
+- compile-time phase boundaries ([ADR-021](decisions/ADR-021-phase-capability-isolation.md)).
+
+`REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
+neither document may silently contradict the other.

@@ -23,6 +23,7 @@ external processes.
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The
+[ADR index](docs/decisions/README.md) records why durable constraints exist, and the
 [roadmap](docs/roadmap.md) records phase gates without weakening them into a generic MVP.
 
 ## Build

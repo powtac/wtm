@@ -3,6 +3,13 @@
 - Status: Accepted
 - Date: 2026-08-24
 
+## Context
+
+An inventory database would enable history and offline snapshots, but would also introduce
+schema migrations, stale-state semantics, local privacy retention, and recovery behaviour
+before those features have proven product value. Provider files are already the source of
+truth for Phase 1.
+
 ## Decision
 
 Phase 1 keeps model identities, installations, artifacts, issues, and storage calculations
@@ -22,3 +29,16 @@ settings. Provider files remain the sole source of truth.
   and early result delivery are release requirements.
 - A future persistent inventory requires a new ADR, schema, migrations, privacy review,
   and explicit product value. It is not a hidden Phase 1 extension.
+
+## Requirements impact
+
+Phase 1 requirements must define full rescan behaviour, what operational settings persist,
+what inventory data does not persist, offline-source semantics, and which historical claims
+are impossible. A future requirement for history, `firstSeenAt`, trends, or offline model
+rows must first supersede this decision.
+
+## Validation
+
+The former SQLite inventory target and schema were removed. Settings round-trip tests prove
+that only source intent and UI preferences persist; architecture and acceptance records
+state that inventory results remain in memory.

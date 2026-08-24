@@ -1,8 +1,9 @@
 # Phase 1 Acceptance
 
-Phase 1 is the read-only beta. This record maps the normative acceptance criteria in
-`REQUIREMENTS.md` to executable evidence. Inventory data remains ephemeral; only source
-consent, bookmarks, volume identity, and UI preferences persist.
+Phase 1 is the read-only beta. This record originally accepted the implementation against
+Requirements 0.1.8. Requirements 0.2.0 consolidates Phase 1 learnings into ADRs and adds a
+scan-generation invariant that still needs implementation evidence. Inventory data remains
+ephemeral; only source consent, bookmarks, volume identity, and UI preferences persist.
 
 | Gate | Evidence |
 |---|---|
@@ -10,13 +11,14 @@ consent, bookmarks, volume identity, and UI preferences persist.
 | External volumes | Stable APFS volume UUID/remount integration in `scripts/test-volume-lifecycle` and targeted unmount/remount app test |
 | Permission recovery | First-run UI smoke plus denied, grant-again, revoke, stale, offline, and unreadable source tests |
 | Scan-only boundary | `scripts/check-architecture` rejects action/runtime linkage, process execution, media frameworks, and known write APIs |
-| Ephemeral normalized graph | Domain tests, source-settings round trip, and ADR-005; no inventory result is persisted |
-| Identity and storage accounting | Physical-ID deduplication, exclusive/shared/unknown storage tests, provider/manual reconciliation, and snapshot-root metadata rejection tests |
+| Ephemeral normalized graph | Domain tests, source-settings round trip, and [ADR-005](decisions/ADR-005-ephemeral-phase-1-inventory.md); no inventory result is persisted |
+| Identity and storage accounting | [ADR-018](decisions/ADR-018-evidence-first-reconciliation-and-storage.md), physical-ID deduplication, exclusive/shared/unknown storage tests, provider/manual reconciliation, and snapshot-root metadata rejection tests |
 | Partial downloads | Synthetic Hugging Face fixture and a controlled interrupted `hf download` validated with `scripts/test-real-cache --expect-partial` on 2026-08-24 |
-| Age and state | Timestamp provenance, whole-unit age, `Old`, `Age Unknown`, and `Incomplete` presentation tests |
+| Age and state | [ADR-019](decisions/ADR-019-timestamp-provenance-and-age.md), timestamp provenance, whole-unit age, `Old`, `Age Unknown`, and `Incomplete` presentation tests |
 | Config and secret handling | Configuration allowlist, harmless-dotfile, secret-pattern, and Finder-target tests |
-| Model cards | Confirmed HTTPS-only link validation and Hugging Face card contract tests |
+| Model cards | [ADR-020](decisions/ADR-020-confirmed-external-model-links.md), confirmed HTTPS-only link validation, canonical `owner/model`, reviewed shorthand alias, and unknown-owner negative contract tests |
 | Extensibility | Immutable adapter registry, role-separated targets, data-driven Settings, and `docs/adapters.md` |
+| Scan streaming | One coordinator, deterministic order, bounded events, and cancellation tests; stale-generation rejection remains open under [ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md) |
 | Product language | `scripts/check-language`; English string catalog and public documentation, with German normative requirements only |
 | UI and accessibility | Fresh first-run labeled-control smoke through the macOS accessibility tree on local and ad-hoc CI signing |
 | Distribution | Developer ID app beta, hardened runtime, notarization, stapling, and Gatekeeper evidence recorded below |
@@ -42,3 +44,16 @@ consent, bookmarks, volume identity, and UI preferences persist.
 - Gatekeeper: accepted, source `Notarized Developer ID`
 
 The distributable DMG and public release automation remain Phase 5 scope.
+
+## Requirements 0.2.0 revalidation findings
+
+1. **Open:** implement and test an explicit scan-generation token so late events and task
+   cleanup from a cancelled scan cannot mutate an immediately started scan (FR-SCN-016).
+2. **Open:** reject case-normalized repository-alias collisions deterministically and add
+   negative tests for collisions and invalid targets (FR-LNK-007).
+3. **Open:** create a new Developer ID archive from current `main`, then repeat
+   notarization, stapling, and Gatekeeper validation. The recorded app export predates the
+   table auto-sizing and canonical Hugging Face model-card alias commits.
+
+Until these findings are closed, Phase 1 remains historically accepted against 0.1.8 but is
+not release-ready against Requirements 0.2.0.

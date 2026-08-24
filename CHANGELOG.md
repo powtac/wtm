@@ -32,6 +32,13 @@ first public release is tagged.
   notarization, stapling, and Gatekeeper.
 - Content-derived initial table-column widths that ignore longer column headers while
   preserving native resizing and persisted column customization.
+- Complete accepted ADR set and decision index, including Phase 1 learnings for consent,
+  volume identity, scan generations, reconciliation, storage accounting, timestamps,
+  confirmed external links, capability isolation, and excluded media permissions.
+- Architecture-grounded Requirements 0.2.0 with ADR traceability, explicit opaque-ID
+  scope, stale scan-generation rejection, and repository-alias governance.
+- CI validation for unique ADR IDs, required decision-record sections, and Requirements
+  traceability.
 
 ### Fixed
 
