@@ -19,9 +19,16 @@ enum AppComposition {
       ManualFolderAdapter(),
     ])
     let coordinator = registry.map { InventoryCoordinator(registry: $0) }
-    let sources = DefaultSourceCatalog().suggestions(
-      homeDirectory: FileManager.default.homeDirectoryForCurrentUser
-    )
+    let homeDirectory: URL
+    #if DEBUG
+      homeDirectory =
+        ProcessInfo.processInfo.environment["WTM_UI_TEST_HOME_DIRECTORY"]
+        .map { URL(filePath: $0, directoryHint: .isDirectory) }
+        ?? FileManager.default.homeDirectoryForCurrentUser
+    #else
+      homeDirectory = FileManager.default.homeDirectoryForCurrentUser
+    #endif
+    let sources = DefaultSourceCatalog().suggestions(homeDirectory: homeDirectory)
     let applicationSupportDirectory = FileManager.default.urls(
       for: .applicationSupportDirectory,
       in: .userDomainMask

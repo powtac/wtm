@@ -30,6 +30,7 @@ struct SourceSetupView: View {
                 .font(.caption)
             }
           }
+          .accessibilityIdentifier("source-toggle-\(source.id)")
         }
       }
       .frame(minHeight: 180)
