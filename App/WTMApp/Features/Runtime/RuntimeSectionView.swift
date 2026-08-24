@@ -72,6 +72,7 @@ struct RuntimeSectionView: View {
         }
         .buttonStyle(.borderedProminent)
         .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
+        .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
       }
 
       if let session = model.latestRuntimeSession(for: installation, runtimeID: runtimeID) {
