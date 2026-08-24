@@ -2,6 +2,7 @@ import SwiftUI
 import WTMDomain
 
 struct InstallationDetailView: View {
+  @Bindable var model: InventoryViewModel
   let installation: ModelInstallation?
   let revealAction: (URL) -> Void
   let deleteAction: () -> Void
@@ -77,6 +78,8 @@ struct InstallationDetailView: View {
         if let modelCardURL = validatedModelCardURL(installation.modelCard) {
           Link("detail.model-card.action", destination: modelCardURL)
         }
+
+        RuntimeSectionView(model: model, installation: installation)
 
         Section {
           Button("deletion.review.action", systemImage: "trash", role: .destructive) {

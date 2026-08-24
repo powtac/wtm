@@ -74,6 +74,7 @@ struct InventoryRootView: View {
             }
           } else {
             InstallationDetailView(
+              model: model,
               installation: model.selectedInstallation,
               revealAction: model.reveal,
               deleteAction: model.prepareDeletion,
@@ -93,6 +94,15 @@ struct InventoryRootView: View {
         )
       }
     }
+    .sheet(isPresented: runtimePlanIsPresented) {
+      if let preview = model.runtimePlanPreview {
+        RuntimePlanPreviewView(
+          preview: preview,
+          cancelAction: model.cancelRuntimePreview,
+          executeAction: model.executeRuntimeTest
+        )
+      }
+    }
     .alert("deletion.error.title", isPresented: deletionErrorIsPresented) {
       Button("action.ok") { model.dismissDeletionError() }
     } message: {
@@ -102,6 +112,11 @@ struct InventoryRootView: View {
       Button("action.ok") { model.dismissDeletionReport() }
     } message: {
       if let report = model.deletionReport { Text(deletionResultKey(report.status)) }
+    }
+    .alert("runtime.error.title", isPresented: runtimeErrorIsPresented) {
+      Button("action.ok") { model.dismissRuntimeError() }
+    } message: {
+      if let error = model.runtimeError { Text(error.message) }
     }
   }
 
@@ -457,6 +472,20 @@ struct InventoryRootView: View {
     Binding(
       get: { model.deletionPlan != nil },
       set: { if !$0 { model.cancelDeletionPreview() } }
+    )
+  }
+
+  private var runtimePlanIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.runtimePlanPreview != nil },
+      set: { if !$0 { model.cancelRuntimePreview() } }
+    )
+  }
+
+  private var runtimeErrorIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.runtimeError != nil },
+      set: { if !$0 { model.dismissRuntimeError() } }
     )
   }
 

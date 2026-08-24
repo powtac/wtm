@@ -1,6 +1,159 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "runtime.check.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Check Readiness" } } }
+    },
+    "runtime.compatibility" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Compatibility" } } }
+    },
+    "runtime.endpoint" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Endpoint" } } }
+    },
+    "runtime.error.executable-changed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The executable changed after approval. Review it again." } } }
+    },
+    "runtime.error.launch-failed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The runtime could not start or did not pass its health check." } } }
+    },
+    "runtime.error.plan-failed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM could not create a safe runtime plan for this model." } } }
+    },
+    "runtime.error.settings-failed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime tool settings could not be read or saved." } } }
+    },
+    "runtime.error.stop-failed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM could not stop the process it started." } } }
+    },
+    "runtime.error.title" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Error" } } }
+    },
+    "runtime.error.tool-disabled" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Enable this runtime tool in Settings before testing it." } } }
+    },
+    "runtime.error.tool-invalid" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The selected executable or tool definition failed validation." } } }
+    },
+    "runtime.error.unavailable" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This runtime adapter is unavailable." } } }
+    },
+    "runtime.health" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Health Check" } } }
+    },
+    "runtime.inference" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Inference Check" } } }
+    },
+    "runtime.integrity" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Integrity" } } }
+    },
+    "runtime.logs" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Session Logs" } } }
+    },
+    "runtime.memory-estimate" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Estimated Memory" } } }
+    },
+    "runtime.not-checked" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Readiness has not been checked in this app session." } } }
+    },
+    "runtime.ownership" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Ownership" } } }
+    },
+    "runtime.plan.approval-required" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirming stores approval for this exact executable and argument template." } } }
+    },
+    "runtime.plan.arguments" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Final Arguments" } } }
+    },
+    "runtime.plan.execute" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Start and Verify" } } }
+    },
+    "runtime.plan.executable" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Executable" } } }
+    },
+    "runtime.plan.inference" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will perform a bounded one-token inference check." } } }
+    },
+    "runtime.plan.model" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Model" } } }
+    },
+    "runtime.plan.path" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Canonical Path" } } }
+    },
+    "runtime.plan.provider-managed" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will call the provider's existing local API and will not own or stop its process." } } }
+    },
+    "runtime.plan.runtime" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime" } } }
+    },
+    "runtime.plan.signature" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Signature" } } }
+    },
+    "runtime.plan.stop-behavior" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop Behavior" } } }
+    },
+    "runtime.plan.version" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } } }
+    },
+    "runtime.plan.warning" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Review Runtime Test" } } }
+    },
+    "runtime.plan.warning-detail" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting this test may load the full model into memory. WTM executes no shell and connects only to the numeric loopback endpoint shown below." } } }
+    },
+    "runtime.refresh.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh Logs" } } }
+    },
+    "runtime.section" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Verification" } } }
+    },
+    "runtime.state" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime State" } } }
+    },
+    "runtime.stop.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } } }
+    },
+    "runtime.stop.owned" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM can stop only this process instance." } } }
+    },
+    "runtime.stop.provider" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider API can stop this model instance." } } }
+    },
+    "runtime.stop.unavailable" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will not stop the provider-managed process." } } }
+    },
+    "runtime.test.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Test" } } }
+    },
+    "runtime.unsupported" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No installed runtime adapter supports this model format." } } }
+    },
+    "runtime.validation" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Validation" } } }
+    },
+    "settings.runtime.local-api" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Built-in · Numeric loopback API" } } }
+    },
+    "settings.runtimes.section" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Tools" } } }
+    },
+    "tool.approved" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Approved for this exact configuration" } } }
+    },
+    "tool.choose-llama.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose llama-server…" } } }
+    },
+    "tool.choose.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose" } } }
+    },
+    "tool.choose.message" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose the llama-server executable. WTM validates it before enabling execution." } } }
+    },
+    "tool.not-approved" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Approval required before execution" } } }
+    },
+    "tool.validate.action" : {
+      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Validate" } } }
+    },
     "action.ok" : {
       "localizations" : {
         "en" : {

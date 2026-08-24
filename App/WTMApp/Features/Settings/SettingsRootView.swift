@@ -146,6 +146,70 @@ struct SettingsRootView: View {
 
   private var integrationSettings: some View {
     Form {
+      Section("settings.runtimes.section") {
+        LabeledContent("Ollama") {
+          Text("settings.runtime.local-api")
+            .foregroundStyle(.secondary)
+        }
+
+        ForEach(model.toolDefinitions, id: \.id) { (definition: ToolDefinition) in
+          VStack(alignment: .leading, spacing: 8) {
+            Toggle(
+              definition.displayName,
+              isOn: Binding(
+                get: { definition.isEnabled },
+                set: { model.setToolEnabled(definition.id, enabled: $0) }
+              )
+            )
+            Text(definition.executableURL.path)
+              .font(.caption.monospaced())
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .truncationMode(.middle)
+
+            HStack {
+              Text(
+                model.isToolApproved(definition)
+                  ? String(localized: "tool.approved") : String(localized: "tool.not-approved")
+              )
+              .font(.caption)
+              .foregroundStyle(
+                model.isToolApproved(definition) ? Color.secondary : Color.orange
+              )
+              Spacer()
+              Button("tool.validate.action") {
+                model.validateTool(definition.id)
+              }
+              Button("inventory.reveal.action", systemImage: "folder") {
+                model.revealTool(definition.id)
+              }
+              .labelStyle(.iconOnly)
+            }
+
+            if let validation = definition.lastValidation {
+              HStack(spacing: 6) {
+                Text(validation.signingStatus.rawValue.capitalized)
+                if let identifier = validation.signingIdentifier {
+                  Text("·")
+                  Text(identifier)
+                }
+                if let version = validation.version {
+                  Text("·")
+                  Text(version)
+                }
+              }
+              .font(.caption)
+              .foregroundStyle(.secondary)
+            }
+          }
+        }
+
+        Button("tool.choose-llama.action") {
+          model.chooseLlamaCppExecutable()
+        }
+        adapterGuideLink
+      }
+
       Section("settings.storage-providers.section") {
         ForEach(model.availableStorageProviderIDs, id: \.self) { providerID in
           LabeledContent(providerID.localizedName) {

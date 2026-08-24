@@ -528,7 +528,7 @@ final class InventoryViewModel {
 
   func isToolApproved(_ definition: ToolDefinition) -> Bool {
     guard let approval = toolApprovals[definition.id], approval.matches(definition),
-      let validation = definition.lastValidation
+      let validation = try? invocationBuilder.inspect(definition)
     else { return false }
     return approval.executableIdentity == validation.executableIdentity
   }

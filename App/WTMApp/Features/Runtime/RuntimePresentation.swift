@@ -31,16 +31,16 @@ enum RuntimeUIError: String, Identifiable {
 
   var id: String { rawValue }
 
-  var messageKey: String.LocalizationValue {
+  var message: String {
     switch self {
-    case .runtimeUnavailable: "runtime.error.unavailable"
-    case .toolDisabled: "runtime.error.tool-disabled"
-    case .toolInvalid: "runtime.error.tool-invalid"
-    case .executableChanged: "runtime.error.executable-changed"
-    case .planFailed: "runtime.error.plan-failed"
-    case .launchFailed: "runtime.error.launch-failed"
-    case .stopFailed: "runtime.error.stop-failed"
-    case .settingsFailed: "runtime.error.settings-failed"
+    case .runtimeUnavailable: String(localized: "runtime.error.unavailable")
+    case .toolDisabled: String(localized: "runtime.error.tool-disabled")
+    case .toolInvalid: String(localized: "runtime.error.tool-invalid")
+    case .executableChanged: String(localized: "runtime.error.executable-changed")
+    case .planFailed: String(localized: "runtime.error.plan-failed")
+    case .launchFailed: String(localized: "runtime.error.launch-failed")
+    case .stopFailed: String(localized: "runtime.error.stop-failed")
+    case .settingsFailed: String(localized: "runtime.error.settings-failed")
     }
   }
 }
