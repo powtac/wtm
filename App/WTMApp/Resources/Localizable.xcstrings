@@ -1894,6 +1894,7 @@
       }
     },
     "runtime.try-anyway.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

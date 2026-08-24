@@ -1,86 +1,94 @@
 # Architecture
 
 WTM is a native Swift 6 macOS application with a thin SwiftUI composition root and one
-local Swift package. Phase 2 adds a capability-isolated cleanup graph to the read-only
-inventory graph.
+local Swift package. Phase 3 adds an isolated runtime graph to the inventory and safe-action
+graphs. Client handoff and downloads remain absent.
 
 ```text
-WTM app
-  -> WTMInventory
-      -> WTMAdapterContracts
-      -> WTMDomain
-      -> WTMSecurity
-  -> AdapterOllama
-  -> AdapterHuggingFace
-  -> AdapterManual
-  -> WTMActions
-      -> WTMAdapterContracts
-      -> WTMDomain
-      -> WTMSecurity
-  -> ActionOllama
-  -> ActionHuggingFace
-  -> ActionManual
+WTM app (composition and presentation only)
+  -> WTMInventory -> WTMAdapterContracts, WTMDomain, WTMSecurity
+  -> AdapterOllama, AdapterHuggingFace, AdapterManual
+  -> WTMActions -> WTMAdapterContracts, WTMDomain, WTMSecurity
+  -> ActionOllama, ActionHuggingFace, ActionManual
+  -> WTMRuntime -> WTMAdapterContracts, WTMDomain
+  -> RuntimeOllama, RuntimeLlamaCpp
   -> WTMPersistence
 ```
 
 `WTMDomain` owns provider-neutral identities, variants, installations, artifacts,
-timestamps, sources, and issues. `WTMAdapterContracts` defines the storage-provider
-boundary and immutable registry. Concrete provider targets do not depend on each other.
-Provider sources are scanned before generic manual sources. The coordinator reconciles
-overlapping artifact paths so provider-backed identity replaces a generic cache view,
-while distinct installation paths and volumes remain separate.
+timestamps, sources, action plans, runtime evidence, sessions, and tool definitions.
+`WTMAdapterContracts` defines separate storage and runtime boundaries with immutable
+registries. Concrete provider targets do not depend on each other.
 
-The app target is the only composition root. It constructs separate discovery and action
-registries and injects them into `InventoryCoordinator` and `ActionExecutor`. Views never
-enumerate or mutate the file system directly.
+The app target is the only composition root. It constructs discovery, action, and runtime
+registries and injects them into `InventoryCoordinator`, `ActionExecutor`, and
+`RuntimeBroker`. Views neither enumerate or mutate the file system nor create a `Process`.
 
-Operational source settings are stored as a versioned JSON document under Application
-Support. Folder URLs use macOS bookmark data and external-volume UUID plus relative path.
-The store never contains installations, artifacts, or historical scan results.
+Provider sources scan before generic manual sources. The inventory coordinator reconciles
+overlapping artifact paths so provider-backed identity replaces a generic cache view while
+distinct installation paths and volumes remain separate.
 
-## Phase 2 security boundary
+## Phase 3 runtime boundary
 
-- Read-only adapters still expose inventory results only; destructive semantics live in
-  separately registered compiled action adapters.
-- Every action uses a short-lived immutable plan and no-follow filesystem identities.
-- `ActionExecutor` revalidates plan generation, expiry, source state, target identity,
-  provider state, and batch conflicts immediately before mutation.
-- Manual and Hugging Face filesystem actions use the macOS Trash through one injected
-  service. Raw permanent filesystem deletion is absent.
-- Ollama deletion uses only its loopback API and requires irreversible confirmation.
-- `SystemOpenFileUsageChecker` uses local macOS process metadata without spawning a helper
-  or shell. Positive file-use matches block planning and are checked again immediately
-  before execution; access-denied processes remain an explicit best-effort limitation.
-- Hugging Face operations are fail-safe ordered: snapshots, then refs, then unreferenced
-  blobs. Batch reclaim estimates attribute each physical file once.
-- Runtime, client, process-launch, download, and privileged-helper targets remain absent.
-- Scan roots require explicit user enablement.
-- Directory traversal resolves symlinks and rejects destinations outside the configured root.
-- Files are opened through read-only APIs; weight files are never hashed during a normal scan.
-- Model inventory is ephemeral and rebuilt on every launch. Only source bookmarks, consent,
-  source order, scan-on-launch, and UI preferences persist.
-- Provider files remain the sole source of truth.
-- The app is not sandboxed, but it does not request Full Disk Access or elevated privileges.
+- `RuntimeAdapter` owns provider-specific compatibility, plan construction, local health
+  contracts, and the minimal inference contract. It never owns an OS process handle.
+- `RuntimeBroker` is the sole process-lifecycle authority. Only its reviewed launcher may
+  use Foundation `Process`; the app, views, adapters, and persistence targets cannot.
+- Ollama uses its numeric-loopback API for readiness and one-token inference. WTM does not
+  claim ownership of the daemon or expose a provider Stop action.
+- llama.cpp uses an absolute executable URL, a separate typed argument array, an explicit
+  allowlisted environment, numeric loopback, and a WTM-owned `Process` handle.
+- Static compatibility, runtime reachability, and successful model inference are separate,
+  timestamped observations. A provider manifest or open port is never inference evidence.
+- A test plan previews the executable, signature status, final arguments, endpoint, memory
+  estimate, and stop semantics before execution. Readiness is checked first; an incompatible
+  result exposes only an explicit secondary `Try Anyway` action.
+- Executable approval is bound to canonical no-follow identity and the exact arguments,
+  endpoint, working directory, environment, and adapter. Any change requires approval again.
+- WTM stops only a process handle it created in the current app session. On app termination,
+  it briefly delays termination to stop remaining WTM-owned processes; it never infers
+  ownership from a port, process name, or model ID.
+- Captured output is bounded, redacted, and in memory only. Runtime endpoints, state,
+  sessions, and logs are not restored after relaunch.
+- Tool manifests use a closed versioned schema. Imports receive a new identity, are fully
+  previewed, remain disabled, replace the existing override for that runtime, and inherit no
+  approval. Exports are disabled and omit validation evidence and home-directory paths.
+- Shells, Terminal automation, inherited login environments, remote endpoints, dynamic
+  libraries, scripts, and executable plugins remain forbidden.
 
-`scripts/check-architecture` enforces the inventory/action split, the single Trash boundary,
-and the remaining forbidden capabilities in CI.
+The Phase 2 action boundary remains intact: actions use short-lived immutable plans,
+no-follow identities, provider revalidation, centralized macOS Trash, explicit irreversible
+confirmation, and bounded privacy-preserving audit entries.
+
+## Persisted and ephemeral state
+
+Versioned JSON under Application Support persists only operational source settings, user
+preferences, tool definitions, and identity-bound tool approvals. Source URLs use macOS
+bookmark data and external-volume UUID plus relative path. A stored runtime override
+suppresses the discovered convention default for the same runtime, preventing duplicate
+tool entries after relaunch.
+
+Installations, artifacts, historical scan results, runtime sessions, endpoints, process
+handles, inference output, and runtime logs are ephemeral. Provider files and live local
+APIs remain the source of truth.
+
+The app is directly distributed, is not sandboxed, requests neither Full Disk Access nor
+elevated privileges, and preserves the explicit source-consent model.
+
+`scripts/check-architecture` enforces the inventory/action/runtime splits, the single Trash
+boundary, the single process-launch boundary, loopback-only HTTP ownership, and the remaining
+forbidden capabilities in CI.
 
 ## Recorded invariants
 
 The [ADR index](decisions/README.md) is the authoritative history for architecture choices.
-Phase 1 implementation specifically validated:
-
-- consent-bound roots and external-volume identity ([ADR-016](decisions/ADR-016-consent-bound-sources-and-volume-identity.md));
-- isolated streaming scan generations ([ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md));
-- provider-first reconciliation and physical storage accounting ([ADR-018](decisions/ADR-018-evidence-first-reconciliation-and-storage.md));
-- timestamp provenance and age semantics ([ADR-019](decisions/ADR-019-timestamp-provenance-and-age.md));
-- confirmed external model links ([ADR-020](decisions/ADR-020-confirmed-external-model-links.md)); and
-- compile-time phase boundaries ([ADR-021](decisions/ADR-021-phase-capability-isolation.md)).
-
-Phase 2 cleanup transactions are governed by
-[ADR-023](decisions/ADR-023-revalidated-deletion-transactions.md).
-Inventory collection controls, selection actions, and empty-state truthfulness are governed
-by [ADR-024](decisions/ADR-024-pane-scoped-inventory-actions.md).
+Phase 1 invariants are recorded in
+[ADR-016](decisions/ADR-016-consent-bound-sources-and-volume-identity.md) through
+[ADR-022](decisions/ADR-022-no-unrelated-media-capabilities.md). Phase 2 transactions and
+pane-scoped actions are governed by
+[ADR-023](decisions/ADR-023-revalidated-deletion-transactions.md) and
+[ADR-024](decisions/ADR-024-pane-scoped-inventory-actions.md). Phase 3 runtime ownership and
+verification are governed by [ADR-025](decisions/ADR-025-owned-runtime-sessions.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
 neither document may silently contradict the other.

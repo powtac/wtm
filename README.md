@@ -9,8 +9,9 @@ What The Model is a native macOS inventory for locally stored LLMs. It explains 
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-The Phase 2 beta adds reviewed cleanup through short-lived, revalidated deletion plans.
-It does not change model configuration, start external processes, or download models.
+The Phase 3 beta adds explicit runtime readiness and one-token verification for Ollama and
+llama.cpp. External execution is limited to reviewed WTM-owned `llama-server` processes;
+WTM never opens a shell, automates Terminal, or downloads models.
 
 ## Current scope
 
@@ -25,6 +26,13 @@ It does not change model configuration, start external processes, or download mo
 - macOS Trash for manual and Hugging Face files; separately confirmed Ollama API deletion
 - Open-file and loaded-model blocking, targeted post-action rescans, and a redacted local
   audit that the user can clear
+- Separate integrity, compatibility, validation, and runtime evidence for each supported
+  model/runtime pair
+- Ollama loopback health and one-token inference verification without daemon ownership
+- Reviewed llama.cpp launch plans, identity-bound executable approval, in-app redacted logs,
+  and Stop limited to the exact WTM-owned process
+- Configurable, schema-validated runtime tool definitions with disabled imports and
+  privacy-redacted exports
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The

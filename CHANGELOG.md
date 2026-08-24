@@ -50,6 +50,17 @@ first public release is tagged.
   rejection, and native cleanup-preview UI coverage on isolated fixtures.
 - Phase 2 acceptance evidence for version `0.2.0 (2)`, including Developer ID signing,
   hardened runtime, Apple notarization, stapling, Gatekeeper, and launch smoke.
+- Separate runtime integrity, compatibility, validation, and lifecycle observations with
+  adapter version, evidence time, expiry, and best-effort memory estimates.
+- Ollama loopback readiness plus bounded one-token inference verification without claiming
+  daemon or loaded-model ownership.
+- Reviewed llama.cpp test plans with absolute executable identity, typed arguments,
+  numeric-loopback port allocation, explicit environment, in-app redacted logs, and Stop
+  limited to the exact WTM-owned process handle.
+- Configurable runtime tool definitions, identity-bound approvals, complete launch preview,
+  and versioned privacy-redacted import/export that always imports disabled and unapproved.
+- Native runtime UI, readiness-gated `Run Test`, explicit secondary `Try Anyway`, owned
+  process cleanup during app termination, and XCUITest coverage of the non-executing plan.
 
 ### Changed
 
@@ -65,6 +76,9 @@ first public release is tagged.
   and irreversible Ollama loopback API deletion with loaded-model blocking.
 - Reclaim estimates now deduplicate hardlinks and shared Ollama blobs; Hugging Face shared
   blobs execute last so partial failures cannot remove them before selected references.
+- Added the Phase 3 capability boundary: runtime adapters create typed plans while only
+  `RuntimeBroker` may launch or stop a process; shells, Terminal automation, client handoff,
+  remote endpoints, and downloads remain absent.
 
 ### Fixed
 
@@ -74,3 +88,6 @@ first public release is tagged.
   finishing an immediately started replacement scan.
 - Hugging Face repository-alias catalogs reject normalized key collisions, unsafe local
   keys, and invalid canonical repository IDs before scanning.
+- User-selected llama.cpp definition provenance is preserved, and a persisted runtime
+  override now suppresses its discovered default after relaunch instead of creating a
+  duplicate tool entry.

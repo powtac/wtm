@@ -31,6 +31,6 @@ stapling, Gatekeeper validation, packaging, checksum, and publication.
 
 ## Validation
 
-Phase 1 and Phase 2 record arm64 Developer ID archives, accepted notarization submissions,
-successful stapling, and Gatekeeper acceptance in their corresponding phase acceptance
-documents.
+Each completed implementation phase records its arm64 Developer ID archive, accepted
+notarization submission, successful stapling, Gatekeeper acceptance, and artifact hashes in
+the corresponding phase acceptance document.

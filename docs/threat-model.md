@@ -75,7 +75,9 @@ available and limitations stay visible in the preview.
 | Health is presented as successful inference | Record static compatibility, reachable health, and inference response as separate timestamped observations |
 | A minimal test exhausts unified memory | Show model size and best-effort memory estimate before opt-in inference; bound timeout and explain that the full model may load |
 | Runtime output exposes tokens or personal paths | Capture only bounded ephemeral output and redact credential-like values and approved sensitive paths before display |
-| A malformed tool manifest expands capabilities | Decode a versioned closed schema; reject unknown executable roles, placeholders, environment keys, and disabled imported definitions |
+| A malformed tool manifest expands capabilities | Decode a versioned closed schema; reject unknown roles, placeholders, environment keys, endpoints, and schema versions; normalize every import to a new disabled unapproved definition after complete preview |
+| An exported tool manifest leaks local identity | Disable the exported definition and remove validation evidence, approval state, and home-directory paths before writing JSON |
+| Convention discovery duplicates an imported override | Persist one override per runtime and suppress the discovered default whenever a valid stored definition exists for that runtime |
 | Runtime state survives as a false live claim | Keep process handles, runtime state, endpoints, and logs in memory; recheck providers after every app launch |
 
 ## Explicitly absent in Phase 3

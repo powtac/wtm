@@ -38,6 +38,13 @@ stopped safely.
   and warns that it can load the full model into unified memory.
 - Runtime logs are bounded, redacted, and ephemeral. Runtime instances and logs are not
   restored as live state after app restart.
+- Tool definitions and execution approvals may persist in versioned JSON. Imported
+  definitions receive a new identity, are fully previewed, remain disabled, replace the
+  stored override for that runtime, and inherit no approval. Export disables the definition
+  and removes validation evidence and home-directory paths.
+- A stored runtime override suppresses convention discovery for the same runtime after
+  relaunch. Discovery must not recreate a duplicate default beside an imported or
+  user-created override.
 - `llama-server` is bound explicitly to `127.0.0.1`. Port availability is checked before
   launch and the selected port is propagated as a typed argument and endpoint. A bind race
   fails safely and may retry with a newly selected port; WTM never attaches ownership to an
@@ -54,6 +61,10 @@ stopped safely.
 - A process crash, RAM exhaustion, provider API change, or port race remains possible and is
   surfaced as bounded evidence rather than converted into a compatibility claim.
 - Custom tool approvals and definitions may persist; runtime state and output do not.
+- App termination waits only for bounded cleanup of live WTM-owned process handles. It does
+  not terminate provider-managed or inferred processes.
+- Readiness precedes the normal test action. A negative compatibility result can expose only
+  an explicit secondary `Try Anyway` path; it is never presented as verified compatibility.
 
 ## Requirements impact
 

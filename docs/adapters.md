@@ -39,8 +39,19 @@ shared, unknown-ownership, credential, identity, and secret-like files. See
 
 ### Runtime adapter
 
-Readiness, start, stop, and health verification. This capability starts in Phase 3 and
-must use an executable plus an argument array, never a shell string.
+Provider-specific readiness, immutable test plans, local health verification, and minimal
+model inference. Phase 3 ships two compiled runtime adapters:
+
+- Ollama uses `/api/tags`, `/api/ps`, and a bounded non-streaming `/api/generate` request on
+  numeric loopback. It does not expose Stop because the daemon does not provide a
+  WTM-exclusive process or loaded-model identity.
+- llama.cpp accepts GGUF installations and produces a reviewed `llama-server` plan bound to
+  `127.0.0.1`, an allocated port, and one exact model path. `RuntimeBroker`, not the adapter,
+  starts and stops the owned process.
+
+Runtime adapters never receive shell strings and never launch processes directly. They
+return typed plans to the central broker. Compatibility, health, inference, and ownership
+remain separate facts.
 
 ### Client adapter
 
@@ -49,8 +60,10 @@ Handoff to a consuming application or endpoint. This capability starts in Phase 
 ## How to extend this list
 
 Use Settings or a validated data manifest for paths, labels, safe HTTPS link templates,
-and other data-only definitions. Data manifests cannot contain Swift binaries, dynamic
-libraries, scripts, or executable command strings.
+typed executable arguments, and other data-only definitions. Imported tool definitions are
+fully previewed, disabled, assigned a new identity, and never inherit execution approval.
+Export removes home-directory paths and validation evidence. Data manifests cannot contain
+Swift binaries, dynamic libraries, scripts, deletion semantics, or shell command strings.
 
 A new parser, provider API, deletion semantic, or process lifecycle requires a compiled
 SwiftPM adapter:
