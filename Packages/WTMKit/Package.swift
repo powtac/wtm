@@ -11,6 +11,7 @@ let package = Package(
     .library(name: "WTMInventory", targets: ["WTMInventory"]),
     .library(name: "WTMSecurity", targets: ["WTMSecurity"]),
     .library(name: "WTMActions", targets: ["WTMActions"]),
+    .library(name: "WTMRuntime", targets: ["WTMRuntime"]),
     .library(name: "WTMPersistence", targets: ["WTMPersistence"]),
     .library(name: "AdapterOllama", targets: ["AdapterOllama"]),
     .library(name: "AdapterHuggingFace", targets: ["AdapterHuggingFace"]),
@@ -26,6 +27,11 @@ let package = Package(
     .target(
       name: "WTMActions",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
+    ),
+    .target(
+      name: "WTMRuntime",
+      dependencies: ["WTMDomain", "WTMAdapterContracts"],
+      linkerSettings: [.linkedFramework("Security")]
     ),
     .target(name: "WTMPersistence", dependencies: ["WTMActions"]),
     .target(
@@ -82,6 +88,10 @@ let package = Package(
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMSecurity", "WTMActions",
       ]
+    ),
+    .testTarget(
+      name: "WTMRuntimeTests",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
     ),
     .testTarget(
       name: "WTMActionAdapterTests",

@@ -205,30 +205,51 @@ public enum ToolSigningStatus: String, Codable, CaseIterable, Sendable {
 }
 
 public struct ExecutableIdentity: Hashable, Codable, Sendable {
+  public let requestedURL: URL
   public let canonicalURL: URL
   public let deviceID: UInt64
   public let fileID: UInt64
+  public let ownerUserID: UInt32
+  public let ownerGroupID: UInt32
   public let mode: UInt32
   public let byteCount: Int64
   public let modificationSeconds: Int64
   public let modificationNanoseconds: Int64
+  public let symbolicLinkDeviceID: UInt64?
+  public let symbolicLinkFileID: UInt64?
+  public let symbolicLinkModificationSeconds: Int64?
+  public let symbolicLinkModificationNanoseconds: Int64?
 
   public init(
+    requestedURL: URL,
     canonicalURL: URL,
     deviceID: UInt64,
     fileID: UInt64,
+    ownerUserID: UInt32,
+    ownerGroupID: UInt32,
     mode: UInt32,
     byteCount: Int64,
     modificationSeconds: Int64,
-    modificationNanoseconds: Int64
+    modificationNanoseconds: Int64,
+    symbolicLinkDeviceID: UInt64? = nil,
+    symbolicLinkFileID: UInt64? = nil,
+    symbolicLinkModificationSeconds: Int64? = nil,
+    symbolicLinkModificationNanoseconds: Int64? = nil
   ) {
+    self.requestedURL = requestedURL
     self.canonicalURL = canonicalURL
     self.deviceID = deviceID
     self.fileID = fileID
+    self.ownerUserID = ownerUserID
+    self.ownerGroupID = ownerGroupID
     self.mode = mode
     self.byteCount = byteCount
     self.modificationSeconds = modificationSeconds
     self.modificationNanoseconds = modificationNanoseconds
+    self.symbolicLinkDeviceID = symbolicLinkDeviceID
+    self.symbolicLinkFileID = symbolicLinkFileID
+    self.symbolicLinkModificationSeconds = symbolicLinkModificationSeconds
+    self.symbolicLinkModificationNanoseconds = symbolicLinkModificationNanoseconds
   }
 }
 
