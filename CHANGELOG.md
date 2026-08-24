@@ -40,6 +40,11 @@ first public release is tagged.
 - CI validation for unique ADR IDs, required decision-record sections, and Requirements
   traceability.
 
+### Changed
+
+- Revalidated Phase 1 against Requirements 0.2.0 with a current Developer ID archive,
+  accepted Apple notarization, stapled ticket, and successful Gatekeeper assessment.
+
 ### Fixed
 
 - Hugging Face model-card links for reviewed shorthand cache directories now restore the

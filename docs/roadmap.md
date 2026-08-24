@@ -6,7 +6,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | Phase | Status | Gate |
 |---|---|---|
 | 0 — Foundation | Completed | Architecture, fixtures, CI including UI smoke, GitHub structure, Developer ID signing, hardened runtime, notarization, stapling, and Gatekeeper smoke are verified |
-| 1 — Read-only Beta | Distribution revalidation required | Requirements 0.2.0 code gates are green; a fresh notarized artifact from current `main` remains required |
+| 1 — Read-only Beta | Completed | Requirements 0.2.0 code gates and fresh Developer ID distribution evidence are verified |
 | 2 — Safe Actions | Not started | No deletion capability is linked |
 | 3 — Runtimes | Not started | No process capability is linked |
 | 4 — Integrations | Not started | No client adapters or menu bar UI are linked |
