@@ -255,6 +255,92 @@ func overlappingTargetsBlockBatch() async throws {
   }
 }
 
+@Test("An open deletion target creates a blocking preview conflict")
+func openTargetCreatesBlockingConflict() async throws {
+  let fixture = try ActionFixture()
+  defer { fixture.cleanup() }
+  let trashMover = RecordingTrashMover()
+  let executor = ActionExecutor(
+    registry: try StorageActionAdapterRegistry(adapters: [
+      FixtureActionAdapter(providerID: .manual)
+    ]),
+    trashMover: trashMover,
+    auditStore: InMemoryActionAuditStore(),
+    openFileUsageChecker: FixedOpenFileUsageChecker(paths: [fixture.fileURL.path])
+  )
+
+  let plan = try await executor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+
+  #expect(plan.conflicts.map(\.reason) == [.modelInUse])
+  await #expect(throws: ActionExecutorError.planConflict) {
+    try await executor.execute(
+      plan,
+      currentInventory: [fixture.installation],
+      sources: [fixture.source],
+      confirmedIrreversible: false
+    )
+  }
+  #expect(await trashMover.movedURLs().isEmpty)
+}
+
+@Test("A target opened after preview is blocked during revalidation")
+func newlyOpenedTargetIsBlockedDuringRevalidation() async throws {
+  let fixture = try ActionFixture()
+  defer { fixture.cleanup() }
+  let checker = SequencedOpenFileUsageChecker(results: [[], [fixture.fileURL.path]])
+  let trashMover = RecordingTrashMover()
+  let executor = ActionExecutor(
+    registry: try StorageActionAdapterRegistry(adapters: [
+      FixtureActionAdapter(providerID: .manual)
+    ]),
+    trashMover: trashMover,
+    auditStore: InMemoryActionAuditStore(),
+    openFileUsageChecker: checker
+  )
+  let plan = try await executor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+
+  await #expect(throws: ActionExecutorError.targetInUse) {
+    try await executor.execute(
+      plan,
+      currentInventory: [fixture.installation],
+      sources: [fixture.source],
+      confirmedIrreversible: false
+    )
+  }
+  #expect(await trashMover.movedURLs().isEmpty)
+}
+
+@Test("The macOS usage checker identifies an open fixture file")
+func systemUsageCheckerIdentifiesOpenFile() async throws {
+  let fixture = try ActionFixture()
+  defer { fixture.cleanup() }
+  let handle = try FileHandle(forReadingFrom: fixture.fileURL)
+  defer { try? handle.close() }
+  let target = DeletionFileTarget(
+    url: fixture.fileURL,
+    sourceID: fixture.source.id,
+    sourceRootURL: fixture.source.rootURL,
+    identity: try DeletionTargetPolicy().captureIdentity(
+      for: fixture.fileURL,
+      under: fixture.source.rootURL
+    ),
+    allocatedByteCount: 1,
+    displayName: fixture.fileURL.lastPathComponent
+  )
+
+  let openPaths = await SystemOpenFileUsageChecker().openTargetPaths(in: [target])
+
+  #expect(openPaths == [fixture.fileURL.path])
+}
+
 @Test("Path containment rejects traversal candidates")
 func pathContainmentRejectsTraversalCandidates() throws {
   let rootURL = URL(filePath: "/tmp/wtm-action-root", directoryHint: .isDirectory)
@@ -291,7 +377,8 @@ private func makeExecutor(
   ActionExecutor(
     registry: try StorageActionAdapterRegistry(adapters: [adapter]),
     trashMover: trashMover,
-    auditStore: InMemoryActionAuditStore()
+    auditStore: InMemoryActionAuditStore(),
+    openFileUsageChecker: FixedOpenFileUsageChecker(paths: [])
   )
 }
 
@@ -439,6 +526,25 @@ private actor RecoverableTrashMover: TrashMoving {
       try FileManager.default.moveItem(at: move.trashed, to: move.original)
     }
     moves = []
+  }
+}
+
+private struct FixedOpenFileUsageChecker: OpenFileUsageChecking {
+  let paths: Set<String>
+
+  func openTargetPaths(in _: [DeletionFileTarget]) -> Set<String> { paths }
+}
+
+private actor SequencedOpenFileUsageChecker: OpenFileUsageChecking {
+  private var results: [Set<String>]
+
+  init(results: [Set<String>]) {
+    self.results = results
+  }
+
+  func openTargetPaths(in _: [DeletionFileTarget]) -> Set<String> {
+    guard !results.isEmpty else { return [] }
+    return results.removeFirst()
   }
 }
 

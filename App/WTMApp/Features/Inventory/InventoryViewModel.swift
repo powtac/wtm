@@ -719,6 +719,8 @@ enum DeletionUIError: String, Identifiable {
       self = .inventoryChanged
     case ActionExecutorError.sourceUnavailable:
       self = .sourceUnavailable
+    case ActionExecutorError.targetInUse:
+      self = .modelInUse
     case ActionExecutorError.targetRevalidationFailed,
       ActionExecutorError.providerRevalidationFailed:
       self = .revalidationFailed

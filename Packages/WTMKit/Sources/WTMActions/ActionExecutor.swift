@@ -12,6 +12,7 @@ public enum ActionExecutorError: Error, Equatable, Sendable {
   case irreversibleConfirmationRequired
   case inventoryChanged
   case sourceUnavailable(ScanSource.ID)
+  case targetInUse
   case targetRevalidationFailed
   case providerRevalidationFailed(ProviderID)
 }
@@ -22,6 +23,7 @@ public actor ActionExecutor {
   private let trashMover: any TrashMoving
   private let auditStore: any ActionAuditStoring
   private let targetPolicy: DeletionTargetPolicy
+  private let openFileUsageChecker: any OpenFileUsageChecking
   private let planLifetime: TimeInterval
   private let now: @Sendable () -> Date
   private var activePlan: DeletionPlan?
@@ -31,6 +33,7 @@ public actor ActionExecutor {
     trashMover: any TrashMoving,
     auditStore: any ActionAuditStoring,
     targetPolicy: DeletionTargetPolicy = DeletionTargetPolicy(),
+    openFileUsageChecker: any OpenFileUsageChecking = SystemOpenFileUsageChecker(),
     planLifetime: TimeInterval = 300,
     now: @escaping @Sendable () -> Date = { .now }
   ) {
@@ -38,6 +41,7 @@ public actor ActionExecutor {
     self.trashMover = trashMover
     self.auditStore = auditStore
     self.targetPolicy = targetPolicy
+    self.openFileUsageChecker = openFileUsageChecker
     self.planLifetime = max(planLifetime, 1)
     self.now = now
   }
@@ -68,13 +72,21 @@ public actor ActionExecutor {
     }
 
     let createdAt = now()
+    let operations = providerPlans.flatMap(\.operations)
+    let openPaths = await openFileUsageChecker.openTargetPaths(
+      in: operations.compactMap(\.fileTarget)
+    )
     let plan = DeletionPlan(
       id: UUID(),
       generationID: UUID(),
       createdAt: createdAt,
       expiresAt: createdAt.addingTimeInterval(planLifetime),
       providerPlans: providerPlans,
-      conflicts: Self.conflicts(in: providerPlans.flatMap(\.operations))
+      conflicts: Self.conflicts(in: operations)
+        + Self.openFileConflicts(
+          in: operations,
+          openPaths: openPaths
+        )
     )
     activePlan = plan
     return plan
@@ -205,6 +217,10 @@ public actor ActionExecutor {
     sources: [ScanSource]
   ) async throws {
     let sourcesByID = Dictionary(uniqueKeysWithValues: sources.map { ($0.id, $0) })
+    let openPaths = await openFileUsageChecker.openTargetPaths(
+      in: plan.operations.compactMap(\.fileTarget)
+    )
+    guard openPaths.isEmpty else { throw ActionExecutorError.targetInUse }
     for operation in plan.operations {
       guard case .trash(let target) = operation.payload else { continue }
       guard let source = sourcesByID[target.sourceID], source.isEnabled,
@@ -285,6 +301,23 @@ public actor ActionExecutor {
     return conflicts
   }
 
+  private static func openFileConflicts(
+    in operations: [DeletionOperation],
+    openPaths: Set<String>
+  ) -> [DeletionConflict] {
+    operations.compactMap { operation in
+      guard let target = operation.fileTarget,
+        openPaths.contains(target.url.standardizedFileURL.path)
+      else { return nil }
+      return DeletionConflict(
+        id: "modelInUse:\(operation.id)",
+        reason: .modelInUse,
+        operationIDs: [operation.id],
+        installationIDs: operation.installationIDs
+      )
+    }
+  }
+
   private static func targetsOverlap(
     _ left: DeletionOperationPayload,
     _ right: DeletionOperationPayload
@@ -300,5 +333,12 @@ public actor ActionExecutor {
     default:
       return false
     }
+  }
+}
+
+private extension DeletionOperation {
+  var fileTarget: DeletionFileTarget? {
+    guard case .trash(let target) = payload else { return nil }
+    return target
   }
 }
