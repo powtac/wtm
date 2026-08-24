@@ -10,6 +10,7 @@ struct RuntimePlanPreviewView: View {
     VStack(alignment: .leading, spacing: 16) {
       Label("runtime.plan.warning", systemImage: "memorychip")
         .font(.headline)
+        .accessibilityIdentifier("runtime-plan-title")
       Text("runtime.plan.warning-detail")
         .foregroundStyle(.secondary)
 
@@ -44,6 +45,8 @@ struct RuntimePlanPreviewView: View {
                   Text(item.element)
                     .font(.caption.monospaced())
                     .textSelection(.enabled)
+                    .accessibilityIdentifier("runtime-argument-\(item.offset)")
+                    .accessibilityLabel(item.element)
                 }
               }
             }

@@ -30,7 +30,8 @@ public struct LlamaCppToolConvention: Sendable {
 
   public func definition(
     executableURL: URL,
-    origin: ToolDefinitionOrigin
+    origin: ToolDefinitionOrigin,
+    isEnabled: Bool = false
   ) -> ToolDefinition {
     ToolDefinition(
       id: Self.definitionID,
@@ -38,7 +39,7 @@ public struct LlamaCppToolConvention: Sendable {
       role: .runtime,
       runtimeAdapterID: .llamaCpp,
       origin: .builtIn,
-      isEnabled: false,
+      isEnabled: isEnabled,
       executableURL: executableURL,
       arguments: [
         .literal("--model"), .placeholder(.modelPath),

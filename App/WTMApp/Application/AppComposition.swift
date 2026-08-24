@@ -9,6 +9,7 @@ import RuntimeLlamaCpp
 import RuntimeOllama
 import WTMActions
 import WTMAdapterContracts
+import WTMDomain
 import WTMInventory
 import WTMPersistence
 import WTMRuntime
@@ -71,7 +72,22 @@ enum AppComposition {
     let runtimeRegistry = try? RuntimeAdapterRegistry(adapters: runtimeAdapters)
     let runtimeBroker = runtimeRegistry.map { RuntimeBroker(registry: $0) }
     let llamaCppConvention = LlamaCppToolConvention()
-    let discoveredLlamaCppDefinition = llamaCppConvention.discoveredDefinition()
+    let discoveredLlamaCppDefinition: ToolDefinition?
+    #if DEBUG
+      if let testExecutable = ProcessInfo.processInfo.environment[
+        "WTM_UI_TEST_RUNTIME_EXECUTABLE"
+      ] {
+        discoveredLlamaCppDefinition = llamaCppConvention.definition(
+          executableURL: URL(filePath: testExecutable),
+          origin: .userCreated,
+          isEnabled: true
+        )
+      } else {
+        discoveredLlamaCppDefinition = llamaCppConvention.discoveredDefinition()
+      }
+    #else
+      discoveredLlamaCppDefinition = llamaCppConvention.discoveredDefinition()
+    #endif
     let runtimeToolTemplates = [
       RuntimeToolTemplate(
         runtimeAdapterID: .llamaCpp,

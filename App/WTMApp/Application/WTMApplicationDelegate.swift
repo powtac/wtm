@@ -8,7 +8,7 @@ final class WTMApplicationDelegate: NSObject, NSApplicationDelegate {
   private var terminationIsInProgress = false
 
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-    guard !terminationIsInProgress else { return .terminateLater }
+    guard !terminationIsInProgress else { return .terminateNow }
     terminationIsInProgress = true
     prepareForTermination {
       sender.reply(toApplicationShouldTerminate: true)

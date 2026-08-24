@@ -82,4 +82,48 @@ final class WTMAppUITests: XCTestCase {
       application.descendants(matching: .any)["Scan on Launch"].waitForExistence(timeout: 5)
     )
   }
+
+  @MainActor
+  func testRuntimePreviewShowsExecutableArgumentsAndOwnershipBeforeLaunch() throws {
+    let homeURL = FileManager.default.temporaryDirectory.appending(
+      path: "wtm-ui-runtime-\(UUID().uuidString)",
+      directoryHint: .isDirectory
+    )
+    let modelsURL = homeURL.appending(path: ".models", directoryHint: .isDirectory)
+    try FileManager.default.createDirectory(at: modelsURL, withIntermediateDirectories: true)
+    let modelURL = modelsURL.appending(path: "Runtime-Fixture-Q4_K_M.gguf")
+    try Data("fixture".utf8).write(to: modelURL)
+    defer { try? FileManager.default.removeItem(at: homeURL) }
+
+    let application = XCUIApplication()
+    application.launchEnvironment["WTM_SETTINGS_NAMESPACE"] =
+      "de.powtac.whatthemodel.ui-tests.runtime.\(UUID().uuidString)"
+    application.launchEnvironment["WTM_UI_TEST_HOME_DIRECTORY"] = homeURL.path
+    application.launchEnvironment["WTM_UI_TEST_RUNTIME_EXECUTABLE"] = "/usr/bin/true"
+    application.launch()
+    defer { application.terminate() }
+
+    let sourceToggle = application.descendants(matching: .any)["source-toggle-default:models"]
+    XCTAssertTrue(sourceToggle.waitForExistence(timeout: 5))
+    sourceToggle.click()
+    application.buttons["Start Scan"].click()
+
+    let modelName = application.staticTexts["Runtime-Fixture-Q4_K_M"].firstMatch
+    XCTAssertTrue(modelName.waitForExistence(timeout: 10))
+    modelName.click()
+
+    let runtimeTest = application.descendants(matching: .any)["runtime-test-llama-cpp"]
+    XCTAssertTrue(runtimeTest.waitForExistence(timeout: 5))
+    runtimeTest.click()
+
+    XCTAssertTrue(
+      application.descendants(matching: .any)["runtime-plan-title"].waitForExistence(timeout: 5)
+    )
+    XCTAssertTrue(application.staticTexts["/usr/bin/true"].exists)
+    let modelArgument = application.descendants(matching: .any)["runtime-argument-1"]
+    XCTAssertTrue(modelArgument.exists)
+    XCTAssertTrue(application.buttons["Start and Verify"].exists)
+    XCTAssertTrue(application.staticTexts["WTM can stop only this process instance."].exists)
+    application.buttons["Cancel"].click()
+  }
 }
