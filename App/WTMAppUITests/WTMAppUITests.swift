@@ -78,6 +78,9 @@ final class WTMAppUITests: XCTestCase {
     let settings = application.buttons["sidebar-settings-button"]
     XCTAssertTrue(settings.waitForExistence(timeout: 15))
     settings.click()
+    let generalSettings = application.buttons["General"].firstMatch
+    XCTAssertTrue(generalSettings.waitForExistence(timeout: 5))
+    generalSettings.click()
     XCTAssertTrue(
       application.descendants(matching: .any)["Scan on Launch"].waitForExistence(timeout: 5)
     )
