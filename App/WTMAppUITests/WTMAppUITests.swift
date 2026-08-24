@@ -53,6 +53,7 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(
       application.descendants(matching: .any)["inventory-filter-menu"].exists
     )
+    let scanControlY = application.descendants(matching: .any)["inventory-scan-button"].frame.minY
 
     let oldSection = application.staticTexts["sidebar-section-old"]
     XCTAssertTrue(oldSection.waitForExistence(timeout: 15))
@@ -61,6 +62,18 @@ final class WTMAppUITests: XCTestCase {
       application.staticTexts["No Models Match This View"].waitForExistence(timeout: 5)
     )
     application.buttons["Show All Models"].click()
+    XCTAssertTrue(modelName.waitForExistence(timeout: 5))
+
+    let issuesSection = application.staticTexts["sidebar-section-issues"]
+    XCTAssertTrue(issuesSection.waitForExistence(timeout: 5))
+    issuesSection.click()
+    XCTAssertTrue(application.staticTexts["No Issues"].waitForExistence(timeout: 5))
+    XCTAssertEqual(
+      application.descendants(matching: .any)["inventory-scan-button"].frame.minY,
+      scanControlY,
+      accuracy: 2
+    )
+    application.staticTexts["sidebar-section-all"].click()
     XCTAssertTrue(modelName.waitForExistence(timeout: 5))
 
     modelName.click()

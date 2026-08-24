@@ -287,6 +287,7 @@ struct InventoryRootView: View {
         systemImage: "checkmark.shield",
         description: Text("issues.empty.description")
       )
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
     } else {
       List(model.issues) { issue in
         VStack(alignment: .leading, spacing: 4) {

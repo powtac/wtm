@@ -85,6 +85,8 @@ first public release is tagged.
 
 ### Fixed
 
+- Empty Issues content now occupies the same content region as populated lists, keeping
+  inventory controls at a stable vertical position when switching sidebar sections.
 - Hugging Face model-card links for reviewed shorthand cache directories now restore the
   repository owner; unknown ownerless cache names no longer produce broken confirmed URLs.
 - Scan-generation UUID gating prevents cancelled scan tasks and late events from mutating or
