@@ -163,9 +163,10 @@ struct InventoryRootView: View {
           totalByteCount: model.storageBreakdown.totalByteCount,
           sourceName: { sourceNames[$0] ?? $0 }
         )
+        let sortedRows = rows.sorted(using: sortOrder)
 
         Table(
-          rows.sorted(using: sortOrder),
+          sortedRows,
           selection: $model.selectedInstallationIDs,
           sortOrder: $sortOrder,
           columnCustomization: $columnCustomization
@@ -274,6 +275,34 @@ struct InventoryRootView: View {
             max: .infinity
           )
           .customizationID("path")
+        }
+        .contextMenu(forSelectionType: ModelInstallation.ID.self) { selectedIDs in
+          if !selectedIDs.isEmpty {
+            Menu("inventory.copy.menu", systemImage: "doc.on.doc") {
+              Button("inventory.copy.model-name") {
+                copyInventoryRows(
+                  sortedRows,
+                  selectedIDs: selectedIDs,
+                  representation: .modelName
+                )
+              }
+              Button("inventory.copy.provider-model-name") {
+                copyInventoryRows(
+                  sortedRows,
+                  selectedIDs: selectedIDs,
+                  representation: .providerAndModelName
+                )
+              }
+              Divider()
+              Button("inventory.copy.absolute-path") {
+                copyInventoryRows(
+                  sortedRows,
+                  selectedIDs: selectedIDs,
+                  representation: .absoluteModelPath
+                )
+              }
+            }
+          }
         }
       }
     }
@@ -467,6 +496,19 @@ struct InventoryRootView: View {
 
   private func sourceName(for sourceID: ScanSource.ID) -> String {
     model.sources.first(where: { $0.id == sourceID })?.displayName ?? sourceID
+  }
+
+  private func copyInventoryRows(
+    _ rows: [InventoryTableRow],
+    selectedIDs: Set<ModelInstallation.ID>,
+    representation: InventoryCopyRepresentation
+  ) {
+    let installations = rows.compactMap { row in
+      selectedIDs.contains(row.id) ? row.installation : nil
+    }
+    writeInventoryCopyTextToPasteboard(
+      inventoryCopyText(for: installations, representation: representation)
+    )
   }
 
   private var deletionPlanIsPresented: Binding<Bool> {

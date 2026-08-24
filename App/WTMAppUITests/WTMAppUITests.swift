@@ -1,3 +1,4 @@
+import AppKit
 import XCTest
 
 final class WTMAppUITests: XCTestCase {
@@ -47,6 +48,17 @@ final class WTMAppUITests: XCTestCase {
 
     let modelName = application.staticTexts["Fixture-Q4_K_M"].firstMatch
     XCTAssertTrue(modelName.waitForExistence(timeout: 10))
+    NSPasteboard.general.clearContents()
+    modelName.rightClick()
+    let copyMenu = application.menuItems["Copy"].firstMatch
+    XCTAssertTrue(copyMenu.waitForExistence(timeout: 5))
+    copyMenu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).hover()
+    XCTAssertTrue(application.menuItems["Model Name"].waitForExistence(timeout: 5))
+    let providerModelCopy = application.menuItems["Provider / Model Name"]
+    XCTAssertTrue(providerModelCopy.waitForExistence(timeout: 5))
+    XCTAssertTrue(application.menuItems["Absolute Model Path"].exists)
+    providerModelCopy.click()
+    XCTAssertEqual(NSPasteboard.general.string(forType: .string), "manual/Fixture-Q4_K_M")
     XCTAssertTrue(
       application.descendants(matching: .any)["inventory-scan-button"].exists
     )

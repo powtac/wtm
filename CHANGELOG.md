@@ -64,6 +64,8 @@ first public release is tagged.
 - Phase 3 acceptance evidence for version `0.3.0 (3)`, including 83 package tests, 19 app
   tests, three UI tests, Developer ID signing, hardened runtime, Apple notarization without
   issues, stapling, Gatekeeper, and controlled launch smoke.
+- A native model-table context menu with newline-safe multi-selection copying for the model
+  name, confirmed provider model reference, or standardized absolute model path.
 
 ### Changed
 

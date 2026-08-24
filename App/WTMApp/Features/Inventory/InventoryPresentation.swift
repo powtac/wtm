@@ -101,6 +101,12 @@ enum StorageDisplayMode: String, CaseIterable {
   case share
 }
 
+enum InventoryCopyRepresentation: CaseIterable {
+  case modelName
+  case providerAndModelName
+  case absoluteModelPath
+}
+
 struct InventoryTableRow: Identifiable {
   let installation: ModelInstallation
   let displayedByteCount: Int64
@@ -196,6 +202,30 @@ func inventoryTableRows(
       reclaimableByteCount: breakdown.exclusiveByteCount(for: installation.id)
     )
   }
+}
+
+func inventoryCopyText(
+  for installations: [ModelInstallation],
+  representation: InventoryCopyRepresentation
+) -> String {
+  installations.map { installation in
+    switch representation {
+    case .modelName:
+      installation.identity.displayName
+    case .providerAndModelName:
+      (installation.modelCard?.confidence == .confirmed ? installation.identity.family : nil)
+        ?? "\(installation.providerID.rawValue)/\(installation.identity.displayName)"
+    case .absoluteModelPath:
+      installation.rootURL.standardizedFileURL.path
+    }
+  }
+  .joined(separator: "\n")
+}
+
+func writeInventoryCopyTextToPasteboard(_ text: String) {
+  guard !text.isEmpty else { return }
+  NSPasteboard.general.clearContents()
+  NSPasteboard.general.setString(text, forType: .string)
 }
 
 func formatAndQuantizationText(_ installation: ModelInstallation) -> String {

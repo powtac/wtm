@@ -1230,6 +1230,46 @@
         }
       }
     },
+    "inventory.copy.absolute-path" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absolute Model Path"
+          }
+        }
+      }
+    },
+    "inventory.copy.menu" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy"
+          }
+        }
+      }
+    },
+    "inventory.copy.model-name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model Name"
+          }
+        }
+      }
+    },
+    "inventory.copy.provider-model-name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider / Model Name"
+          }
+        }
+      }
+    },
     "inventory.empty.description" : {
       "localizations" : {
         "en" : {

@@ -142,6 +142,64 @@ func inventoryRowsSupportColumnSorting() {
   #expect(installations.sorted(using: descending).map(\.identity.displayName) == ["Zeta", "Alpha"])
 }
 
+@Test("Inventory copy representations preserve model identity and absolute paths")
+func inventoryCopyRepresentations() {
+  let huggingFaceIdentity = ModelIdentity(
+    id: "hf:openai/gpt-oss-20b",
+    displayName: "gpt-oss-20b",
+    family: "openai/gpt-oss-20b"
+  )
+  let manualIdentity = ModelIdentity(id: "manual:local-model", displayName: "Local Model")
+  let installations = [
+    ModelInstallation(
+      id: "hf",
+      identity: huggingFaceIdentity,
+      variant: ModelVariant(
+        id: "hf:variant",
+        identityID: huggingFaceIdentity.id,
+        format: .safetensors
+      ),
+      sourceID: "hugging-face",
+      providerID: .huggingFace,
+      rootURL: URL(filePath: "/tmp/hugging-face/gpt-oss-20b"),
+      state: .stored,
+      artifacts: [],
+      modelCard: ModelCardLink(
+        url: URL(string: "https://huggingface.co/openai/gpt-oss-20b")!,
+        confidence: .confirmed,
+        evidence: "fixture"
+      )
+    ),
+    ModelInstallation(
+      id: "manual",
+      identity: manualIdentity,
+      variant: ModelVariant(
+        id: "manual:variant",
+        identityID: manualIdentity.id,
+        format: .gguf
+      ),
+      sourceID: "manual",
+      providerID: .manual,
+      rootURL: URL(filePath: "/tmp/models/../models/Local Model.gguf"),
+      state: .stored,
+      artifacts: []
+    ),
+  ]
+
+  #expect(
+    inventoryCopyText(for: installations, representation: .modelName)
+      == "gpt-oss-20b\nLocal Model"
+  )
+  #expect(
+    inventoryCopyText(for: installations, representation: .providerAndModelName)
+      == "openai/gpt-oss-20b\nmanual/Local Model"
+  )
+  #expect(
+    inventoryCopyText(for: installations, representation: .absoluteModelPath)
+      == "/tmp/hugging-face/gpt-oss-20b\n/tmp/models/Local Model.gguf"
+  )
+}
+
 @Test("Inventory column widths use cell content and ignore headers")
 func inventoryColumnWidthsUseCellContent() {
   let names = ["M", "A substantially wider model"]
