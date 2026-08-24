@@ -3,15 +3,19 @@ import SwiftUI
 
 @main
 struct WTMApp: App {
+  @Environment(\.openWindow) private var openWindow
   @NSApplicationDelegateAdaptor(WTMApplicationDelegate.self) private var applicationDelegate
   @State private var model = AppComposition.makeInventoryViewModel()
-  @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
 
   var body: some Scene {
     WindowGroup(id: "inventory") {
       InventoryRootView(model: model)
         .frame(minWidth: 920, minHeight: 600)
         .task {
+          applicationDelegate.configureMenuBar(model: model) {
+            openWindow(id: "inventory")
+            NSApplication.shared.activate(ignoringOtherApps: true)
+          }
           applicationDelegate.prepareForTermination = { completion in
             Task {
               await model.stopOwnedRuntimeSessionsForTermination()
@@ -33,27 +37,9 @@ struct WTMApp: App {
     }
     .defaultSize(width: 1_180, height: 760)
 
-    MenuBarExtra(
-      "app.name",
-      systemImage: "externaldrive.badge.checkmark",
-      isInserted: menuBarInsertion
-    ) {
-      MenuBarInventoryView(model: model)
-    }
-    .menuBarExtraStyle(.window)
-
     Settings {
       SettingsRootView(model: model)
         .frame(width: 620, height: 440)
     }
-  }
-
-  private var menuBarInsertion: Binding<Bool> {
-    Binding(
-      get: {
-        ProcessInfo.processInfo.environment["XCTestBundlePath"] == nil && isMenuBarEnabled
-      },
-      set: { isMenuBarEnabled = $0 }
-    )
   }
 }

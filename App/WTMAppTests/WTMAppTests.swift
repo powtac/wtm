@@ -300,6 +300,40 @@ func modelAgesUseWholeUnits() {
   )
 }
 
+@Test("Menu bar summary uses the same ephemeral inventory facts")
+func menuBarSummaryUsesInventoryFacts() {
+  let now = Date(timeIntervalSince1970: 20_000_000)
+  let summary = menuBarInventorySummary(
+    installations: [
+      ageFixture(timestamp: now.addingTimeInterval(-(31 * 86_400))),
+      ageFixture(timestamp: now.addingTimeInterval(-3_600), state: .incomplete),
+    ],
+    totalByteCount: 12_345,
+    issueCount: 2,
+    runningModelCount: 1,
+    sources: [
+      ScanSource(
+        id: "offline",
+        displayName: "Offline",
+        providerID: .manual,
+        rootURL: URL(filePath: "/Volumes/Offline"),
+        accessState: .offline,
+        isEnabled: true
+      )
+    ],
+    oldModelThresholdDays: 30,
+    now: now
+  )
+
+  #expect(summary.modelCount == 2)
+  #expect(summary.totalByteCount == 12_345)
+  #expect(summary.oldModelCount == 1)
+  #expect(summary.incompleteModelCount == 1)
+  #expect(summary.issueCount == 2)
+  #expect(summary.runningModelCount == 1)
+  #expect(summary.offlineSourceCount == 1)
+}
+
 @Test("Model card links require HTTPS and a host")
 func modelCardsRequireHTTPS() {
   let https = ModelCardLink(
@@ -871,7 +905,10 @@ private actor RemovingTrashMover: TrashMoving {
   }
 }
 
-private func ageFixture(timestamp: Date?) -> ModelInstallation {
+private func ageFixture(
+  timestamp: Date?,
+  state: InstallationState = .stored
+) -> ModelInstallation {
   let identity = ModelIdentity(id: "age", displayName: "Age Model")
   let variant = ModelVariant(id: "age:variant", identityID: identity.id, format: .gguf)
   return ModelInstallation(
@@ -881,7 +918,7 @@ private func ageFixture(timestamp: Date?) -> ModelInstallation {
     sourceID: "source",
     providerID: .manual,
     rootURL: URL(filePath: "/tmp/age-model"),
-    state: .stored,
+    state: state,
     artifacts: [],
     timestamps: timestamp.map {
       [ObservedTimestamp(value: $0, kind: .fileCreation, confidence: .derived)]

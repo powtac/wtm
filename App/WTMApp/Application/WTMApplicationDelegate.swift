@@ -6,6 +6,12 @@ final class WTMApplicationDelegate: NSObject, NSApplicationDelegate {
     completion()
   }
   private var terminationIsInProgress = false
+  private var menuBarController: MacMenuBarController?
+
+  func configureMenuBar(model: InventoryViewModel, openInventory: @escaping @MainActor () -> Void) {
+    guard menuBarController == nil else { return }
+    menuBarController = MacMenuBarController(model: model, openInventory: openInventory)
+  }
 
   func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
     guard !terminationIsInProgress else { return .terminateNow }
