@@ -166,6 +166,24 @@ func llamaCppReadinessSeparatesMemoryEstimate() async throws {
   #expect(readiness.estimatedMemory?.basis.contains("estimate only") == true)
 }
 
+@Test("llama.cpp readiness rejects an unsupported architecture")
+func llamaCppReadinessChecksArchitecture() async throws {
+  let (definition, approval) = try enabledLlamaDefinition()
+  let adapter = LlamaCppRuntimeAdapter(
+    configuredDefinition: definition,
+    configuredApproval: approval,
+    transport: LlamaCppTransportStub()
+  )
+
+  let readiness = await adapter.readiness(
+    for: ggufInstallation(),
+    environment: RuntimeEnvironment(architecture: "x86_64")
+  )
+
+  #expect(readiness.compatibility.value == .unsupportedArchitecture)
+  #expect(readiness.validation.value == .blocked)
+}
+
 @Test("llama.cpp inference result requires a completed model request")
 func llamaCppInferenceUsesMinimalCompletion() async {
   let transport = LlamaCppTransportStub(response: "O")

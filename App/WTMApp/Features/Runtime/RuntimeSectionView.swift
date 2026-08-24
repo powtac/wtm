@@ -67,12 +67,23 @@ struct RuntimeSectionView: View {
         Button("runtime.check.action") {
           model.checkRuntimeReadiness(runtimeID, for: installation)
         }
-        Button("runtime.test.action") {
-          model.prepareRuntimeTest(runtimeID, for: installation)
+        .accessibilityIdentifier("runtime-check-\(runtimeID.rawValue)")
+        if let readiness = model.readiness(for: installation, runtimeID: runtimeID) {
+          if readiness.compatibility.value == .compatible {
+            Button("runtime.test.action") {
+              model.prepareRuntimeTest(runtimeID, for: installation)
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
+            .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
+          } else {
+            Button("runtime.try-anyway.action") {
+              model.prepareRuntimeTest(runtimeID, for: installation)
+            }
+            .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
+            .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
+          }
         }
-        .buttonStyle(.borderedProminent)
-        .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
-        .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
       }
 
       if let session = model.latestRuntimeSession(for: installation, runtimeID: runtimeID) {

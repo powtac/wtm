@@ -96,6 +96,20 @@ func ollamaPlanNeverClaimsProcessOwnership() async throws {
   #expect(identifier == "tiny:latest")
 }
 
+@Test("Ollama readiness rejects an unsupported architecture before API access")
+func ollamaReadinessChecksArchitecture() async {
+  let transport = OllamaRuntimeTransportStub(available: ["tiny:latest"], running: [])
+  let adapter = OllamaRuntimeAdapter(endpoint: ollamaEndpoint(), transport: transport)
+
+  let readiness = await adapter.readiness(
+    for: ollamaInstallation(),
+    environment: RuntimeEnvironment(architecture: "x86_64")
+  )
+
+  #expect(readiness.compatibility.value == .unsupportedArchitecture)
+  #expect(readiness.validation.value == .blocked)
+}
+
 @Test("Ollama inference uses the manifest-derived provider model name")
 func ollamaInferenceUsesProviderIdentity() async {
   let transport = OllamaRuntimeTransportStub(available: ["tiny:latest"], running: [])

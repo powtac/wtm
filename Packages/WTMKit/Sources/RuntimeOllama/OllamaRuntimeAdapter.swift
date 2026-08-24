@@ -27,16 +27,22 @@ public struct OllamaRuntimeAdapter: RuntimeAdapter {
   ) async -> RuntimeReadiness {
     let checkedAt = Date.now
     let integrityValue = integrity(for: installation)
-    var compatibilityValue: RuntimeCompatibility =
-      supportedFormats.contains(
-        installation.variant.format) ? .compatible : .unsupportedFormat
-    var validationValue: ModelValidation =
-      compatibilityValue == .compatible
-      ? .staticCompatible : .blocked
+    var compatibilityValue: RuntimeCompatibility
+    var validationValue: ModelValidation
     var runtimeValue = RuntimeState.stopped
     var blockers: [String] = []
 
-    if compatibilityValue == .compatible {
+    if !supportedFormats.contains(installation.variant.format) {
+      compatibilityValue = .unsupportedFormat
+      validationValue = .blocked
+      blockers.append("Ollama runs only Ollama-managed model installations.")
+    } else if !supportsArchitecture(environment.architecture) {
+      compatibilityValue = .unsupportedArchitecture
+      validationValue = .blocked
+      blockers.append("Ollama requires Apple Silicon in this WTM release.")
+    } else {
+      compatibilityValue = .compatible
+      validationValue = .staticCompatible
       do {
         _ = try await transport.availableModelNames()
         let runningNames = try await transport.runningModelNames()
@@ -49,8 +55,6 @@ public struct OllamaRuntimeAdapter: RuntimeAdapter {
         validationValue = .blocked
         blockers.append("Ollama's local API is not reachable.")
       }
-    } else {
-      blockers.append("Ollama runs only Ollama-managed model installations.")
     }
 
     return RuntimeReadiness(
@@ -76,6 +80,10 @@ public struct OllamaRuntimeAdapter: RuntimeAdapter {
       estimatedMemory: memoryEstimate(for: installation),
       blockers: blockers
     )
+  }
+
+  private func supportsArchitecture(_ architecture: String) -> Bool {
+    architecture == "arm64" || architecture == "arm64e"
   }
 
   public func makeTestPlan(

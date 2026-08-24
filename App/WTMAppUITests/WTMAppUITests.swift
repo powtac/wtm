@@ -112,6 +112,9 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(modelName.waitForExistence(timeout: 10))
     modelName.click()
 
+    let readinessCheck = application.descendants(matching: .any)["runtime-check-llama-cpp"]
+    XCTAssertTrue(readinessCheck.waitForExistence(timeout: 5))
+    readinessCheck.click()
     let runtimeTest = application.descendants(matching: .any)["runtime-test-llama-cpp"]
     XCTAssertTrue(runtimeTest.waitForExistence(timeout: 5))
     runtimeTest.click()

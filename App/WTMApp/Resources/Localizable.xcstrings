@@ -1893,6 +1893,16 @@
         }
       }
     },
+    "runtime.try-anyway.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try Anyway"
+          }
+        }
+      }
+    },
     "runtime.unsupported" : {
       "localizations" : {
         "en" : {

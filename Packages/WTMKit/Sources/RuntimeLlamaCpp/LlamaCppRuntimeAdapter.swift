@@ -44,6 +44,10 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       compatibilityValue = .unsupportedFormat
       validationValue = .blocked
       blockers.append("llama.cpp requires a GGUF model.")
+    } else if !supportsArchitecture(environment.architecture) {
+      compatibilityValue = .unsupportedArchitecture
+      validationValue = .blocked
+      blockers.append("llama.cpp requires Apple Silicon in this WTM release.")
     } else if let definition = environment.toolDefinition ?? configuredDefinition {
       do {
         _ = try invocationBuilder.inspect(definition, checkedAt: checkedAt)
@@ -94,6 +98,10 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       estimatedMemory: estimate,
       blockers: blockers
     )
+  }
+
+  private func supportsArchitecture(_ architecture: String) -> Bool {
+    architecture == "arm64" || architecture == "arm64e"
   }
 
   public func makeTestPlan(
