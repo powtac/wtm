@@ -11,3 +11,4 @@ first public release is tagged.
 - Read-only domain, adapter registry, scanner coordination, and SQLite schema.
 - Initial Ollama, Hugging Face, and manual-folder inventory adapters.
 - Synthetic adapter fixtures, contract tests, app test plan, and CI entry points.
+- Temporary macOS application icon asset and editable master artwork.

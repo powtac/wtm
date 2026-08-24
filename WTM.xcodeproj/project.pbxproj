@@ -330,8 +330,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000C /* Debug.xcconfig */;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				ENABLE_TESTABILITY = YES;
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
@@ -342,8 +340,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000D /* Release.xcconfig */;
 			buildSettings = {
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				DEVELOPMENT_TEAM = YOUR_TEAM_ID;
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
 			};

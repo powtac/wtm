@@ -14,6 +14,7 @@ INFOPLIST_KEY_NSDesktopFolderUsageDescription = WTM reads model files in Desktop
 INFOPLIST_KEY_NSDocumentsFolderUsageDescription = WTM reads model files in Documents folders you explicitly enable to calculate local model storage.
 INFOPLIST_KEY_NSDownloadsFolderUsageDescription = WTM reads model files in Downloads folders you explicitly enable to calculate local model storage.
 INFOPLIST_KEY_NSRemovableVolumesUsageDescription = WTM reads model files on volumes you explicitly enable to calculate local model storage.
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
 ENABLE_APP_SANDBOX = NO
 ENABLE_HARDENED_RUNTIME = YES
 CODE_SIGN_STYLE = Automatic
