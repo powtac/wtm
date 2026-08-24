@@ -19,12 +19,19 @@ identity. Immediately before execution, the executor revalidates plan generation
 source consent, path containment, filesystem identity, shared-reference state, provider
 state, and unresolved batch conflicts.
 
+Filesystem plans also inspect local macOS process file descriptors. Positively identified
+open targets become blocking conflicts and are checked again before mutation. macOS can
+deny metadata for protected or other-user processes, so absence of a match is explicitly
+best effort rather than proof that no external process uses a file. Ollama's provider
+preflight remains authoritative for loaded models it reports.
+
 Manual files and provider cache files use the macOS Trash through one injected system
 service. Raw permanent filesystem deletion is forbidden. Hugging Face plans operate on
 revisions, refs, and blobs proven unreferenced by remaining snapshots; they never delete a
-blob merely because one model references it. Ollama deletion uses its loopback API, is
-classified as irreversible, is blocked while the model is reported loaded, and requires a
-separate explicit confirmation.
+blob merely because one model references it. Snapshot and ref operations execute before
+blob operations so a partial failure retains every later shared blob. Ollama deletion uses
+its loopback API, is classified as irreversible, is blocked while the model is reported
+loaded, and requires a separate explicit confirmation.
 
 Batch plans are built provider-wise and combined into a conflict graph before preview.
 Execution is serialized. Partial failure stops subsequent operations and produces a
@@ -38,7 +45,7 @@ contents, and the user can clear it.
 - Trash-backed actions are recoverable through Finder; provider API deletion is not presented
   as recoverable.
 - Expected reclaimable storage remains a conservative estimate, never proof of free-space
-  change.
+  change. Hardlinks and shared Ollama blobs are attributed once per batch.
 - Provider action targets are linked in Phase 2, while process, runtime, client, download,
   privileged-helper, and raw-delete capabilities remain absent.
 - Tests use injected mutation services and isolated temporary directories; they never target

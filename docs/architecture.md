@@ -48,6 +48,11 @@ The store never contains installations, artifacts, or historical scan results.
 - Manual and Hugging Face filesystem actions use the macOS Trash through one injected
   service. Raw permanent filesystem deletion is absent.
 - Ollama deletion uses only its loopback API and requires irreversible confirmation.
+- `SystemOpenFileUsageChecker` uses local macOS process metadata without spawning a helper
+  or shell. Positive file-use matches block planning and are checked again immediately
+  before execution; access-denied processes remain an explicit best-effort limitation.
+- Hugging Face operations are fail-safe ordered: snapshots, then refs, then unreferenced
+  blobs. Batch reclaim estimates attribute each physical file once.
 - Runtime, client, process-launch, download, and privileged-helper targets remain absent.
 - Scan roots require explicit user enablement.
 - Directory traversal resolves symlinks and rejects destinations outside the configured root.

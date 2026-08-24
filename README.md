@@ -9,8 +9,8 @@ What The Model is a native macOS inventory for locally stored LLMs. It explains 
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-The Phase 1 read-only beta cannot delete files, change model configuration, or start
-external processes.
+The Phase 2 beta adds reviewed cleanup through short-lived, revalidated deletion plans.
+It does not change model configuration, start external processes, or download models.
 
 ## Current scope
 
@@ -20,6 +20,11 @@ external processes.
 - Explicit per-source consent before scanning
 - Search, provider/state filtering, local file details, and Finder reveal
 - A normalized in-memory inventory rebuilt from provider files on every launch
+- Multi-model cleanup preview with retained dependencies, conflicts, and conservative
+  reclaim estimates
+- macOS Trash for manual and Hugging Face files; separately confirmed Ollama API deletion
+- Open-file and loaded-model blocking, targeted post-action rescans, and a redacted local
+  audit that the user can clear
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The

@@ -46,8 +46,9 @@ recognition access are also explicitly absent.
 | A shared blob is deleted while still referenced | Provider action adapters build a fresh reference graph and retain every target with a remaining reference |
 | A stale preview is replayed | Plans are short-lived, bound to one executor generation, and consumed once |
 | Two selected models claim overlapping targets | Build and display a batch conflict graph; unresolved conflicts block execution |
-| A running model is removed | Provider preflight blocks known loaded or open models; WTM never claims unknown external usage is stopped |
+| A running model is removed | Ollama `/api/ps` blocks loaded models; local macOS process metadata blocks positively identified open file targets at preview and revalidation; access-denied processes remain explicitly unverified |
 | A provider partially completes deletion | Stop subsequent operations, report each result, append a redacted audit entry, and rescan affected sources |
+| A partial Hugging Face action removes a still-needed blob | Execute selected snapshots and refs before blobs; stop on first failure so no later shared blob is touched |
 | A reversible action is presented as permanent, or vice versa | Every operation carries explicit reversibility; irreversible provider actions require separate confirmation |
 | Audit data leaks private paths or credentials | Persist only time, adapter, action kind, counts, and outcome; never persist paths, names, payloads, or file contents |
 | Action code becomes a general mutation surface | Compile-time targets, immutable contracts, central Trash service, and architecture checks reject raw delete and shell APIs |

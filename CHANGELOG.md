@@ -39,6 +39,13 @@ first public release is tagged.
   scope, stale scan-generation rejection, and repository-alias governance.
 - CI validation for unique ADR IDs, required decision-record sections, and Requirements
   traceability.
+- Reviewed single- and multi-model cleanup UI with complete operation, dependency,
+  conflict, reversibility, and conservative reclaim previews.
+- Centralized macOS Trash actions for manual and Hugging Face storage, separately confirmed
+  irreversible Ollama deletion through the loopback API, and targeted verification rescans.
+- Bounded, paths-free local cleanup audit with explicit user clearing in Settings.
+- Best-effort macOS open-file detection, Ollama loaded-model blocking, read-only-volume
+  rejection, and native cleanup-preview UI coverage on isolated fixtures.
 
 ### Changed
 
@@ -48,6 +55,8 @@ first public release is tagged.
   revalidation, conflict detection, centralized Trash dispatch, and redacted local audit.
 - Added compiled cleanup adapters for manual files, Hugging Face revision/reference graphs,
   and irreversible Ollama loopback API deletion with loaded-model blocking.
+- Reclaim estimates now deduplicate hardlinks and shared Ollama blobs; Hugging Face shared
+  blobs execute last so partial failures cannot remove them before selected references.
 
 ### Fixed
 
