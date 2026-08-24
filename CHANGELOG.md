@@ -7,6 +7,8 @@ first public release is tagged.
 
 ### Added
 
+- A fixed `Settings…` footer below the collapsible inventory sidebar, backed by the native
+  macOS Settings scene and covered by UI automation.
 - Native macOS application scaffold for bundle `de.powtac.whatthemodel`.
 - Read-only domain, adapter registry, and ephemeral scanner coordination.
 - Initial Ollama, Hugging Face, and manual-folder inventory adapters.

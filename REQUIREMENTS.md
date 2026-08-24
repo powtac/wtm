@@ -3,7 +3,7 @@
 | Feld | Wert |
 |---|---|
 | Status | **Accepted Baseline** |
-| Version | 0.2.1 |
+| Version | 0.2.2 |
 | Datum | 2026-08-24 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
@@ -505,6 +505,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-EXT-012 (P1):** Settings SHOULD durchsuchbar sein und pro Eintrag `Test`, `Reveal in Finder`, `Reset` und `Diagnostics` anbieten, soweit anwendbar.
 - **FR-EXT-013 (P0):** Jede erweiterbare Integrationsliste MUST ein kleines Info-Element mit dem englischen Linktext `How to extend this list` anbieten. Es öffnet den passenden Abschnitt der öffentlichen Adapterdokumentation; eine kurze lokale Erklärung bleibt ohne Netzwerk verfügbar.
 - **FR-EXT-014 (P0):** Die Hilfe MUST klar unterscheiden: Datenkonfiguration in Settings, Datenmanifest per Import, neuer kompilierter Adapter per GitHub Pull Request und nicht unterstützte dynamische Code-Plugins.
+- **FR-EXT-015 (P0):** Die ein-/ausblendbare Hauptseitenleiste MUST `Settings…` als festen, visuell getrennten Footer unterhalb der scrollbaren Inventar-Scope-Liste zeigen. Diese Aktion öffnet das native Settings-Fenster, verändert weder Sidebar-Auswahl noch Inventarfilter und bleibt funktional gleichwertig zum App-Menübefehl sowie `Command-,`.
 
 ## 10. Einheitliches Zustandsmodell
 
@@ -528,6 +529,7 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 ### 11.1 Fenster und Navigation
 
 - Native `NavigationSplitView`-Struktur: Sidebar, sortierbare Tabelle, Inspector/Detail.
+- Die scrollbare Sidebar-Liste enthält ausschließlich Inventar-Scope-Auswahlen. `Settings…` liegt als davon getrennter Footer am unteren Rand und wird gemeinsam mit der Sidebar ein-/ausgeblendet.
 - Der Kopf des Inventar-Listenbereichs enthält die prominente Scan-/Rescan-Aktion und Filter; Suche ist an denselben Collection-Scope gebunden. Modellbezogene und destruktive Aktionen liegen sichtbar getrennt im rechten Detailbereich beziehungsweise erlaubten Zeilenkontexten.
 - Ein aktiver Scan erhält neben der Listenaktion einen nativen Fortschrittsindikator, `Scanning`, die kompakte aktuelle Scan-Wurzel und einen separat beschrifteten Abbruchbutton. Aktivität wird nie ausschließlich durch Rotation, Farbe oder Animation vermittelt.
 - Alle Aktionen zusätzlich über Menüleiste und sinnvolle Tastaturkürzel.
@@ -579,7 +581,7 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 
 ### 11.6 Settings
 
-- Settings öffnen nativ über den App-Menübefehl `Settings…` und `Command-,` in einem eigenen Fenster.
+- Settings öffnen nativ über den festen Sidebar-Footer, den App-Menübefehl `Settings…` oder `Command-,` in demselben eigenen Fenster.
 - Die Top-Level-Panes bleiben auf `General`, `Sources`, `Integrations`, `Security` und `Advanced` begrenzt; der zuletzt verwendete Pane wird wiederhergestellt.
 - Häufige, taskbezogene Aktionen wie Scan, Reveal, Test, Start, Stop oder Delete bleiben im Hauptfenster beziehungsweise Inspector und werden nicht in Settings versteckt.
 - `How to extend this list` ist eine sekundäre Infoaktion mit Textlabel und Accessibility-Label, kein unbeschriftetes, schwer auffindbares Symbol.
@@ -742,6 +744,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - UI-Tests für Scan, Filter, Finder, Startvorschau, Löschvorschau und Tastaturnavigation.
 - UI-Tests für Ablehnen, späteres Erlauben, falschen Ordner, Widerruf und erneute Freigabe.
 - UI- und Integrationstests für ersten Start ohne vorzeitigen Scan, unmittelbaren Scan nach `Start Scan`, automatischen Folgestart-Scan und deaktiviertes `Scan on Launch`.
+- UI-Test für den festen Settings-Footer außerhalb der Sidebar-Scope-Auswahl und das Öffnen des nativen Settings-Fensters.
 - Tests für deterministische Standardquellen-Reihenfolge und die Invariante, dass `~`, `~/.cache`, `~/Library` und andere breite Elternpfade nicht als automatische Scanwurzeln verwendet werden.
 - Tests für überlappende Provider-/manuelle Quellen: kanonischer Providerfund statt generischem `local`-Duplikat, aber Erhalt tatsächlich getrennter Installationspfade.
 - Tests für Scan-Generationen: Abbruch, sofortiger Rescan und verspätete Batches einer älteren Generation dürfen den aktiven Snapshot, Auswahl, Zähler und Abschlussstatus nicht verändern.
@@ -774,6 +777,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Null Treffer durch Sidebar, Suche und strukturierte Filter zeigen `No Models Match This View`; `Show All Models` stellt das vorhandene Inventar ohne erneuten Scan wieder dar.
 - Aktiver Scan mit Text, Fortschrittsindikator, wechselnden Quellen, gekürzten Home-/Volume-Pfaden, VoiceOver-Ausgabe und funktionierendem `Cancel Scan`.
 - Settings-Erweiterungen, Reset auf Defaults, ungültige/neue Schemas und Export ohne persönliche Pfade.
+- Settings-Aufruf über Sidebar-Footer, App-Menü und `Command-,`; alle drei Wege öffnen dasselbe native Settings-Fenster und verändern keinen Inventarfilter.
 - Gatekeeper-Test auf sauberem Mac-Benutzerkonto.
 - `codesign`, Hardened Runtime, Notarisierung, Stapling und `spctl` erfolgreich.
 - Keine Secrets in Diagnoseexport, Logs oder Crashfixtures.

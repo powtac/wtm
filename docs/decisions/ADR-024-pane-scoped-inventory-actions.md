@@ -17,6 +17,10 @@ That statement was false when the ephemeral inventory contained models but the s
 sidebar scope, search text, or filter combination matched none. Offering another scan in
 that state suggested the wrong recovery action.
 
+Settings is an application-level destination, not an inventory scope. Placing it among the
+selectable sidebar rows would incorrectly imply that it filters or replaces the inventory
+content pane.
+
 ## Decision
 
 Action placement follows the data scope represented by each split-view pane:
@@ -26,6 +30,9 @@ Action placement follows the data scope represented by each split-view pane:
   search remains bound to the same collection;
 - the detail pane owns model-selection actions, including the only visible Cleanup/Trash
   button. Batch selection is still represented in that pane;
+- `Settings…` is pinned below the scrollable sidebar scope list in a visually separated
+  footer. It opens the native SwiftUI Settings scene and does not participate in sidebar
+  selection; the standard application menu command and `Command-,` remain equivalent;
 - `Command-R` invokes the collection scan. `Command-Delete` is available only through an
   actionable selection context in the detail pane.
 
@@ -51,13 +58,16 @@ active filter but is never its sole accessible meaning.
 - A zero-result filter state cannot falsely claim that the local inventory is empty.
 - The recovery action changes view scope instead of performing unnecessary filesystem IO.
 - Destructive action availability is visually and semantically bound to selected models.
+- Application configuration remains reachable from the collapsible navigation area without
+  masquerading as an inventory filter.
 - Future list-wide actions belong in the content header; future model-specific actions
   belong in the detail pane or an explicit row context.
 
 ## Requirements impact
 
-This decision revises `FR-INV-020` and `FR-INV-021`, adds `FR-INV-028` and `FR-DEL-012`,
-and refines the macOS navigation, accessibility, automated-test, and manual-gate sections.
+This decision revises `FR-INV-020` and `FR-INV-021`, adds `FR-INV-028`, `FR-DEL-012`, and
+`FR-EXT-015`, and refines the macOS navigation, accessibility, automated-test, and
+manual-gate sections.
 It does not change scan scope, source consent, deletion planning, or storage mutation
 semantics.
 
@@ -67,5 +77,6 @@ View-model tests distinguish no-inventory and no-match states and verify that
 `Show All Models` clears sidebar, search, and structured filters. A macOS UI test selects a
 sidebar scope with zero matches, verifies the truthful message and recovery action, returns
 to the populated inventory, and then confirms that Cleanup remains reachable from the
-selected model's detail pane. Release builds continue to compile with Swift 6 warnings as
-errors and the English localization catalog gate.
+selected model's detail pane. The same UI flow verifies that the sidebar footer opens the
+native Settings scene. Release builds continue to compile with Swift 6 warnings as errors
+and the English localization catalog gate.
