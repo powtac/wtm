@@ -1,0 +1,7 @@
+#include "Base.xcconfig"
+#include? "Local.xcconfig"
+
+SWIFT_COMPILATION_MODE = wholemodule
+SWIFT_TREAT_WARNINGS_AS_ERRORS = YES
+GCC_TREAT_WARNINGS_AS_ERRORS = YES
+DEBUG_INFORMATION_FORMAT = dwarf-with-dsym

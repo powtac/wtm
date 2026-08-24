@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a product capability that is not a new provider adapter.
+title: "[Feature]: "
+labels: [enhancement, needs-triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Describe the user outcome, not only a preferred implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include the expected macOS interaction and failure behavior.
+    validations:
+      required: true
+  - type: dropdown
+    id: capability
+    attributes:
+      label: Capability class
+      options:
+        - Read-only inventory
+        - Storage action
+        - Runtime action
+        - Client integration
+        - User interface
+        - Distribution or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and security impact
+      description: State which paths, processes, network services, or credentials are involved.
+    validations:
+      required: true

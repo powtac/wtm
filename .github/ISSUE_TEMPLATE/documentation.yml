@@ -1,0 +1,24 @@
+name: Documentation issue
+description: Report missing, incorrect, or unclear project documentation.
+title: "[Docs]: "
+labels: [documentation, needs-triage]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Link the page, file, heading, or UI help entry.
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain what is incorrect, missing, or hard to understand.
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Suggested correction
+      description: Provide a concise replacement or the expected information when possible.

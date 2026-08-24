@@ -1,0 +1,54 @@
+name: Adapter proposal
+description: Propose support for another model store, runtime, or client.
+title: "[Adapter]: "
+labels: [adapter, needs-triage]
+body:
+  - type: input
+    id: system
+    attributes:
+      label: Tool or provider
+      placeholder: Provider name and official URL
+    validations:
+      required: true
+  - type: dropdown
+    id: adapter-type
+    attributes:
+      label: Adapter type
+      multiple: true
+      options:
+        - Storage provider
+        - Storage action
+        - Runtime
+        - Client
+    validations:
+      required: true
+  - type: textarea
+    id: contract
+    attributes:
+      label: Stable integration contract
+      description: Document the official API, metadata schema, or filesystem convention.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Detection evidence
+      description: Explain how WTM can identify models without guessing or reading secrets.
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures
+    attributes:
+      label: Fixture plan
+      description: Describe synthetic or redistributable fixtures and their licenses.
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundaries
+      options:
+        - label: The initial scanner can be implemented read-only.
+          required: true
+        - label: The proposal excludes secrets and proprietary model weights.
+          required: true

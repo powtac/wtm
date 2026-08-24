@@ -1,0 +1,24 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+cd "$repository_root"
+
+./scripts/format --lint
+./scripts/check-architecture
+./scripts/validate-fixtures
+swift test --package-path Packages/WTMKit
+xcodebuild \
+  -project WTM.xcodeproj \
+  -scheme WTM \
+  -configuration Release \
+  -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGNING_ALLOWED=NO \
+  build
+xcodebuild \
+  -project WTM.xcodeproj \
+  -scheme WTM \
+  -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGNING_ALLOWED=NO \
+  -only-testing:WTMAppTests \
+  test

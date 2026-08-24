@@ -1,0 +1,21 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+cd "$repository_root"
+
+if /usr/sbin/DevToolsSecurity -status 2>&1 | rg -q 'disabled'; then
+  echo "UI tests require macOS Developer Tools security to be enabled." >&2
+  echo "Enable it through Xcode or run: sudo DevToolsSecurity -enable" >&2
+  exit 2
+fi
+
+xcodebuild \
+  -project WTM.xcodeproj \
+  -scheme WTM \
+  -destination 'platform=macOS,arch=arm64' \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY=- \
+  DEVELOPMENT_TEAM= \
+  -only-testing:WTMAppUITests \
+  test

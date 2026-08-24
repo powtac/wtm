@@ -1,0 +1,11 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+cd "$repository_root"
+
+if [[ "${1:-}" == "--lint" ]]; then
+  xcrun swift-format lint --strict --recursive App Packages/WTMKit
+else
+  xcrun swift-format format --in-place --recursive App Packages/WTMKit
+fi

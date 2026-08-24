@@ -1,0 +1,37 @@
+{
+  "configurations" : [
+    {
+      "id" : "A1000000-0000-0000-0000-000000000001",
+      "name" : "Default",
+      "options" : {
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:WTM.xcodeproj",
+      "identifier" : "A00000000000000000000030",
+      "name" : "WTM"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:WTM.xcodeproj",
+        "identifier" : "A00000000000000000000031",
+        "name" : "WTMAppTests"
+      }
+    },
+    {
+      "parallelizable" : false,
+      "target" : {
+        "containerPath" : "container:WTM.xcodeproj",
+        "identifier" : "A00000000000000000000032",
+        "name" : "WTMAppUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

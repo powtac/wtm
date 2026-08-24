@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/powtac/wtm/security/advisories/new
+    about: Report vulnerabilities privately. Do not open a public issue.
+  - name: Support and questions
+    url: https://github.com/powtac/wtm/discussions
+    about: Ask usage and support questions in Discussions after public launch.

@@ -1,0 +1,18 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+fixture_root="$repository_root/Packages/WTMKit/Tests/WTMAdapterTests/Fixtures"
+manifest="$fixture_root/LICENSES.json"
+
+jq -e '.schemaVersion == 1 and (.files | length > 0)' "$manifest" >/dev/null
+
+while IFS= read -r fixture_file; do
+  relative_path="${fixture_file#$fixture_root/}"
+  if [[ "$relative_path" == "LICENSES.json" ]]; then
+    continue
+  fi
+  jq -e --arg path "$relative_path" '.files[] | select(.path == $path and .license != "" and .origin != "")' "$manifest" >/dev/null
+done < <(find "$fixture_root" -type f | sort)
+
+echo "Fixture licenses are complete."

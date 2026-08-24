@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+title: What The Model
+message: If you use this software, cite it using this metadata.
+type: software
+authors:
+  - name: powtac
+repository-code: https://github.com/powtac/wtm
+license: Apache-2.0

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "huggingface/models--acme--tiny/snapshots/rev1/config.json",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture; contains no model data"
+    },
+    {
+      "path": "huggingface/models--acme--tiny/snapshots/rev1/model.safetensors",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture; contains no model weights"
+    },
+    {
+      "path": "manual/tiny-Q4_K_M.gguf",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture; contains no model weights"
+    },
+    {
+      "path": "ollama/blobs/sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture; contains no model data"
+    },
+    {
+      "path": "ollama/manifests/registry.ollama.ai/library/tiny/latest",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture"
+    }
+  ]
+}

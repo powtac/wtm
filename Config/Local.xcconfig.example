@@ -1,0 +1,3 @@
+// Copy to Local.xcconfig and set your local Apple Developer team.
+// Local.xcconfig is intentionally ignored by Git.
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
