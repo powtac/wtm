@@ -3,5 +3,4 @@
 /Config/ @powtac
 /.github/ @powtac
 /Packages/WTMKit/Sources/WTMSecurity/ @powtac
-/Packages/WTMKit/Sources/WTMPersistence/ @powtac
 /docs/decisions/ @powtac

@@ -26,7 +26,7 @@ public enum TimestampKind: String, Codable, CaseIterable, Sendable {
   case providerDownload
   case fileCreation
   case fileModification
-  case firstSeen
+  case observedThisScan
 }
 
 public struct ObservedTimestamp: Hashable, Codable, Sendable {
@@ -169,5 +169,30 @@ public struct ModelInstallation: Identifiable, Hashable, Codable, Sendable {
 
   public var allocatedByteCount: Int64 {
     artifacts.reduce(0) { $0 + $1.allocatedByteCount }
+  }
+
+  /// Earliest available local-model timestamp. Scan observation is excluded because it is not
+  /// evidence of when the model first changed on disk.
+  public var earliestChangeTimestamp: ObservedTimestamp? {
+    timestamps
+      .filter { $0.kind != .observedThisScan }
+      .min { left, right in
+        if left.value != right.value { return left.value < right.value }
+        if left.confidence != right.confidence {
+          return left.confidence.sortPriority < right.confidence.sortPriority
+        }
+        return left.kind.rawValue < right.kind.rawValue
+      }
+  }
+}
+
+private extension EvidenceConfidence {
+  var sortPriority: Int {
+    switch self {
+    case .confirmed: 0
+    case .derived: 1
+    case .heuristic: 2
+    case .unknown: 3
+    }
   }
 }

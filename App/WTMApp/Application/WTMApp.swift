@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 @main
@@ -8,6 +9,19 @@ struct WTMApp: App {
     WindowGroup {
       InventoryRootView(model: model)
         .frame(minWidth: 920, minHeight: 600)
+        .task {
+          await model.prepareForLaunch()
+        }
+        .onReceive(
+          NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didMountNotification)
+        ) { _ in
+          model.handleVolumeChange()
+        }
+        .onReceive(
+          NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didUnmountNotification)
+        ) { _ in
+          model.handleVolumeChange()
+        }
     }
     .defaultSize(width: 1_180, height: 760)
 

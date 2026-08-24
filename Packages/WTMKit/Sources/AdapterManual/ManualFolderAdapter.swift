@@ -4,44 +4,104 @@ import WTMDomain
 import WTMSecurity
 
 public struct ManualFolderAdapter: StorageProviderAdapter {
+  private static let streamBatchSize = 25
+
   public let id = ProviderID.manual
   public let displayName = "Manual Folder"
 
   public init() {}
 
   public func scan(source: ScanSource) async -> AdapterScanResult {
-    let entries: [FileSystemEntry]
-    do {
-      entries = try ReadOnlyDirectoryWalker().entries(under: source.rootURL)
-    } catch {
-      return AdapterScanResult(
-        source: source,
-        installations: [],
-        issues: [scanIssue(source: source, code: "MANUAL_ENUMERATION_FAILED", url: source.rootURL)]
-      )
+    var installations: [ModelInstallation] = []
+    var issues: [InventoryIssue] = []
+    for await batch in scanBatches(source: source) {
+      installations.append(contentsOf: batch.installations)
+      issues.append(contentsOf: batch.issues)
     }
+    return AdapterScanResult(source: source, installations: installations, issues: issues)
+  }
 
-    let regularFiles = entries.filter { $0.isRegularFile || $0.isSymbolicLink }
-    let ggufFiles = regularFiles.filter { $0.url.pathExtension.lowercased() == "gguf" }
-    let partialFiles = regularFiles.filter { $0.url.pathExtension.lowercased() == "incomplete" }
-    let safetensorFiles = regularFiles.filter {
-      $0.url.pathExtension.lowercased() == "safetensors"
-    }
+  public func scanBatches(source: ScanSource) -> AsyncStream<AdapterScanBatch> {
+    AsyncStream { continuation in
+      let task = Task {
+        var pendingInstallations: [ModelInstallation] = []
+        var regularFilesByDirectory: [URL: [FileSystemEntry]] = [:]
+        var safetensorFilesByDirectory: [URL: [FileSystemEntry]] = [:]
 
-    var installations = ggufFiles.compactMap { installation(forGGUF: $0, source: source) }
-    let safetensorGroups = Dictionary(grouping: safetensorFiles) {
-      $0.url.deletingLastPathComponent()
-    }
-    installations.append(
-      contentsOf: safetensorGroups.compactMap { directory, files in
-        installation(
-          forSafetensors: files, directory: directory, allFiles: regularFiles, source: source)
+        func yieldPendingIfNeeded(force: Bool = false) {
+          guard !pendingInstallations.isEmpty else { return }
+          guard force || pendingInstallations.count >= Self.streamBatchSize else { return }
+          continuation.yield(AdapterScanBatch(installations: pendingInstallations))
+          pendingInstallations.removeAll(keepingCapacity: true)
+        }
+
+        do {
+          for try await entry in ReadOnlyDirectoryWalker().entryStream(under: source.rootURL) {
+            guard !Task.isCancelled else {
+              continuation.finish()
+              return
+            }
+            guard entry.isRegularFile || entry.isSymbolicLink else { continue }
+
+            let directory = entry.url.deletingLastPathComponent()
+            regularFilesByDirectory[directory, default: []].append(entry)
+            switch entry.url.pathExtension.lowercased() {
+            case "gguf":
+              if let installation = installation(forGGUF: entry, source: source) {
+                pendingInstallations.append(installation)
+                yieldPendingIfNeeded()
+              }
+            case "incomplete":
+              if let installation = partialInstallation(entry, source: source) {
+                pendingInstallations.append(installation)
+                yieldPendingIfNeeded()
+              }
+            case "safetensors":
+              safetensorFilesByDirectory[directory, default: []].append(entry)
+            default:
+              break
+            }
+          }
+
+          yieldPendingIfNeeded(force: true)
+          for directory in safetensorFilesByDirectory.keys.sorted(by: { $0.path < $1.path }) {
+            guard !Task.isCancelled else {
+              continuation.finish()
+              return
+            }
+            guard
+              let safetensorFiles = safetensorFilesByDirectory[directory],
+              let allFiles = regularFilesByDirectory[directory],
+              let installation = installation(
+                forSafetensors: safetensorFiles,
+                directory: directory,
+                allFiles: allFiles,
+                source: source
+              )
+            else { continue }
+            pendingInstallations.append(installation)
+            yieldPendingIfNeeded()
+          }
+          yieldPendingIfNeeded(force: true)
+        } catch {
+          yieldPendingIfNeeded(force: true)
+          continuation.yield(
+            AdapterScanBatch(
+              installations: [],
+              issues: [
+                scanIssue(
+                  source: source,
+                  code: "MANUAL_ENUMERATION_FAILED",
+                  url: source.rootURL
+                )
+              ]
+            )
+          )
+        }
+        continuation.finish()
       }
-    )
-    installations.append(
-      contentsOf: partialFiles.compactMap { partialInstallation($0, source: source) })
-
-    return AdapterScanResult(source: source, installations: installations)
+      continuation.onTermination = { _ in task.cancel() }
+    }
   }
 
   private func installation(forGGUF entry: FileSystemEntry, source: ScanSource)
@@ -88,7 +148,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
     let variantID = "\(identityID):safetensors"
     let identity = ModelIdentity(id: identityID, displayName: name)
     let variant = ModelVariant(id: variantID, identityID: identityID, format: .safetensors)
-    let configurations = relatedFiles.map(\.url).filter { $0.lastPathComponent == "config.json" }
+    let configurations = relatedFiles.map(\.url).filter(ConfigurationFilePolicy().isAllowed)
     return ModelInstallation(
       id: "\(source.id):\(directory.path)",
       identity: identity,
@@ -99,7 +159,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       state: .stored,
       artifacts: artifacts,
       configurationURLs: configurations,
-      timestamps: timestamps(for: directory)
+      timestamps: timestamps(in: relatedFiles)
     )
   }
 
@@ -161,25 +221,36 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
 
   private func timestamps(for url: URL) -> [ObservedTimestamp] {
     guard let metadata = try? FileMetadataReader().metadata(for: url) else { return [] }
-    if let creationDate = metadata.creationDate {
-      return [
+    return timestamps(from: [metadata])
+  }
+
+  private func timestamps(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
+    timestamps(
+      from: entries.compactMap { try? FileMetadataReader().metadata(for: $0.resolvedURL) }
+    )
+  }
+
+  private func timestamps(from metadata: [FileMetadata]) -> [ObservedTimestamp] {
+    var timestamps: [ObservedTimestamp] = []
+    if let creationDate = metadata.compactMap(\.creationDate).min() {
+      timestamps.append(
         ObservedTimestamp(
           value: creationDate,
           kind: .fileCreation,
           confidence: .derived
         )
-      ]
+      )
     }
-    if let modificationDate = metadata.modificationDate {
-      return [
+    if let modificationDate = metadata.compactMap(\.modificationDate).min() {
+      timestamps.append(
         ObservedTimestamp(
           value: modificationDate,
           kind: .fileModification,
           confidence: .heuristic
         )
-      ]
+      )
     }
-    return []
+    return timestamps
   }
 
   private func scanIssue(source: ScanSource, code: String, url: URL) -> InventoryIssue {

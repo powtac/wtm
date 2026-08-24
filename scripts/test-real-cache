@@ -1,0 +1,20 @@
+#!/bin/zsh
+set -euo pipefail
+
+if (( $# != 1 )); then
+  print -u2 "Usage: scripts/test-real-cache /absolute/path/to/huggingface/hub"
+  exit 64
+fi
+
+real_cache_root="$1"
+if [[ ! -d "$real_cache_root" ]]; then
+  print -u2 "Hugging Face cache root does not exist: $real_cache_root"
+  exit 66
+fi
+
+repository_root="${0:A:h:h}"
+cd "$repository_root"
+
+WTM_REAL_HF_CACHE="$real_cache_root" swift test \
+  --package-path Packages/WTMKit \
+  --filter realHuggingFaceCacheHasNoManualDuplicates

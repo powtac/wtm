@@ -12,6 +12,11 @@
       "origin": "Generated WTM test fixture; contains no model weights"
     },
     {
+      "path": "huggingface/models--acme--partial/blobs/model.safetensors.incomplete",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM interrupted-download fixture; contains no model weights"
+    },
+    {
       "path": "manual/tiny-Q4_K_M.gguf",
       "license": "CC0-1.0",
       "origin": "Generated WTM test fixture; contains no model weights"

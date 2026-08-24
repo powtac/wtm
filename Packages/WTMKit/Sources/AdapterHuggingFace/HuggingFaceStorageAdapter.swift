@@ -10,36 +10,75 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   public init() {}
 
   public func scan(source: ScanSource) async -> AdapterScanResult {
-    let repositories: [URL]
-    do {
-      repositories = try FileManager.default.contentsOfDirectory(
-        at: source.rootURL,
-        includingPropertiesForKeys: [.isDirectoryKey],
-        options: [.skipsHiddenFiles]
-      ).filter { url in
-        url.lastPathComponent.hasPrefix("models--")
-          && ((try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false)
-      }
-    } catch {
-      return AdapterScanResult(
-        source: source,
-        installations: [],
-        issues: [issue(source: source, code: "HF_CACHE_ENUMERATION_FAILED", url: source.rootURL)]
-      )
-    }
-
     var installations: [ModelInstallation] = []
     var issues: [InventoryIssue] = []
-    for repositoryURL in repositories {
-      do {
-        installations.append(
-          contentsOf: try scanRepository(repositoryURL, source: source, issues: &issues)
-        )
-      } catch {
-        issues.append(issue(source: source, code: "HF_REPOSITORY_INVALID", url: repositoryURL))
-      }
+    for await batch in scanBatches(source: source) {
+      installations.append(contentsOf: batch.installations)
+      issues.append(contentsOf: batch.issues)
     }
     return AdapterScanResult(source: source, installations: installations, issues: issues)
+  }
+
+  public func scanBatches(source: ScanSource) -> AsyncStream<AdapterScanBatch> {
+    AsyncStream { continuation in
+      let task = Task {
+        let repositories: [URL]
+        do {
+          repositories = try FileManager.default.contentsOfDirectory(
+            at: source.rootURL,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: [.skipsHiddenFiles]
+          ).filter { url in
+            url.lastPathComponent.hasPrefix("models--")
+              && ((try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false)
+          }
+        } catch {
+          continuation.yield(
+            AdapterScanBatch(
+              installations: [],
+              issues: [
+                issue(
+                  source: source,
+                  code: "HF_CACHE_ENUMERATION_FAILED",
+                  url: source.rootURL
+                )
+              ]
+            )
+          )
+          continuation.finish()
+          return
+        }
+
+        for repositoryURL in repositories {
+          guard !Task.isCancelled else {
+            continuation.finish()
+            return
+          }
+          var repositoryIssues: [InventoryIssue] = []
+          do {
+            let installations = try scanRepository(
+              repositoryURL,
+              source: source,
+              issues: &repositoryIssues
+            )
+            continuation.yield(
+              AdapterScanBatch(installations: installations, issues: repositoryIssues)
+            )
+          } catch {
+            continuation.yield(
+              AdapterScanBatch(
+                installations: [],
+                issues: [
+                  issue(source: source, code: "HF_REPOSITORY_INVALID", url: repositoryURL)
+                ]
+              )
+            )
+          }
+        }
+        continuation.finish()
+      }
+      continuation.onTermination = { _ in task.cancel() }
+    }
   }
 
   private func scanRepository(
@@ -147,7 +186,7 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
       state: partialEntries.isEmpty ? .stored : .incomplete,
       artifacts: artifacts,
       configurationURLs: configurations,
-      timestamps: oldestTimestamp(in: files),
+      timestamps: timestamps(in: files),
       modelCard: modelCard(for: repositoryName)
     )
   }
@@ -187,7 +226,7 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
       rootURL: firstPartialEntry.url,
       state: .incomplete,
       artifacts: artifacts,
-      timestamps: oldestTimestamp(in: partialEntries),
+      timestamps: timestamps(in: partialEntries),
       modelCard: modelCard(for: repositoryName)
     )
   }
@@ -220,16 +259,29 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   }
 
   private func isConfiguration(_ url: URL) -> Bool {
-    let name = url.lastPathComponent.lowercased()
-    return name == "config.json" || name == "generation_config.json"
+    ConfigurationFilePolicy().isAllowed(url)
   }
 
-  private func oldestTimestamp(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
-    let dates = entries.compactMap { entry in
-      try? FileMetadataReader().metadata(for: entry.resolvedURL).creationDate
+  private func timestamps(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
+    let metadata = entries.compactMap { entry in
+      try? FileMetadataReader().metadata(for: entry.resolvedURL)
     }
-    guard let oldest = dates.compactMap({ $0 }).min() else { return [] }
-    return [ObservedTimestamp(value: oldest, kind: .fileCreation, confidence: .derived)]
+    var timestamps: [ObservedTimestamp] = []
+    if let oldestCreation = metadata.compactMap(\.creationDate).min() {
+      timestamps.append(
+        ObservedTimestamp(value: oldestCreation, kind: .fileCreation, confidence: .derived)
+      )
+    }
+    if let oldestModification = metadata.compactMap(\.modificationDate).min() {
+      timestamps.append(
+        ObservedTimestamp(
+          value: oldestModification,
+          kind: .fileModification,
+          confidence: .heuristic
+        )
+      )
+    }
+    return timestamps
   }
 
   private func issue(source: ScanSource, code: String, url: URL) -> InventoryIssue {

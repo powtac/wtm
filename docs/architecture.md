@@ -12,7 +12,6 @@ WTM app
   -> AdapterOllama
   -> AdapterHuggingFace
   -> AdapterManual
-  -> WTMPersistence
 ```
 
 `WTMDomain` owns provider-neutral identities, variants, installations, artifacts,
@@ -22,6 +21,10 @@ boundary and immutable registry. Concrete provider targets do not depend on each
 The app target is the only composition root. It constructs the registry and injects it
 into `InventoryCoordinator`. Views never enumerate the file system directly.
 
+Operational source settings are stored as a versioned JSON document under Application
+Support. Folder URLs use macOS bookmark data and external-volume UUID plus relative path.
+The store never contains installations, artifacts, or historical scan results.
+
 ## Phase 1 security boundary
 
 - No action, runtime, client, or process-launch target is linked.
@@ -29,7 +32,9 @@ into `InventoryCoordinator`. Views never enumerate the file system directly.
 - Scan roots require explicit user enablement.
 - Directory traversal resolves symlinks and rejects destinations outside the configured root.
 - Files are opened through read-only APIs; weight files are never hashed during a normal scan.
-- SQLite is a regenerable index. Model files remain the source of truth.
+- Model inventory is ephemeral and rebuilt on every launch. Only source bookmarks, consent,
+  source order, scan-on-launch, and UI preferences persist.
+- Provider files remain the sole source of truth.
 - The app is not sandboxed, but it does not request Full Disk Access or elevated privileges.
 
 `scripts/check-architecture` enforces the most important negative dependencies and

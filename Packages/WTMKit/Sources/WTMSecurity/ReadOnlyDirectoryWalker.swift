@@ -32,6 +32,32 @@ public struct ReadOnlyDirectoryWalker: Sendable {
   public init() {}
 
   public func entries(under rootURL: URL) throws -> [FileSystemEntry] {
+    var entries: [FileSystemEntry] = []
+    try enumerate(under: rootURL) { entries.append($0) }
+    return entries
+  }
+
+  /// Produces validated entries as traversal advances so adapters can publish bounded results.
+  public func entryStream(under rootURL: URL) -> AsyncThrowingStream<FileSystemEntry, Error> {
+    AsyncThrowingStream { continuation in
+      let task = Task {
+        do {
+          try enumerate(under: rootURL) { entry in
+            continuation.yield(entry)
+          }
+          continuation.finish()
+        } catch {
+          continuation.finish(throwing: error)
+        }
+      }
+      continuation.onTermination = { _ in task.cancel() }
+    }
+  }
+
+  private func enumerate(
+    under rootURL: URL,
+    yield: (FileSystemEntry) -> Void
+  ) throws {
     let policy = ScopedPathPolicy(rootURL: rootURL)
     guard FileManager.default.isReadableFile(atPath: rootURL.path) else {
       throw DirectoryWalkerError.rootIsNotReadable
@@ -53,8 +79,8 @@ public struct ReadOnlyDirectoryWalker: Sendable {
       throw DirectoryWalkerError.enumerationFailed
     }
 
-    var entries: [FileSystemEntry] = []
     for case let url as URL in enumerator {
+      try Task.checkCancellation()
       let values: URLResourceValues
       do {
         values = try url.resourceValues(forKeys: Set(keys))
@@ -74,7 +100,7 @@ public struct ReadOnlyDirectoryWalker: Sendable {
         continue
       }
 
-      entries.append(
+      yield(
         FileSystemEntry(
           url: url,
           resolvedURL: resolvedURL,
@@ -84,6 +110,5 @@ public struct ReadOnlyDirectoryWalker: Sendable {
         )
       )
     }
-    return entries
   }
 }

@@ -19,7 +19,7 @@ files, change model configuration, or start external processes.
 - Conservative GGUF and Safetensors discovery in user-selected folders
 - Explicit per-source consent before scanning
 - Search, provider/state filtering, local file details, and Finder reveal
-- A normalized, regenerable SQLite index schema
+- A normalized in-memory inventory rebuilt from provider files on every launch
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The

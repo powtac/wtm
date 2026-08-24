@@ -9,13 +9,18 @@ if rg -n 'import Adapter' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sour
   exit 1
 fi
 
-if rg -n 'ActionExecutor|RuntimeBroker|StorageActionAdapter|RuntimeAdapter|ClientAdapter' App Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
+if rg -n 'ActionExecutor|RuntimeBroker|StorageActionAdapter|RuntimeAdapter|ClientAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
   echo "Phase 1 must not contain action, runtime, or client capabilities." >&2
   exit 1
 fi
 
-if rg -n 'Process\s*\(|/bin/(zsh|bash|sh)|FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem)' App Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
+if rg -n 'Process\s*\(|/bin/(zsh|bash|sh)|FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
   echo "A forbidden process or source-mutation API entered the scan-only graph." >&2
+  exit 1
+fi
+
+if rg -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechRecognitionUsageDescription|com\.apple\.security\.device\.audio-input|com\.apple\.developer\.(musickit|music-user-token)|import[[:space:]]+(AudioToolbox|AVFAudio|AVFoundation|AVKit|CoreAudio|MediaPlayer|MusicKit|Speech)' App/WTMApp Packages/WTMKit/Sources Config WTM.xcodeproj/project.pbxproj; then
+  echo "Microphone, audio, media-library, Apple Music, and speech capabilities are forbidden." >&2
   exit 1
 fi
 

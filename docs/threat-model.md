@@ -26,9 +26,12 @@
 | A scan mutates source data | No action/runtime target; architecture check blocks known mutation and process APIs in scan targets |
 | Secrets appear in UI or logs | Do not preview secret-like configuration; OSLog treats dynamic local data as private |
 | A broad permission is implied | Consent and actual file-system access are separate states; no Full Disk Access guidance |
+| Unrelated media access expands the trust boundary | No microphone, audio-capture, Media Library, Apple Music, or speech-recognition usage descriptions, entitlements, or framework imports |
 
 ## Explicitly absent in Phase 1
 
 Deletion, process launch, local inference, executable discovery, dynamic code plugins,
 privileged helpers, telemetry, and remote inventory upload are out of scope. Their later
 introduction requires an ADR and an updated threat model before implementation.
+Microphone input, audio capture or playback, Media Library, Apple Music, and speech
+recognition access are also explicitly absent.

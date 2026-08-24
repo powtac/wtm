@@ -9,7 +9,6 @@ let package = Package(
     .library(name: "WTMDomain", targets: ["WTMDomain"]),
     .library(name: "WTMAdapterContracts", targets: ["WTMAdapterContracts"]),
     .library(name: "WTMInventory", targets: ["WTMInventory"]),
-    .library(name: "WTMPersistence", targets: ["WTMPersistence"]),
     .library(name: "WTMSecurity", targets: ["WTMSecurity"]),
     .library(name: "AdapterOllama", targets: ["AdapterOllama"]),
     .library(name: "AdapterHuggingFace", targets: ["AdapterHuggingFace"]),
@@ -23,7 +22,6 @@ let package = Package(
       name: "WTMInventory",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
     ),
-    .target(name: "WTMPersistence", dependencies: ["WTMDomain"]),
     .target(
       name: "AdapterOllama",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
@@ -41,7 +39,6 @@ let package = Package(
       name: "WTMInventoryTests",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMInventory", "WTMSecurity"]
     ),
-    .testTarget(name: "WTMPersistenceTests", dependencies: ["WTMPersistence"]),
     .testTarget(
       name: "WTMAdapterTests",
       dependencies: [
@@ -50,6 +47,7 @@ let package = Package(
         "AdapterOllama",
         "AdapterHuggingFace",
         "AdapterManual",
+        "WTMInventory",
       ],
       resources: [.copy("Fixtures")]
     ),

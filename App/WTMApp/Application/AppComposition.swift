@@ -13,15 +13,23 @@ enum AppComposition {
       HuggingFaceStorageAdapter(),
       ManualFolderAdapter(),
     ])
-    let coordinator = registry.map(InventoryCoordinator.init(registry:))
+    let coordinator = registry.map { InventoryCoordinator(registry: $0) }
     let sources = DefaultSourceCatalog().suggestions(
       homeDirectory: FileManager.default.homeDirectoryForCurrentUser
     )
+    let applicationSupportURL = FileManager.default.urls(
+      for: .applicationSupportDirectory,
+      in: .userDomainMask
+    )[0]
+    .appending(path: "de.powtac.whatthemodel", directoryHint: .isDirectory)
+    .appending(path: "source-settings.json", directoryHint: .notDirectory)
     return InventoryViewModel(
       coordinator: coordinator,
       initialSources: sources,
+      sourceSettingsStore: JSONSourceSettingsStore(settingsURL: applicationSupportURL),
       folderSelector: MacFolderSelector(),
-      fileRevealer: MacFileRevealer()
+      fileRevealer: MacFileRevealer(),
+      volumeCatalog: MacVolumeCatalog()
     )
   }
 }

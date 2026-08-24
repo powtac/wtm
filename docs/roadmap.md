@@ -5,8 +5,8 @@ automated tests, manual gates, and distribution evidence are complete.
 
 | Phase | Status | Gate |
 |---|---|---|
-| 0 — Foundation | In progress | Architecture, fixtures, local CI, and GitHub structure exist; Developer ID signing and notarization remain open |
-| 1 — Read-only Beta | In progress | Initial inventory slice exists; permission recovery, volume identity, persistence integration, storage percentages, age UX, and real-cache tests remain open |
+| 0 — Foundation | Completed | Architecture, fixtures, CI including UI smoke, GitHub structure, Developer ID signing, hardened runtime, notarization, stapling, and Gatekeeper smoke are verified |
+| 1 — Read-only Beta | In progress | First-run/launch scanning, bounded source-result updates, source/bookmark settings, scan status, catalogued Unsloth discovery, whole-unit storage totals, sortable age with provenance, configurable old-model thresholds/filters, and core toolbar UX exist; permission recovery, source removal, volume remount handling, intra-adapter streaming, storage percentages, and real-cache tests remain open |
 | 2 — Safe Actions | Not started | No deletion capability is linked |
 | 3 — Runtimes | Not started | No process capability is linked |
 | 4 — Integrations | Not started | No client adapters or menu bar UI are linked |

@@ -10,7 +10,6 @@
 		A00000000000000000000020 /* WTMDomain in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000010 /* WTMDomain */; };
 		A00000000000000000000021 /* WTMAdapterContracts in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000011 /* WTMAdapterContracts */; };
 		A00000000000000000000022 /* WTMInventory in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000012 /* WTMInventory */; };
-		A00000000000000000000023 /* WTMPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000013 /* WTMPersistence */; };
 		A00000000000000000000024 /* AdapterOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000014 /* AdapterOllama */; };
 		A00000000000000000000025 /* AdapterHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000015 /* AdapterHuggingFace */; };
 		A00000000000000000000026 /* AdapterManual in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000016 /* AdapterManual */; };
@@ -68,7 +67,6 @@
 				A00000000000000000000020 /* WTMDomain in Frameworks */,
 				A00000000000000000000021 /* WTMAdapterContracts in Frameworks */,
 				A00000000000000000000022 /* WTMInventory in Frameworks */,
-				A00000000000000000000023 /* WTMPersistence in Frameworks */,
 				A00000000000000000000024 /* AdapterOllama in Frameworks */,
 				A00000000000000000000025 /* AdapterHuggingFace in Frameworks */,
 				A00000000000000000000026 /* AdapterManual in Frameworks */,
@@ -146,7 +144,6 @@
 				A00000000000000000000010 /* WTMDomain */,
 				A00000000000000000000011 /* WTMAdapterContracts */,
 				A00000000000000000000012 /* WTMInventory */,
-				A00000000000000000000013 /* WTMPersistence */,
 				A00000000000000000000014 /* AdapterOllama */,
 				A00000000000000000000015 /* AdapterHuggingFace */,
 				A00000000000000000000016 /* AdapterManual */,
@@ -330,6 +327,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000C /* Debug.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				ENABLE_TESTABILITY = YES;
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
@@ -340,6 +338,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = A0000000000000000000000D /* Release.xcconfig */;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
 				PRODUCT_MODULE_NAME = WTM;
 				SUPPORTED_PLATFORMS = macosx;
 			};
@@ -454,11 +453,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = WTMInventory;
-		};
-		A00000000000000000000013 /* WTMPersistence */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
-			productName = WTMPersistence;
 		};
 		A00000000000000000000014 /* AdapterOllama */ = {
 			isa = XCSwiftPackageProductDependency;

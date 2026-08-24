@@ -23,3 +23,7 @@ the first stable release.
 Phase 1 is read-only. Scanners must not start processes, execute shell content, mutate
 provider stores, follow symlinks outside an approved root, or ingest secrets. See the
 [threat model](docs/threat-model.md) for the normative engineering constraints.
+
+WTM does not request microphone, audio-capture, Media Library, Apple Music, or speech
+recognition access. Adding any such capability requires an explicit architecture and
+security decision before implementation.

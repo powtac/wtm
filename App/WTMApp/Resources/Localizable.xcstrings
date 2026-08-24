@@ -1,56 +1,1264 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "app.name" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "What The Model" } } } },
-    "detail.artifacts" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Artifacts" } } } },
-    "detail.empty.description" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a model to inspect its local files and metadata." } } } },
-    "detail.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Model Selected" } } } },
-    "detail.format" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Format" } } } },
-    "detail.model-card.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Open Model Card" } } } },
-    "detail.path" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Path" } } } },
-    "detail.provider" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Provider" } } } },
-    "detail.size" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Allocated Size" } } } },
-    "format.gguf" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "GGUF" } } } },
-    "format.mlx" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "MLX" } } } },
-    "format.ollama" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Ollama" } } } },
-    "format.safetensors" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Safetensors" } } } },
-    "format.unknown" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Unknown" } } } },
-    "installation-state.incomplete" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Incomplete" } } } },
-    "installation-state.issue" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Issue" } } } },
-    "installation-state.offline" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Offline" } } } },
-    "installation-state.stored" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stored" } } } },
-    "inventory.column.format" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Format" } } } },
-    "inventory.column.name" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Name" } } } },
-    "inventory.column.path" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Path" } } } },
-    "inventory.column.provider" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Provider" } } } },
-    "inventory.column.size" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Allocated Size" } } } },
-    "inventory.column.state" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "State" } } } },
-    "inventory.empty.description" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Run a scan or review the selected source paths." } } } },
-    "inventory.empty.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No Models Found" } } } },
-    "inventory.reveal.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Reveal in Finder" } } } },
-    "inventory.search.prompt" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Search models, formats, and paths" } } } },
-    "inventory.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Local Model Inventory" } } } },
-    "provider.hugging-face" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Hugging Face" } } } },
-    "provider.manual" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Manual Folder" } } } },
-    "provider.ollama" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Ollama" } } } },
-    "scan.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan Now" } } } },
-    "scan.cancel.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Cancel Scan" } } } },
-    "settings.extend.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "How to extend this list" } } } },
-    "settings.security" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Security" } } } },
-    "settings.security.description" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM reads only the model sources you enable. It does not request Full Disk Access." } } } },
-    "settings.security.section" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan Access" } } } },
-    "settings.sources" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Sources" } } } },
-    "settings.sources.section" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Enabled Sources" } } } },
-    "sidebar.all-models" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "All Models" } } } },
-    "sidebar.incomplete" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Incomplete" } } } },
-    "sidebar.issues" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Issues" } } } },
-    "sidebar.providers" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Providers" } } } },
-    "source.add-folder.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Add Folder…" } } } },
-    "source.choose.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose" } } } },
-    "source.choose.message" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose a folder containing local model files. WTM will read this folder only." } } } },
-    "source.scan-enabled.action" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Scan Enabled Sources" } } } },
-    "source.setup.description" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Enable each source you want WTM to read. Inventory data remains on this Mac, and this release cannot delete files or start processes." } } } },
-    "source.setup.title" : { "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose Model Sources" } } } }
+    "action.cancel" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "·" : {
+
+    },
+    "%@" : {
+
+    },
+    "%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$@"
+          }
+        }
+      }
+    },
+    "%@/%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "age.day" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day"
+          }
+        }
+      }
+    },
+    "age.days" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days"
+          }
+        }
+      }
+    },
+    "age.hour" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hour"
+          }
+        }
+      }
+    },
+    "age.hours" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hours"
+          }
+        }
+      }
+    },
+    "age.minute" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minute"
+          }
+        }
+      }
+    },
+    "age.minutes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minutes"
+          }
+        }
+      }
+    },
+    "age.unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Age Unknown"
+          }
+        }
+      }
+    },
+    "age.year" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "year"
+          }
+        }
+      }
+    },
+    "age.years" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "years"
+          }
+        }
+      }
+    },
+    "app.name" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What The Model"
+          }
+        }
+      }
+    },
+    "artifact.shared" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared"
+          }
+        }
+      }
+    },
+    "artifact.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
+    "detail.age" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Age"
+          }
+        }
+      }
+    },
+    "detail.age-basis" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Age Basis"
+          }
+        }
+      }
+    },
+    "detail.artifact" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Artifact"
+          }
+        }
+      }
+    },
+    "detail.artifacts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Artifacts"
+          }
+        }
+      }
+    },
+    "detail.configurations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configurations"
+          }
+        }
+      }
+    },
+    "detail.empty.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a model to inspect its local files and metadata."
+          }
+        }
+      }
+    },
+    "detail.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Model Selected"
+          }
+        }
+      }
+    },
+    "detail.exact-size" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exact Bytes"
+          }
+        }
+      }
+    },
+    "detail.first-change" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earliest Change"
+          }
+        }
+      }
+    },
+    "detail.format" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        }
+      }
+    },
+    "detail.model-card.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Model Card"
+          }
+        }
+      }
+    },
+    "detail.path" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path"
+          }
+        }
+      }
+    },
+    "detail.provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        }
+      }
+    },
+    "detail.size" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allocated Size"
+          }
+        }
+      }
+    },
+    "format.gguf" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GGUF"
+          }
+        }
+      }
+    },
+    "format.mlx" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MLX"
+          }
+        }
+      }
+    },
+    "format.ollama" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama"
+          }
+        }
+      }
+    },
+    "format.safetensors" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Safetensors"
+          }
+        }
+      }
+    },
+    "format.unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
+    "installation-state.incomplete" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplete"
+          }
+        }
+      }
+    },
+    "installation-state.issue" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issue"
+          }
+        }
+      }
+    },
+    "installation-state.offline" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline"
+          }
+        }
+      }
+    },
+    "installation-state.stored" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stored"
+          }
+        }
+      }
+    },
+    "inventory.column.age" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Age"
+          }
+        }
+      }
+    },
+    "inventory.column.format" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        }
+      }
+    },
+    "inventory.column.name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "inventory.column.path" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path"
+          }
+        }
+      }
+    },
+    "inventory.column.provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        }
+      }
+    },
+    "inventory.column.share" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory Share"
+          }
+        }
+      }
+    },
+    "inventory.column.size" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allocated Size"
+          }
+        }
+      }
+    },
+    "inventory.column.state" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "State"
+          }
+        }
+      }
+    },
+    "inventory.empty.description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run a scan or review the selected source paths."
+          }
+        }
+      }
+    },
+    "inventory.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Models Found"
+          }
+        }
+      }
+    },
+    "inventory.reveal.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveal in Finder"
+          }
+        }
+      }
+    },
+    "inventory.search.prompt" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search models, formats, and paths"
+          }
+        }
+      }
+    },
+    "inventory.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Model Inventory"
+          }
+        }
+      }
+    },
+    "provider.hugging-face" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face"
+          }
+        }
+      }
+    },
+    "provider.manual" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual Folder"
+          }
+        }
+      }
+    },
+    "provider.ollama" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama"
+          }
+        }
+      }
+    },
+    "scan.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan Now"
+          }
+        }
+      }
+    },
+    "scan.cancel.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel Scan"
+          }
+        }
+      }
+    },
+    "scan.rescan.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rescan"
+          }
+        }
+      }
+    },
+    "scan.status.empty-description" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Results appear here as model sources are inspected."
+          }
+        }
+      }
+    },
+    "scan.status.found" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "found"
+          }
+        }
+      }
+    },
+    "scan.status.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scanning"
+          }
+        }
+      }
+    },
+    "scan.summary.cancelled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan cancelled"
+          }
+        }
+      }
+    },
+    "scan.summary.completed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan completed"
+          }
+        }
+      }
+    },
+    "scan.summary.issues" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "issues"
+          }
+        }
+      }
+    },
+    "scan.summary.sources" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sources"
+          }
+        }
+      }
+    },
+    "scan.summary.total" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "total"
+          }
+        }
+      }
+    },
+    "settings.age.presets" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presets"
+          }
+        }
+      }
+    },
+    "settings.age.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model Age"
+          }
+        }
+      }
+    },
+    "settings.days" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "days"
+          }
+        }
+      }
+    },
+    "settings.extend.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to extend this list"
+          }
+        }
+      }
+    },
+    "settings.old-after" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mark as Old After"
+          }
+        }
+      }
+    },
+    "settings.scan-on-launch" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan on Launch"
+          }
+        }
+      }
+    },
+    "settings.security" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Security"
+          }
+        }
+      }
+    },
+    "settings.security.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM reads only the model sources you enable. It does not request Full Disk Access."
+          }
+        }
+      }
+    },
+    "settings.security.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan Access"
+          }
+        }
+      }
+    },
+    "settings.sources" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sources"
+          }
+        }
+      }
+    },
+    "settings.sources.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enabled Sources"
+          }
+        }
+      }
+    },
+    "sidebar.age-unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Age Unknown"
+          }
+        }
+      }
+    },
+    "sidebar.all-models" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All Models"
+          }
+        }
+      }
+    },
+    "sidebar.incomplete" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplete"
+          }
+        }
+      }
+    },
+    "sidebar.issues" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issues"
+          }
+        }
+      }
+    },
+    "sidebar.old" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Old"
+          }
+        }
+      }
+    },
+    "sidebar.providers" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Providers"
+          }
+        }
+      }
+    },
+    "source.access.allowed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allowed"
+          }
+        }
+      }
+    },
+    "source.access.denied" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denied"
+          }
+        }
+      }
+    },
+    "source.access.limited" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limited"
+          }
+        }
+      }
+    },
+    "source.access.not-set-up" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Set Up"
+          }
+        }
+      }
+    },
+    "source.access.offline" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline"
+          }
+        }
+      }
+    },
+    "source.access.stale" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stale"
+          }
+        }
+      }
+    },
+    "source.add-folder.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Folder…"
+          }
+        }
+      }
+    },
+    "source.choose.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose"
+          }
+        }
+      }
+    },
+    "source.choose.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a folder containing local model files. WTM will read this folder only."
+          }
+        }
+      }
+    },
+    "source.grant-again.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grant Access Again…"
+          }
+        }
+      }
+    },
+    "source.loading" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading model sources…"
+          }
+        }
+      }
+    },
+    "source.revoke.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Access…"
+          }
+        }
+      }
+    },
+    "source.revoke.confirmation.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Access"
+          }
+        }
+      }
+    },
+    "source.revoke.confirmation.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will forget this source and its scan results. Model files remain unchanged."
+          }
+        }
+      }
+    },
+    "source.revoke.confirmation.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove Scan Access?"
+          }
+        }
+      }
+    },
+    "source.scan-enabled.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Scan"
+          }
+        }
+      }
+    },
+    "source.setup.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM has no saved model index. Enable each source you want it to read, then start the scan. Results remain on this Mac, and this release cannot delete files or start processes."
+          }
+        }
+      }
+    },
+    "source.setup.no-media-access" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No microphone, audio capture, Media Library, Apple Music, or speech recognition access."
+          }
+        }
+      }
+    },
+    "source.setup.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Model Sources"
+          }
+        }
+      }
+    },
+    "value.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
+    "volume.add.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add…"
+          }
+        }
+      }
+    },
+    "volume.read-only" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read Only"
+          }
+        }
+      }
+    },
+    "volume.read-write" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read/Write"
+          }
+        }
+      }
+    },
+    "volume.refresh.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh Volumes"
+          }
+        }
+      }
+    },
+    "settings.volumes.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mounted Volumes"
+          }
+        }
+      }
+    },
+    "storage.active-scope" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "active scanned inventory"
+          }
+        }
+      }
+    },
+    "storage.mode.absolute" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absolute"
+          }
+        }
+      }
+    },
+    "storage.mode.label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage Display"
+          }
+        }
+      }
+    },
+    "storage.mode.share" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        }
+      }
+    },
+    "storage.share.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model rows show exclusively attributable bytes. Shared and physically unidentified artifacts are separate categories so the active scope totals 100%."
+          }
+        }
+      }
+    },
+    "storage.shared" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared"
+          }
+        }
+      }
+    },
+    "storage.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
+    "timestamp.file-creation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File Created"
+          }
+        }
+      }
+    },
+    "timestamp.file-modification" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File Modified"
+          }
+        }
+      }
+    },
+    "timestamp.observed-this-scan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Observed This Scan"
+          }
+        }
+      }
+    },
+    "timestamp.provider-download" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider Downloaded"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

@@ -159,19 +159,22 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
 
   private func timestamps(for url: URL) -> [ObservedTimestamp] {
     guard let metadata = try? FileMetadataReader().metadata(for: url) else { return [] }
+    var timestamps: [ObservedTimestamp] = []
     if let creationDate = metadata.creationDate {
-      return [ObservedTimestamp(value: creationDate, kind: .fileCreation, confidence: .derived)]
+      timestamps.append(
+        ObservedTimestamp(value: creationDate, kind: .fileCreation, confidence: .derived)
+      )
     }
     if let modificationDate = metadata.modificationDate {
-      return [
+      timestamps.append(
         ObservedTimestamp(
           value: modificationDate,
           kind: .fileModification,
           confidence: .heuristic
         )
-      ]
+      )
     }
-    return []
+    return timestamps
   }
 
   private func issue(source: ScanSource, code: String, url: URL) -> InventoryIssue {
