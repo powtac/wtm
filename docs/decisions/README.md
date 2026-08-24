@@ -44,6 +44,7 @@ before merge.
 | [ADR-020](ADR-020-confirmed-external-model-links.md) | Confirmed external model links | Phase 1 learning |
 | [ADR-021](ADR-021-phase-capability-isolation.md) | Compile-time phase capability isolation | Phase 1 learning |
 | [ADR-022](ADR-022-no-unrelated-media-capabilities.md) | No unrelated media capabilities | Phase 1 learning |
+| [ADR-023](ADR-023-revalidated-deletion-transactions.md) | Revalidated deletion transactions | Phase 2 boundary |
 
 ## Requirements revision checklist
 
