@@ -61,6 +61,9 @@ first public release is tagged.
   and versioned privacy-redacted import/export that always imports disabled and unapproved.
 - Native runtime UI, readiness-gated `Run Test`, explicit secondary `Try Anyway`, owned
   process cleanup during app termination, and XCUITest coverage of the non-executing plan.
+- Phase 3 acceptance evidence for version `0.3.0 (3)`, including 83 package tests, 19 app
+  tests, three UI tests, Developer ID signing, hardened runtime, Apple notarization without
+  issues, stapling, Gatekeeper, and controlled launch smoke.
 
 ### Changed
 
