@@ -57,6 +57,7 @@ final class InventoryViewModel {
   private(set) var runtimeReadiness: [RuntimeReadinessKey: RuntimeReadiness] = [:]
   private(set) var runtimeSessions: [RuntimeInstance.ID: RuntimeSessionSnapshot] = [:]
   private(set) var runtimePlanPreview: RuntimePlanPreview?
+  private(set) var toolImportPreview: ToolDefinitionImportPreview?
   private(set) var runtimeError: RuntimeUIError?
   private(set) var isCheckingRuntime = false
   private(set) var isPreparingRuntime = false
@@ -82,6 +83,7 @@ final class InventoryViewModel {
   private let initialToolDefinitions: [ToolDefinition]
   private let runtimeToolTemplates: [RuntimeToolTemplate]
   private let executableSelector: (any ExecutableSelecting)?
+  private let toolManifestDocument: (any ToolManifestDocumenting)?
   private let invocationBuilder: ToolInvocationBuilder
   private var scanTask: Task<Void, Never>?
   private var actionTask: Task<Void, Never>?
@@ -106,6 +108,7 @@ final class InventoryViewModel {
     initialToolDefinitions: [ToolDefinition] = [],
     runtimeToolTemplates: [RuntimeToolTemplate] = [],
     executableSelector: (any ExecutableSelecting)? = nil,
+    toolManifestDocument: (any ToolManifestDocumenting)? = nil,
     invocationBuilder: ToolInvocationBuilder = ToolInvocationBuilder()
   ) {
     self.coordinator = coordinator
@@ -122,6 +125,7 @@ final class InventoryViewModel {
     self.initialToolDefinitions = initialToolDefinitions
     self.runtimeToolTemplates = runtimeToolTemplates
     self.executableSelector = executableSelector
+    self.toolManifestDocument = toolManifestDocument
     self.invocationBuilder = invocationBuilder
     toolDefinitions = initialToolDefinitions
   }
@@ -542,6 +546,50 @@ final class InventoryViewModel {
   func revealTool(_ definitionID: ToolDefinition.ID) {
     guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
     fileRevealer.reveal(definition.executableURL)
+  }
+
+  func importToolDefinition() {
+    do {
+      guard let imported = try toolManifestDocument?.importDefinition() else { return }
+      guard let runtimeID = imported.runtimeAdapterID,
+        runtimeRegistry?.adapter(for: runtimeID) != nil,
+        runtimeToolTemplates.contains(where: { $0.runtimeAdapterID == runtimeID })
+      else {
+        runtimeError = .importFailed
+        return
+      }
+      let normalized = ToolDefinitionManifestPolicy.definitionForImport(imported)
+      try ToolDefinitionValidator().validate(normalized)
+      toolImportPreview = ToolDefinitionImportPreview(definition: normalized)
+    } catch {
+      runtimeError = .importFailed
+    }
+  }
+
+  func confirmToolImport() {
+    guard let definition = toolImportPreview, let runtimeID = definition.definition.runtimeAdapterID
+    else { return }
+    let replacedIDs = toolDefinitions.filter { $0.runtimeAdapterID == runtimeID }.map(\.id)
+    toolDefinitions.removeAll { $0.runtimeAdapterID == runtimeID }
+    for definitionID in replacedIDs {
+      toolApprovals.removeValue(forKey: definitionID)
+    }
+    toolDefinitions.append(definition.definition)
+    toolImportPreview = nil
+    persistToolSettings()
+  }
+
+  func cancelToolImport() {
+    toolImportPreview = nil
+  }
+
+  func exportToolDefinition(_ definitionID: ToolDefinition.ID) {
+    guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
+    do {
+      try toolManifestDocument?.exportDefinition(definition)
+    } catch {
+      runtimeError = .settingsFailed
+    }
   }
 
   func isToolApproved(_ definition: ToolDefinition) -> Bool {
@@ -1116,7 +1164,14 @@ final class InventoryViewModel {
       }
       var merged = storedDefinitions
       let storedIDs = Set(storedDefinitions.map(\.id))
-      merged.append(contentsOf: initialToolDefinitions.filter { !storedIDs.contains($0.id) })
+      let storedRuntimeIDs = Set(storedDefinitions.compactMap(\.runtimeAdapterID))
+      merged.append(
+        contentsOf: initialToolDefinitions.filter { definition in
+          guard !storedIDs.contains(definition.id) else { return false }
+          guard let runtimeID = definition.runtimeAdapterID else { return true }
+          return !storedRuntimeIDs.contains(runtimeID)
+        }
+      )
       toolDefinitions = merged.sorted {
         $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
       }

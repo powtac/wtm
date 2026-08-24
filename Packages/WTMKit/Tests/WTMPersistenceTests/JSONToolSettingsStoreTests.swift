@@ -46,3 +46,52 @@ func toolSettingsRoundTrip() async throws {
   #expect(!json.contains("RuntimeInstance"))
   #expect(!json.contains("standardOutput"))
 }
+
+@Test("Tool manifests import disabled and export without home paths or approvals")
+func toolManifestPolicy() throws {
+  let originalID = UUID()
+  let importedID = UUID()
+  let homeURL = URL(filePath: "/tmp/wtm-test-home", directoryHint: .isDirectory)
+  let definition = ToolDefinition(
+    id: originalID,
+    displayName: "llama.cpp",
+    role: .runtime,
+    runtimeAdapterID: RuntimeAdapterID(rawValue: "runtime.llama-cpp"),
+    origin: .userCreated,
+    isEnabled: true,
+    executableURL: homeURL.appending(path: "bin/llama-server"),
+    arguments: [
+      .literal("--model"),
+      .literal("/tmp/wtm-test-home/Models/model.gguf"),
+      .placeholder(.port),
+    ],
+    supportedFormats: [.gguf],
+    currentDirectoryURL: homeURL.appending(path: "Models", directoryHint: .isDirectory),
+    environment: [
+      "SAFE": "1",
+      "PRIVATE_PATH": "/tmp/wtm-test-home/.cache",
+    ]
+  )
+
+  let imported = ToolDefinitionManifestPolicy.definitionForImport(definition, id: importedID)
+  #expect(imported.id == importedID)
+  #expect(imported.origin == .imported)
+  #expect(!imported.isEnabled)
+  #expect(imported.lastValidation == nil)
+
+  let exported = ToolDefinitionManifestPolicy.definitionForExport(
+    definition,
+    homeDirectoryURL: homeURL
+  )
+  let data = try JSONEncoder().encode(ToolDefinitionManifest(definition: exported))
+  let json = try #require(String(data: data, encoding: .utf8))
+  #expect(!exported.isEnabled)
+  #expect(exported.currentDirectoryURL == nil)
+  #expect(exported.environment == ["SAFE": "1"])
+  #expect(exported.executableURL.path == "/path/to/llama-server")
+  #expect(!json.contains("/tmp/wtm-test-home"))
+
+  let manifest = try JSONDecoder().decode(ToolDefinitionManifest.self, from: data)
+  #expect(manifest.schemaVersion == ToolDefinitionManifest.currentSchemaVersion)
+  #expect(manifest.definition == exported)
+}

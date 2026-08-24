@@ -67,6 +67,16 @@
         }
       }
     },
+    "%@=%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@=%2$@"
+          }
+        }
+      }
+    },
     "action.cancel" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1468,6 +1478,17 @@
         }
       }
     },
+    "runtime.error.import-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The tool manifest is invalid, unsafe, or targets an unavailable runtime adapter."
+          }
+        }
+      }
+    },
     "runtime.error.launch-failed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2770,6 +2791,147 @@
         }
       }
     },
+    "tool.export.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export…"
+          }
+        }
+      }
+    },
+    "tool.export.privacy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exports are disabled by default and omit approvals, validation identity, and personal home-directory paths. Review the JSON before sharing it."
+          }
+        }
+      }
+    },
+    "tool.import.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import Tool Definition…"
+          }
+        }
+      }
+    },
+    "tool.import.confirm" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Import Disabled"
+          }
+        }
+      }
+    },
+    "tool.import.disabled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disabled · validation and approval required"
+          }
+        }
+      }
+    },
+    "tool.import.environment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environment"
+          }
+        }
+      }
+    },
+    "tool.import.formats" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Formats"
+          }
+        }
+      }
+    },
+    "tool.import.name" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        }
+      }
+    },
+    "tool.import.preview.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review the complete data-only definition. Import replaces the current definition for this runtime, remains disabled, and grants no execution approval."
+          }
+        }
+      }
+    },
+    "tool.import.preview.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Tool Definition"
+          }
+        }
+      }
+    },
+    "tool.import.runtime" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime"
+          }
+        }
+      }
+    },
+    "tool.import.state" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported State"
+          }
+        }
+      }
+    },
+    "tool.import.working-directory" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Working Directory"
+          }
+        }
+      }
+    },
     "tool.not-approved" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2782,6 +2944,7 @@
       }
     },
     "tool.origin" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2792,6 +2955,7 @@
       }
     },
     "tool.origin.built-in" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2802,6 +2966,7 @@
       }
     },
     "tool.origin.imported" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2812,6 +2977,7 @@
       }
     },
     "tool.origin.user-override" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2822,6 +2988,7 @@
       }
     },
     "tool.reset.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

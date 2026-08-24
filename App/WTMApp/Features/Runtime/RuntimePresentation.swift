@@ -28,6 +28,11 @@ struct RuntimePlanPreview: Identifiable {
   var requiresApproval: Bool { approvalToPersist != nil }
 }
 
+struct ToolDefinitionImportPreview: Identifiable {
+  var id: ToolDefinition.ID { definition.id }
+  let definition: ToolDefinition
+}
+
 enum RuntimeUIError: String, Identifiable {
   case runtimeUnavailable
   case toolDisabled
@@ -37,6 +42,7 @@ enum RuntimeUIError: String, Identifiable {
   case launchFailed
   case stopFailed
   case settingsFailed
+  case importFailed
 
   var id: String { rawValue }
 
@@ -50,6 +56,7 @@ enum RuntimeUIError: String, Identifiable {
     case .launchFailed: String(localized: "runtime.error.launch-failed")
     case .stopFailed: String(localized: "runtime.error.stop-failed")
     case .settingsFailed: String(localized: "runtime.error.settings-failed")
+    case .importFailed: String(localized: "runtime.error.import-failed")
     }
   }
 }

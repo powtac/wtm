@@ -5,6 +5,7 @@ import WTMActions
 import WTMAdapterContracts
 import WTMDomain
 import WTMInventory
+import WTMPersistence
 
 @testable import WTM
 
@@ -36,6 +37,56 @@ func appDeclaresNoMicrophoneOrMediaPermissions() {
       Bundle.main.object(forInfoDictionaryKey: $0) == nil
     }
   )
+}
+
+@MainActor
+@Test("A stored runtime override suppresses the discovered default after relaunch")
+func storedRuntimeOverrideSuppressesDefault() async {
+  let stored = ToolDefinition(
+    id: UUID(),
+    displayName: "Imported llama.cpp",
+    role: .runtime,
+    runtimeAdapterID: .llamaCpp,
+    origin: .imported,
+    isEnabled: false,
+    executableURL: URL(filePath: "/usr/bin/true"),
+    arguments: [.placeholder(.modelPath)],
+    supportedFormats: [.gguf]
+  )
+  let discovered = ToolDefinition(
+    id: UUID(),
+    displayName: "Discovered llama.cpp",
+    role: .runtime,
+    runtimeAdapterID: .llamaCpp,
+    origin: .builtIn,
+    isEnabled: false,
+    executableURL: URL(filePath: "/usr/bin/false"),
+    arguments: [.placeholder(.modelPath)],
+    supportedFormats: [.gguf]
+  )
+  let model = InventoryViewModel(
+    coordinator: nil,
+    initialSources: [],
+    sourceSettingsStore: FixtureSourceSettingsStore(
+      snapshot: SourceSettingsSnapshot(
+        revision: 1,
+        sources: [],
+        hasCompletedOnboarding: true,
+        scanOnLaunch: false
+      )
+    ),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog(),
+    toolSettingsStore: FixtureToolSettingsStore(
+      snapshot: ToolSettingsSnapshot(revision: 1, definitions: [stored], approvals: [])
+    ),
+    initialToolDefinitions: [discovered]
+  )
+
+  await model.prepareForLaunch()
+
+  #expect(model.toolDefinitions == [stored])
 }
 
 @MainActor
@@ -643,6 +694,17 @@ private actor FixtureSourceSettingsStore: SourceSettingsStoring {
       isEnabled: true
     )
   }
+}
+
+private actor FixtureToolSettingsStore: ToolSettingsStoring {
+  private let snapshot: ToolSettingsSnapshot?
+
+  init(snapshot: ToolSettingsSnapshot?) {
+    self.snapshot = snapshot
+  }
+
+  func load() -> ToolSettingsSnapshot? { snapshot }
+  func save(_: ToolSettingsSnapshot) {}
 }
 
 private struct LaunchFixtureAdapter: StorageProviderAdapter {

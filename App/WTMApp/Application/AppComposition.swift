@@ -121,7 +121,8 @@ enum AppComposition {
       ),
       initialToolDefinitions: discoveredLlamaCppDefinition.map { [$0] } ?? [],
       runtimeToolTemplates: runtimeToolTemplates,
-      executableSelector: MacExecutableSelector()
+      executableSelector: MacExecutableSelector(),
+      toolManifestDocument: JSONToolManifestDocument()
     )
   }
 }

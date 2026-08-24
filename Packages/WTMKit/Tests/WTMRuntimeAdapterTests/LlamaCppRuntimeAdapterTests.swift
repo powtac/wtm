@@ -72,6 +72,16 @@ private func enabledLlamaDefinition() throws -> (ToolDefinition, ToolExecutionAp
   )
 }
 
+@Test("llama.cpp convention preserves the selected definition origin")
+func llamaCppConventionPreservesOrigin() {
+  let definition = LlamaCppToolConvention().definition(
+    executableURL: URL(filePath: "/usr/bin/true"),
+    origin: .userCreated
+  )
+
+  #expect(definition.origin == .userCreated)
+}
+
 @Test("llama.cpp plan binds one approved GGUF to numeric loopback")
 func llamaCppPlanUsesApprovedLoopbackArguments() async throws {
   let (definition, approval) = try enabledLlamaDefinition()

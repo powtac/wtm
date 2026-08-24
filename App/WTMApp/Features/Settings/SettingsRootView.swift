@@ -52,6 +52,20 @@ struct SettingsRootView: View {
     } message: {
       Text("settings.audit.clear-confirmation.message")
     }
+    .sheet(isPresented: toolImportIsPresented) {
+      if let preview = model.toolImportPreview {
+        ToolDefinitionImportPreviewView(
+          preview: preview,
+          cancelAction: model.cancelToolImport,
+          importAction: model.confirmToolImport
+        )
+      }
+    }
+    .alert("runtime.error.title", isPresented: runtimeErrorIsPresented) {
+      Button("action.ok") { model.dismissRuntimeError() }
+    } message: {
+      if let error = model.runtimeError { Text(error.message) }
+    }
   }
 
   private var generalSettings: some View {
@@ -190,6 +204,9 @@ struct SettingsRootView: View {
                 model.revealTool(definition.id)
               }
               .labelStyle(.iconOnly)
+              Button("tool.export.action") {
+                model.exportToolDefinition(definition.id)
+              }
               Button("tool.reset.action") {
                 if let runtimeID = definition.runtimeAdapterID {
                   model.resetRuntimeTool(runtimeID)
@@ -229,6 +246,12 @@ struct SettingsRootView: View {
             )
           }
         }
+        Button("tool.import.action", systemImage: "square.and.arrow.down") {
+          model.importToolDefinition()
+        }
+        Text("tool.export.privacy")
+          .font(.caption)
+          .foregroundStyle(.secondary)
         adapterGuideLink
       }
 
@@ -335,6 +358,20 @@ struct SettingsRootView: View {
     Binding(
       get: { model.oldModelThresholdDays },
       set: { model.setOldModelThresholdDays($0) }
+    )
+  }
+
+  private var toolImportIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.toolImportPreview != nil },
+      set: { if !$0 { model.cancelToolImport() } }
+    )
+  }
+
+  private var runtimeErrorIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.runtimeError != nil },
+      set: { if !$0 { model.dismissRuntimeError() } }
     )
   }
 }
