@@ -35,6 +35,7 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
 
     var aggregates: [String: TargetAggregate] = [:]
     var retainedByID: [String: RetainedDeletionDependency] = [:]
+    var countedPhysicalIDs: Set<String> = []
     for installation in selected {
       guard let source = context.source(for: installation.sourceID), source.isEnabled,
         source.accessState == .allowed
@@ -76,6 +77,9 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
         }
 
         let path = artifact.url.standardizedFileURL.path
+        let estimatedReclaimableByteCount =
+          countedPhysicalIDs.insert(physicalIdentifier).inserted
+          ? artifact.allocatedByteCount : 0
         let identity: DeletionFileIdentity
         do {
           identity = try targetPolicy.captureIdentity(
@@ -91,7 +95,7 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
             url: artifact.url,
             source: source,
             identity: identity,
-            allocatedByteCount: artifact.allocatedByteCount,
+            allocatedByteCount: estimatedReclaimableByteCount,
             installationIDs: []
           )
         guard aggregate.identity == identity, aggregate.source.id == source.id else {
@@ -100,7 +104,7 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
         aggregate.installationIDs.insert(installation.id)
         aggregate.allocatedByteCount = max(
           aggregate.allocatedByteCount,
-          artifact.allocatedByteCount
+          estimatedReclaimableByteCount
         )
         aggregates[path] = aggregate
       }

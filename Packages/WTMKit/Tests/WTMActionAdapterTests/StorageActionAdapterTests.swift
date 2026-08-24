@@ -114,6 +114,44 @@ func manualRetainedDependenciesAreUnique() async throws {
   #expect(Set(plan.retainedDependencies[0].installationIDs) == [first.id, second.id])
 }
 
+@Test("Manual batch reclaim estimate counts a physical file only once")
+func manualBatchEstimateDeduplicatesHardLinks() async throws {
+  let rootURL = temporaryActionDirectory()
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  let firstURL = rootURL.appending(path: "first.gguf")
+  let secondURL = rootURL.appending(path: "second.gguf")
+  try Data(repeating: 1, count: 8_192).write(to: firstURL)
+  try FileManager.default.linkItem(at: firstURL, to: secondURL)
+  let source = actionSource(id: "manual", providerID: .manual, rootURL: rootURL)
+  let first = try actionInstallation(
+    id: "first",
+    providerID: .manual,
+    source: source,
+    files: [firstURL]
+  )
+  let second = try actionInstallation(
+    id: "second",
+    providerID: .manual,
+    source: source,
+    files: [secondURL]
+  )
+
+  let plan = try await ManualStorageActionAdapter().makeDeletionPlan(
+    context: DeletionPlanningContext(
+      selectedInstallations: [first, second],
+      currentInventory: [first, second],
+      sources: [source]
+    )
+  )
+
+  #expect(plan.operations.count == 2)
+  #expect(
+    plan.operations.reduce(0) { $0 + $1.expectedReclaimableByteCount }
+      == first.artifacts[0].allocatedByteCount
+  )
+}
+
 @Test("Hugging Face retains a blob referenced by an unselected revision")
 func huggingFaceRetainsSharedBlob() async throws {
   let fixture = try HuggingFaceActionFixture()
@@ -208,6 +246,59 @@ func ollamaBlocksLoadedModelsAndDeletesThroughProvider() async throws {
   #expect(request.identifier == "tiny:latest")
   try await adapter.execute(request)
   #expect(await transport.deletedModels() == ["tiny:latest"])
+}
+
+@Test("Ollama batch reclaim estimate counts a shared blob only once")
+func ollamaBatchEstimateDeduplicatesSharedBlob() async throws {
+  let rootURL = temporaryActionDirectory()
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  let firstManifestURL = rootURL.appending(
+    path: "manifests/registry.ollama.ai/library/tiny/latest"
+  )
+  let secondManifestURL = rootURL.appending(
+    path: "manifests/registry.ollama.ai/library/tiny/v2"
+  )
+  let blobURL = rootURL.appending(path: "blobs/sha256-shared")
+  for url in [firstManifestURL, secondManifestURL, blobURL] {
+    try FileManager.default.createDirectory(
+      at: url.deletingLastPathComponent(),
+      withIntermediateDirectories: true
+    )
+    try Data(repeating: 1, count: 4_096).write(to: url)
+  }
+  let source = actionSource(id: "ollama", providerID: .ollama, rootURL: rootURL)
+  let first = try actionInstallation(
+    id: "ollama:tiny:latest",
+    providerID: .ollama,
+    source: source,
+    rootURL: firstManifestURL,
+    files: [firstManifestURL, blobURL]
+  )
+  let second = try actionInstallation(
+    id: "ollama:tiny:v2",
+    providerID: .ollama,
+    source: source,
+    rootURL: secondManifestURL,
+    files: [secondManifestURL, blobURL]
+  )
+  let inventory = [first, second]
+
+  let plan = try await OllamaStorageActionAdapter(transport: RecordingOllamaTransport())
+    .makeDeletionPlan(
+      context: DeletionPlanningContext(
+        selectedInstallations: inventory,
+        currentInventory: inventory,
+        sources: [source]
+      )
+    )
+
+  let distinctByteCount = Dictionary(
+    grouping: inventory.flatMap(\.artifacts),
+    by: { $0.physicalIdentifier! }
+  ).values.reduce(Int64(0)) { total, artifacts in
+    total + (artifacts.first?.allocatedByteCount ?? 0)
+  }
+  #expect(plan.operations.reduce(0) { $0 + $1.expectedReclaimableByteCount } == distinctByteCount)
 }
 
 @Test("Ollama provider failure is recoverable through a fresh reviewed plan")

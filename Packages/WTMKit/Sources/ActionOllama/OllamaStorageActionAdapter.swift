@@ -92,6 +92,7 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
     )
     var operations: [DeletionOperation] = []
     var retainedByID: [String: RetainedDeletionDependency] = [:]
+    var countedPhysicalIDs: Set<String> = []
 
     for installation in selected {
       guard let source = context.source(for: installation.sourceID), source.isEnabled,
@@ -105,7 +106,6 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
       }
 
       var reclaimableByteCount: Int64 = 0
-      var countedPhysicalIDs: Set<String> = []
       for artifact in installation.artifacts {
         guard let physicalIdentifier = artifact.physicalIdentifier else {
           mergeRetained(
