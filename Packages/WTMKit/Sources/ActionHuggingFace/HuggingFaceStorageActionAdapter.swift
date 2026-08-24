@@ -276,13 +276,20 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
       displayName: url.lastPathComponent
     )
     operationsByPath[path] = DeletionOperation(
-      id: "hf:trash:\(path)",
+      id: "hf:trash:\(operationPriority(for: url)):\(path)",
       providerID: id,
       installationIDs: Array(combinedInstallationIDs),
       reversibility: .trash,
       expectedReclaimableByteCount: combinedByteCount,
       payload: .trash(target)
     )
+  }
+
+  private func operationPriority(for url: URL) -> String {
+    let path = url.standardizedFileURL.path
+    if path.contains("/blobs/") { return "90-blob" }
+    if path.contains("/refs/") { return "20-ref" }
+    return "10-snapshot"
   }
 
   private func merging(

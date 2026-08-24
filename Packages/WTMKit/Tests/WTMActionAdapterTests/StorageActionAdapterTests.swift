@@ -150,6 +150,39 @@ func huggingFaceBatchIncludesUnreferencedBlob() async throws {
   )
   #expect(plan.operations.contains { $0.fileURL == fixture.firstRevisionURL })
   #expect(plan.operations.contains { $0.fileURL == fixture.secondRevisionURL })
+  #expect(plan.operations.last?.fileURL == fixture.blobURL)
+}
+
+@Test("Hugging Face partial failure retains the shared blob")
+func huggingFacePartialFailureRetainsBlob() async throws {
+  let fixture = try HuggingFaceActionFixture()
+  defer { fixture.cleanup() }
+  let inventory = [fixture.firstInstallation, fixture.secondInstallation]
+  let trashMover = FailingRecordingTrashMover(failingAtCall: 2)
+  let executor = ActionExecutor(
+    registry: try StorageActionAdapterRegistry(adapters: [
+      HuggingFaceStorageActionAdapter()
+    ]),
+    trashMover: trashMover,
+    auditStore: InMemoryActionAuditStore(),
+    openFileUsageChecker: NoOpenFileUsageChecker()
+  )
+  let plan = try await executor.prepareDeletion(
+    installationIDs: Set(inventory.map(\.id)),
+    currentInventory: inventory,
+    sources: [fixture.source]
+  )
+
+  let report = try await executor.execute(
+    plan,
+    currentInventory: inventory,
+    sources: [fixture.source],
+    confirmedIrreversible: false
+  )
+
+  #expect(report.status == .partial)
+  #expect(!(await trashMover.attemptedURLs()).contains(fixture.blobURL))
+  #expect(FileManager.default.fileExists(atPath: fixture.blobURL.path))
 }
 
 @Test("Ollama blocks loaded models and uses its provider request for deletion")
@@ -313,6 +346,30 @@ private actor RecoveringOllamaTransport: OllamaActionTransport {
 
 private struct NoopTrashMover: TrashMoving {
   func moveToTrash(_: URL) async throws {}
+}
+
+private struct NoOpenFileUsageChecker: OpenFileUsageChecking {
+  func openTargetPaths(in _: [DeletionFileTarget]) -> Set<String> { [] }
+}
+
+private enum TrashFixtureError: Error {
+  case expectedFailure
+}
+
+private actor FailingRecordingTrashMover: TrashMoving {
+  let failingAtCall: Int
+  private var attempted: [URL] = []
+
+  init(failingAtCall: Int) {
+    self.failingAtCall = failingAtCall
+  }
+
+  func moveToTrash(_ url: URL) throws {
+    attempted.append(url)
+    if attempted.count == failingAtCall { throw TrashFixtureError.expectedFailure }
+  }
+
+  func attemptedURLs() -> [URL] { attempted }
 }
 
 private struct CapturedHTTPRequest: Sendable {
