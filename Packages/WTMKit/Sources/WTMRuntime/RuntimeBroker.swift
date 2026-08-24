@@ -247,6 +247,17 @@ public actor RuntimeBroker {
     )
   }
 
+  /// Stops every live process handle created by this broker.
+  /// Provider-managed runtimes are deliberately excluded.
+  public func stopAllOwned(timeout: Duration = .seconds(10)) async {
+    let ownedIDs = sessions.values
+      .filter { $0.instance.ownership == .startedByWTM && $0.instance.state != .stopped }
+      .map(\.instance.id)
+    for id in ownedIDs {
+      _ = try? await stop(id, timeout: timeout)
+    }
+  }
+
   private func waitUntilHealthy(
     sessionID: RuntimeInstance.ID,
     timeout: Duration,

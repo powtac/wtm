@@ -466,6 +466,11 @@ final class InventoryViewModel {
     runtimeError = nil
   }
 
+  func stopOwnedRuntimeSessionsForTermination() async {
+    runtimeTask?.cancel()
+    await runtimeBroker?.stopAllOwned()
+  }
+
   func setToolEnabled(_ definitionID: ToolDefinition.ID, enabled: Bool) {
     guard let definition = toolDefinitions.first(where: { $0.id == definitionID }) else { return }
     if enabled {

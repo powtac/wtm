@@ -50,9 +50,13 @@ struct RuntimeSectionView: View {
             .font(.caption)
             .foregroundStyle(.orange)
         }
-        Text(readiness.validation.checkedAt, format: .dateTime.hour().minute().second())
-          .font(.caption)
-          .foregroundStyle(.secondary)
+        HStack(spacing: 4) {
+          Text(readiness.validation.checkedAt, format: .dateTime.hour().minute().second())
+          Text("·")
+          Text("\(runtimeID.localizedName) v\(readiness.validation.adapterVersion)")
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
       } else {
         Text("runtime.not-checked")
           .font(.callout)

@@ -154,6 +154,35 @@ func ownedProcessLifecycle() async throws {
   #expect(await launcher.handle.wasTerminated())
 }
 
+@Test("Termination cleanup stops every WTM-owned process")
+func terminationCleanupStopsOwnedProcesses() async throws {
+  let adapter = FakeRuntimeAdapter(
+    id: .llamaCpp,
+    healthSucceeds: true,
+    inferenceSucceeds: true
+  )
+  let launcher = FakeProcessLauncher()
+  let broker = RuntimeBroker(
+    registry: try RuntimeAdapterRegistry(adapters: [adapter]),
+    launcher: launcher
+  )
+  let installation = runtimeInstallation()
+  let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
+
+  _ = try await broker.start(
+    plan: executablePlan(installation: installation, identity: identity),
+    installation: installation,
+    verifyInference: true,
+    timeout: .seconds(1),
+    pollInterval: .milliseconds(1)
+  )
+
+  await broker.stopAllOwned(timeout: .seconds(1))
+
+  #expect(await launcher.handle.wasTerminated())
+  #expect(await broker.allInstances().allSatisfy { $0.state == .stopped })
+}
+
 @Test("A failed inference remains distinct from a healthy runtime")
 func inferenceFailureDoesNotEraseHealthEvidence() async throws {
   let adapter = FakeRuntimeAdapter(

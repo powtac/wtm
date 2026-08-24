@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct WTMApp: App {
+  @NSApplicationDelegateAdaptor(WTMApplicationDelegate.self) private var applicationDelegate
   @State private var model = AppComposition.makeInventoryViewModel()
 
   var body: some Scene {
@@ -10,6 +11,12 @@ struct WTMApp: App {
       InventoryRootView(model: model)
         .frame(minWidth: 920, minHeight: 600)
         .task {
+          applicationDelegate.prepareForTermination = { completion in
+            Task {
+              await model.stopOwnedRuntimeSessionsForTermination()
+              completion()
+            }
+          }
           await model.prepareForLaunch()
         }
         .onReceive(
