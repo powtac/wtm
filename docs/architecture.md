@@ -89,6 +89,8 @@ pane-scoped actions are governed by
 [ADR-023](decisions/ADR-023-revalidated-deletion-transactions.md) and
 [ADR-024](decisions/ADR-024-pane-scoped-inventory-actions.md). Phase 3 runtime ownership and
 verification are governed by [ADR-025](decisions/ADR-025-owned-runtime-sessions.md).
+Phase 4 menu projections and client trust boundaries are governed by
+[ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
 neither document may silently contradict the other.

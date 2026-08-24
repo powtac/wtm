@@ -5,9 +5,10 @@ import SwiftUI
 struct WTMApp: App {
   @NSApplicationDelegateAdaptor(WTMApplicationDelegate.self) private var applicationDelegate
   @State private var model = AppComposition.makeInventoryViewModel()
+  @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
 
   var body: some Scene {
-    WindowGroup {
+    WindowGroup(id: "inventory") {
       InventoryRootView(model: model)
         .frame(minWidth: 920, minHeight: 600)
         .task {
@@ -31,6 +32,15 @@ struct WTMApp: App {
         }
     }
     .defaultSize(width: 1_180, height: 760)
+
+    MenuBarExtra(
+      "app.name",
+      systemImage: "externaldrive.badge.checkmark",
+      isInserted: $isMenuBarEnabled
+    ) {
+      MenuBarInventoryView(model: model)
+    }
+    .menuBarExtraStyle(.window)
 
     Settings {
       SettingsRootView(model: model)

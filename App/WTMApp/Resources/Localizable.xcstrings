@@ -1965,6 +1965,106 @@
         }
       }
     },
+    "menu.incomplete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplete"
+          }
+        }
+      }
+    },
+    "menu.issues" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issues"
+          }
+        }
+      }
+    },
+    "menu.last-scan" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last scan"
+          }
+        }
+      }
+    },
+    "menu.models" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Models"
+          }
+        }
+      }
+    },
+    "menu.not-scanned" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not scanned yet"
+          }
+        }
+      }
+    },
+    "menu.offline-sources" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline sources"
+          }
+        }
+      }
+    },
+    "menu.old" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Old"
+          }
+        }
+      }
+    },
+    "menu.open" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open WTM"
+          }
+        }
+      }
+    },
+    "menu.running" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
+          }
+        }
+      }
+    },
+    "menu.storage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage"
+          }
+        }
+      }
+    },
     "scan.action" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2224,6 +2324,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Extending WTM"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show a compact, passive inventory summary in the menu bar."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.enabled" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show WTM in Menu Bar"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu Bar"
           }
         }
       }

@@ -3,6 +3,7 @@ import WTMDomain
 
 struct SettingsRootView: View {
   @Bindable var model: InventoryViewModel
+  @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
   @State private var pendingRevocationSourceID: ScanSource.ID?
   @State private var isAuditClearConfirmationPresented = false
 
@@ -78,6 +79,13 @@ struct SettingsRootView: View {
             set: { model.setScanOnLaunch($0) }
           )
         )
+      }
+
+      Section("settings.menu-bar.section") {
+        Toggle("settings.menu-bar.enabled", isOn: $isMenuBarEnabled)
+        Text("settings.menu-bar.description")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
 
       Section("settings.age.section") {
