@@ -18,8 +18,9 @@ unrelated tools or public-tunnel behaviour.
 - The menu bar is a passive projection of the existing in-memory inventory view model. It
   never owns a scanner, persistence layer, runtime registry, or background refresh loop.
 - The status item uses a monochrome SF Symbol without permanent text. Its native `NSMenu`
-  exposes counts, physical storage, old and incomplete models, issues, running WTM sessions,
-  offline sources, last scan evidence, and explicit Open/Scan actions.
+  exposes counts, physical storage, old models, uniquely accounted incomplete bytes, issues,
+  running WTM sessions, offline sources, last scan evidence, and explicit Open/Scan actions.
+  Issue and running-session rows open the inventory in the matching context.
 - A SwiftUI `MenuBarExtra` was rejected after Xcode-hosted execution showed an AppKit symbol
   update loop at 100% CPU even while `isInserted` was false. `NSStatusItem` avoids that
   lifecycle defect and is omitted entirely from hosted unit-test processes.

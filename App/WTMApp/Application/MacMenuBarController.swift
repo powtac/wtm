@@ -1,11 +1,12 @@
 import AppKit
 import WTMDomain
+import WTMInventory
 
 struct MenuBarInventorySummary: Equatable {
   let modelCount: Int
   let totalByteCount: Int64
   let oldModelCount: Int
-  let incompleteModelCount: Int
+  let incompleteByteCount: Int64
   let issueCount: Int
   let runningModelCount: Int
   let offlineSourceCount: Int
@@ -27,7 +28,9 @@ func menuBarInventorySummary(
       guard let date = installation.earliestChangeTimestamp?.value else { return false }
       return now.timeIntervalSince(date) >= Double(oldModelThresholdDays) * 86_400
     },
-    incompleteModelCount: installations.count { $0.state == .incomplete },
+    incompleteByteCount: InventoryStorageBreakdown(
+      installations: installations.filter { $0.state == .incomplete }
+    ).totalByteCount,
     issueCount: issueCount,
     runningModelCount: runningModelCount,
     offlineSourceCount: sources.count { $0.isEnabled && $0.accessState == .offline }
@@ -108,13 +111,23 @@ final class MacMenuBarController: NSObject, NSMenuDelegate {
       informationalItem(title: "\(String(localized: "menu.old")): \(summary.oldModelCount)"))
     menu.addItem(
       informationalItem(
-        title: "\(String(localized: "menu.incomplete")): \(summary.incompleteModelCount)"
+        title:
+          "\(String(localized: "menu.incomplete")): \(wholeByteCount(summary.incompleteByteCount))"
       )
     )
     menu.addItem(
-      informationalItem(title: "\(String(localized: "menu.issues")): \(summary.issueCount)"))
+      contextItem(
+        title: "\(String(localized: "menu.issues")): \(summary.issueCount)",
+        count: summary.issueCount,
+        action: #selector(showIssues)
+      )
+    )
     menu.addItem(
-      informationalItem(title: "\(String(localized: "menu.running")): \(summary.runningModelCount)")
+      contextItem(
+        title: "\(String(localized: "menu.running")): \(summary.runningModelCount)",
+        count: summary.runningModelCount,
+        action: #selector(showRunningModels)
+      )
     )
     menu.addItem(
       informationalItem(
@@ -168,7 +181,27 @@ final class MacMenuBarController: NSObject, NSMenuDelegate {
     return item
   }
 
+  private func contextItem(title: String, count: Int, action: Selector) -> NSMenuItem {
+    count > 0 ? actionItem(title: title, action: action) : informationalItem(title: title)
+  }
+
   @objc private func showInventory() {
+    openInventory()
+  }
+
+  @objc private func showIssues() {
+    model.selectedInstallationIDs.removeAll()
+    model.selectedSection = .issues
+    openInventory()
+  }
+
+  @objc private func showRunningModels() {
+    model.selectedSection = .all
+    model.selectedInstallationIDs = Set(
+      model.runtimeSessions.values
+        .filter { $0.instance.state == .running }
+        .map(\.instance.installationID)
+    )
     openInventory()
   }
 

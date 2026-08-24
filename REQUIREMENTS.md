@@ -382,7 +382,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-INV-009 (P1):** Export als JSON und CSV MUST ohne Secrets möglich sein; das JSON-Schema ist zu versionieren.
 - **FR-INV-010 (P0):** Die App MUST ein vom Nutzer deaktivierbares macOS-Menüleisten-Symbol anbieten.
 - **FR-INV-011 (P0):** Die vereinfachte Menüleisten-Übersicht MUST Anzahl gefundener Modelle, gesamten Modellbestand, alte Modelle, unvollständige Bytes, Problemzahl, laufende Modelle, Offline-Quellen und Zeitpunkt des letzten erfolgreichen Scans zeigen.
-- **FR-INV-012 (P0):** Das Menüleisten-Popover MUST mindestens `Open WTM`, `Scan Now`, Problemübersicht und laufende Modelle anbieten. Detailaktionen öffnen das Hauptfenster im passenden Kontext.
+- **FR-INV-012 (P0):** Die native Menüleisten-Oberfläche MUST mindestens `Open WTM`, `Scan Now`, Problemübersicht und laufende Modelle anbieten. Detailaktionen öffnen das Hauptfenster im passenden Kontext. Die konkrete Darstellung als `NSMenu` statt Popover folgt ADR-026.
 - **FR-INV-013 (P0):** Hauptansicht und Speichervisualisierung MUST zwischen `Absolute` und `Share of Model Inventory` umschaltbar sein.
 - **FR-INV-014 (P0):** Die absolute Ansicht MUST den gewählten Größenbegriff und exakte Einheit anzeigen; Standard ist die allokierte Größe.
 - **FR-INV-015 (P0):** Der standardmäßige prozentuale Anteil MUST sich ausschließlich auf den in der aktuellen App-Sitzung gescannten Speicherbestand verbundener Quellen beziehen. Der sichtbare Nenner wird nicht still durch Tabellenfilter oder offline konfigurierte Quellen verändert.

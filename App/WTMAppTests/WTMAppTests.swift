@@ -306,7 +306,11 @@ func menuBarSummaryUsesInventoryFacts() {
   let summary = menuBarInventorySummary(
     installations: [
       ageFixture(timestamp: now.addingTimeInterval(-(31 * 86_400))),
-      ageFixture(timestamp: now.addingTimeInterval(-3_600), state: .incomplete),
+      ageFixture(
+        timestamp: now.addingTimeInterval(-3_600),
+        state: .incomplete,
+        allocatedByteCount: 4_096
+      ),
     ],
     totalByteCount: 12_345,
     issueCount: 2,
@@ -328,7 +332,7 @@ func menuBarSummaryUsesInventoryFacts() {
   #expect(summary.modelCount == 2)
   #expect(summary.totalByteCount == 12_345)
   #expect(summary.oldModelCount == 1)
-  #expect(summary.incompleteModelCount == 1)
+  #expect(summary.incompleteByteCount == 4_096)
   #expect(summary.issueCount == 2)
   #expect(summary.runningModelCount == 1)
   #expect(summary.offlineSourceCount == 1)
@@ -907,7 +911,8 @@ private actor RemovingTrashMover: TrashMoving {
 
 private func ageFixture(
   timestamp: Date?,
-  state: InstallationState = .stored
+  state: InstallationState = .stored,
+  allocatedByteCount: Int64 = 0
 ) -> ModelInstallation {
   let identity = ModelIdentity(id: "age", displayName: "Age Model")
   let variant = ModelVariant(id: "age:variant", identityID: identity.id, format: .gguf)
@@ -919,7 +924,17 @@ private func ageFixture(
     providerID: .manual,
     rootURL: URL(filePath: "/tmp/age-model"),
     state: state,
-    artifacts: [],
+    artifacts: allocatedByteCount > 0
+      ? [
+        Artifact(
+          id: "age:artifact:\(state.rawValue)",
+          url: URL(filePath: "/tmp/age-model/weights.gguf"),
+          kind: .weights,
+          logicalByteCount: allocatedByteCount,
+          allocatedByteCount: allocatedByteCount,
+          physicalIdentifier: "age:physical:\(state.rawValue)"
+        )
+      ] : [],
     timestamps: timestamp.map {
       [ObservedTimestamp(value: $0, kind: .fileCreation, confidence: .derived)]
     } ?? []
