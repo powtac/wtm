@@ -5,7 +5,7 @@ repository_root="${0:A:h:h}"
 decision_directory="$repository_root/docs/decisions"
 requirements_file="$repository_root/REQUIREMENTS.md"
 
-for number in {001..024}; do
+for number in {001..025}; do
   records=("$decision_directory"/ADR-"$number"-*.md(N))
   if (( ${#records} != 1 )); then
     echo "ADR-$number must resolve to exactly one decision record." >&2
