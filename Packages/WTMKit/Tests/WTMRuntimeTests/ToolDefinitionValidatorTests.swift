@@ -38,14 +38,23 @@ func endpointPolicyRequiresNumericLoopback() {
   let policy = LoopbackEndpointPolicy()
 
   #expect(throws: LoopbackEndpointPolicyError.nonLoopbackHost) {
-    try policy.validate(URL(string: "http://example.com:11434")!)
+    try policy.validate(endpointURL(host: "example.com"))
   }
   #expect(throws: LoopbackEndpointPolicyError.nonLoopbackHost) {
-    try policy.validate(URL(string: "http://localhost:11434")!)
+    try policy.validate(endpointURL(host: "localhost"))
   }
   #expect(throws: Never.self) {
-    try policy.validate(URL(string: "http://127.0.0.1:11434")!)
+    try policy.validate(endpointURL(host: "127.0.0.1"))
   }
+}
+
+private func endpointURL(host: String) -> URL {
+  var components = URLComponents()
+  components.scheme = "http"
+  components.host = host
+  components.port = 11_434
+  guard let url = components.url else { preconditionFailure("Valid test endpoint") }
+  return url
 }
 
 @Test("Environment rejects search paths and dynamic-loader injection")
