@@ -148,7 +148,10 @@ func clientBrokerStartsReviewedPlan() async throws {
   let broker = ClientHandoffBroker()
   let started = try await broker.start(plan: plan, installation: model)
   #expect(started.processIdentifier > 0)
-  try await Task.sleep(for: .milliseconds(20))
-  let finished = try await broker.snapshot(sessionID: started.id)
+  var finished = try await broker.snapshot(sessionID: started.id)
+  for _ in 0..<100 where finished.exitStatus == nil {
+    try await Task.sleep(for: .milliseconds(10))
+    finished = try await broker.snapshot(sessionID: started.id)
+  }
   #expect(finished.exitStatus == 0)
 }
