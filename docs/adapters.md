@@ -12,6 +12,10 @@ Read-only inventory of provider manifests, physical artifacts, configuration fil
 completeness, identity, and model-card evidence. Phase 1 ships Ollama and Hugging Face
 storage adapters.
 
+The Hugging Face adapter accepts an explicit repository-alias map for non-standard cache
+directories that omit the owner. Built-in or reviewed data aliases may restore a confirmed
+`owner/model` repository ID; an unknown short name never becomes a guessed model-card URL.
+
 ### Manual folder adapter
 
 Conservative recognition of GGUF, Safetensors, and related configuration files in a

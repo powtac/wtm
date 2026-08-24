@@ -4,10 +4,24 @@ import WTMDomain
 import WTMSecurity
 
 public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
+  public static let builtInRepositoryAliases = [
+    "gpt-oss-20b": "openai/gpt-oss-20b"
+  ]
+
   public let id = ProviderID.huggingFace
   public let displayName = "Hugging Face"
+  private let repositoryAliases: [String: String]
 
-  public init() {}
+  private struct ConfirmedRepository {
+    let id: String
+    let evidence: String
+  }
+
+  public init(repositoryAliases: [String: String] = Self.builtInRepositoryAliases) {
+    self.repositoryAliases = repositoryAliases.reduce(into: [:]) { aliases, entry in
+      aliases[entry.key.lowercased()] = entry.value
+    }
+  }
 
   public func scan(source: ScanSource) async -> AdapterScanResult {
     var installations: [ModelInstallation] = []
@@ -87,10 +101,11 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     issues: inout [InventoryIssue]
   ) throws -> [ModelInstallation] {
     let entries = try ReadOnlyDirectoryWalker().entries(under: repositoryURL)
-    let repositoryName = repositoryURL.lastPathComponent
+    let cacheRepositoryName = repositoryURL.lastPathComponent
       .dropFirst("models--".count)
       .replacingOccurrences(of: "--", with: "/")
-    guard !repositoryName.isEmpty else { return [] }
+    guard !cacheRepositoryName.isEmpty else { return [] }
+    let repository = confirmedRepository(for: cacheRepositoryName)
 
     let snapshotRoot = repositoryURL.appending(path: "snapshots", directoryHint: .isDirectory)
     let snapshotPrefix = snapshotRoot.path + "/"
@@ -123,7 +138,8 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
 
     var result = groupedByRevision.compactMap { revision, files in
       makeInstallation(
-        repositoryName: repositoryName,
+        cacheRepositoryName: cacheRepositoryName,
+        repository: repository,
         revision: revision,
         files: files,
         partialEntries: partialEntries,
@@ -134,7 +150,8 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
 
     if groupedByRevision.isEmpty, !partialEntries.isEmpty,
       let incomplete = makeIncompleteInstallation(
-        repositoryName: repositoryName,
+        cacheRepositoryName: cacheRepositoryName,
+        repository: repository,
         partialEntries: partialEntries,
         source: source
       )
@@ -149,7 +166,8 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   }
 
   private func makeInstallation(
-    repositoryName: String,
+    cacheRepositoryName: String,
+    repository: ConfirmedRepository?,
     revision: String,
     files: [FileSystemEntry],
     partialEntries: [FileSystemEntry],
@@ -172,18 +190,20 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     }
     guard !artifacts.isEmpty else { return nil }
 
-    let identityID = "hf:\(repositoryName.lowercased())"
+    let logicalRepositoryName = repository?.id ?? cacheRepositoryName
+    let identityID = "hf:\(logicalRepositoryName.lowercased())"
     let variantID = "\(identityID):\(revision)"
     let identity = ModelIdentity(
       id: identityID,
-      displayName: repositoryName.split(separator: "/").last.map(String.init) ?? repositoryName,
-      family: repositoryName
+      displayName: logicalRepositoryName.split(separator: "/").last.map(String.init)
+        ?? logicalRepositoryName,
+      family: repository?.id
     )
     let format = inferredFormat(from: files.map(\.url))
     let variant = ModelVariant(id: variantID, identityID: identityID, format: format)
     let configurations = files.map(\.url).filter { isConfiguration($0) }
     return ModelInstallation(
-      id: "\(source.id):\(repositoryName):\(revision)",
+      id: "\(source.id):\(logicalRepositoryName):\(revision)",
       identity: identity,
       variant: variant,
       sourceID: source.id,
@@ -193,12 +213,13 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
       artifacts: artifacts,
       configurationURLs: configurations,
       timestamps: timestamps(in: files),
-      modelCard: modelCard(for: repositoryName)
+      modelCard: repository.flatMap(modelCard)
     )
   }
 
   private func makeIncompleteInstallation(
-    repositoryName: String,
+    cacheRepositoryName: String,
+    repository: ConfirmedRepository?,
     partialEntries: [FileSystemEntry],
     source: ScanSource
   ) -> ModelInstallation? {
@@ -219,12 +240,18 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     }
     guard !artifacts.isEmpty else { return nil }
 
-    let identityID = "hf:\(repositoryName.lowercased())"
+    let logicalRepositoryName = repository?.id ?? cacheRepositoryName
+    let identityID = "hf:\(logicalRepositoryName.lowercased())"
     let variantID = "\(identityID):incomplete"
-    let identity = ModelIdentity(id: identityID, displayName: repositoryName)
+    let identity = ModelIdentity(
+      id: identityID,
+      displayName: logicalRepositoryName.split(separator: "/").last.map(String.init)
+        ?? logicalRepositoryName,
+      family: repository?.id
+    )
     let variant = ModelVariant(id: variantID, identityID: identityID, format: .unknown)
     return ModelInstallation(
-      id: "\(source.id):\(repositoryName):incomplete",
+      id: "\(source.id):\(logicalRepositoryName):incomplete",
       identity: identity,
       variant: variant,
       sourceID: source.id,
@@ -233,17 +260,32 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
       state: .incomplete,
       artifacts: artifacts,
       timestamps: timestamps(in: partialEntries),
-      modelCard: modelCard(for: repositoryName)
+      modelCard: repository.flatMap(modelCard)
     )
   }
 
-  private func modelCard(for repositoryName: String) -> ModelCardLink? {
+  private func confirmedRepository(for cacheRepositoryName: String) -> ConfirmedRepository? {
+    let alias = repositoryAliases[cacheRepositoryName.lowercased()]
+    let candidate = alias ?? cacheRepositoryName
+    let components = candidate.split(separator: "/", omittingEmptySubsequences: false)
+    guard components.count == 2,
+      components.allSatisfy({ !$0.isEmpty && $0 != "." && $0 != ".." })
+    else { return nil }
+    return ConfirmedRepository(
+      id: candidate,
+      evidence: alias == nil
+        ? "Hugging Face cache key"
+        : "WTM Hugging Face repository alias"
+    )
+  }
+
+  private func modelCard(for repository: ConfirmedRepository) -> ModelCardLink? {
     var components = URLComponents()
     components.scheme = "https"
     components.host = "huggingface.co"
-    components.path = "/\(repositoryName)"
+    components.path = "/\(repository.id)"
     guard let url = components.url else { return nil }
-    return ModelCardLink(url: url, confidence: .confirmed, evidence: "Hugging Face cache key")
+    return ModelCardLink(url: url, confidence: .confirmed, evidence: repository.evidence)
   }
 
   private func inferredFormat(from urls: [URL]) -> ModelFormat {

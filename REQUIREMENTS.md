@@ -380,7 +380,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 ### 9.5 Model Cards und externe Links
 
 - **FR-LNK-001 (P0):** Die Detailansicht MUST bestätigte Model-Card- und Repository-Links des Providers anzeigen.
-- **FR-LNK-002 (P0):** Hugging-Face-Links MUST aus einer bestätigten Repository-ID aufgebaut werden und MAY auf die erkannte Revision verweisen.
+- **FR-LNK-002 (P0):** Hugging-Face-Links MUST aus einer bestätigten Repository-ID im Format `owner/model` aufgebaut werden und MAY auf die erkannte Revision verweisen. Ein standardkonformer Cache-Key liefert diese ID direkt; verkürzte Cache-Keys benötigen einen expliziten datenbasierten Alias. Aus einem alleinstehenden Modellnamen darf weder ein Owner geraten noch ein bestätigter Link erzeugt werden.
 - **FR-LNK-003 (P0):** Weitere Provider definieren kanonische Model-Card-URLs ausschließlich über ihren Adapter.
 - **FR-LNK-004 (P0):** Bei mehreren möglichen Ursprüngen MUST die App alle Kandidaten mit Provider und Confidence zeigen, statt einen Link still auszuwählen.
 - **FR-LNK-005 (P0):** Aus Dateinamen allein darf kein bestätigter Link entstehen. Für manuelle Modelle MUST ein Nutzer einen Link ergänzen oder korrigieren können.

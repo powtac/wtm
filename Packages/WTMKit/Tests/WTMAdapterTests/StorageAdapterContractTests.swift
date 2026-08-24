@@ -54,8 +54,44 @@ func huggingFaceFixtureIsInventoried() async throws {
   #expect(tiny.identity.family == "acme/tiny")
   #expect(
     tiny.modelCard?.url.absoluteString == "https://huggingface.co/acme/tiny")
+  #expect(tiny.modelCard?.evidence == "Hugging Face cache key")
   #expect(result.installations.contains { $0.state == .incomplete })
   #expect(result.issues.contains { $0.code == "HF_DOWNLOAD_INCOMPLETE" })
+}
+
+@Test("Hugging Face aliases restore owners without guessing unknown shorthand caches")
+func huggingFaceAliasesRestoreRepositoryOwners() async throws {
+  let root = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  defer { try? FileManager.default.removeItem(at: root) }
+  for repositoryName in ["gpt-oss-20b", "unknown-model"] {
+    let snapshot = root.appending(
+      path: "models--\(repositoryName)/snapshots/local",
+      directoryHint: .isDirectory
+    )
+    try FileManager.default.createDirectory(at: snapshot, withIntermediateDirectories: true)
+    try Data("{}".utf8).write(to: snapshot.appending(path: "config.json"))
+  }
+
+  let result = await HuggingFaceStorageAdapter().scan(
+    source: allowedSource(id: "hf-alias", provider: .huggingFace, root: root)
+  )
+
+  let gptOSS = try #require(
+    result.installations.first { $0.identity.displayName == "gpt-oss-20b" }
+  )
+  #expect(gptOSS.identity.family == "openai/gpt-oss-20b")
+  #expect(gptOSS.modelCard?.url.absoluteString == "https://huggingface.co/openai/gpt-oss-20b")
+  #expect(gptOSS.modelCard?.confidence == .confirmed)
+  #expect(gptOSS.modelCard?.evidence == "WTM Hugging Face repository alias")
+
+  let unknown = try #require(
+    result.installations.first { $0.identity.displayName == "unknown-model" }
+  )
+  #expect(unknown.identity.family == nil)
+  #expect(unknown.modelCard == nil)
 }
 
 @Test("Manual folders detect GGUF quantization")
@@ -119,6 +155,13 @@ func realHuggingFaceCacheHasNoManualDuplicates() async throws {
       $0.providerID == .huggingFace && $0.rootURL.lastPathComponent == "snapshots"
     }
   )
+  if let gptOSS = snapshot.installations.first(where: {
+    $0.identity.displayName == "gpt-oss-20b"
+  }) {
+    #expect(
+      gptOSS.modelCard?.url.absoluteString == "https://huggingface.co/openai/gpt-oss-20b"
+    )
+  }
   if ProcessInfo.processInfo.environment["WTM_EXPECT_REAL_HF_PARTIAL"] == "1" {
     #expect(
       snapshot.installations.contains {

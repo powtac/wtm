@@ -32,3 +32,8 @@ first public release is tagged.
   notarization, stapling, and Gatekeeper.
 - Content-derived initial table-column widths that ignore longer column headers while
   preserving native resizing and persisted column customization.
+
+### Fixed
+
+- Hugging Face model-card links for reviewed shorthand cache directories now restore the
+  repository owner; unknown ownerless cache names no longer produce broken confirmed URLs.
