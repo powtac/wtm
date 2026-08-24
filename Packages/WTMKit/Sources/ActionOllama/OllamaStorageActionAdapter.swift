@@ -91,7 +91,7 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
         .compactMap(\.physicalIdentifier)
     )
     var operations: [DeletionOperation] = []
-    var retained: [RetainedDeletionDependency] = []
+    var retainedByID: [String: RetainedDeletionDependency] = [:]
 
     for installation in selected {
       guard let source = context.source(for: installation.sourceID), source.isEnabled,
@@ -108,26 +108,22 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
       var countedPhysicalIDs: Set<String> = []
       for artifact in installation.artifacts {
         guard let physicalIdentifier = artifact.physicalIdentifier else {
-          retained.append(
-            RetainedDeletionDependency(
-              id: "ollama:retained:unknown:\(artifact.url.path)",
-              displayName: artifact.url.lastPathComponent,
-              allocatedByteCount: artifact.allocatedByteCount,
-              reason: .unknownOwnership,
-              installationIDs: [installation.id]
-            )
+          mergeRetained(
+            id: "ollama:retained:unknown:\(artifact.url.standardizedFileURL.path)",
+            artifact: artifact,
+            installationID: installation.id,
+            reason: .unknownOwnership,
+            into: &retainedByID
           )
           continue
         }
         guard !remainingPhysicalIDs.contains(physicalIdentifier) else {
-          retained.append(
-            RetainedDeletionDependency(
-              id: "ollama:retained:shared:\(physicalIdentifier)",
-              displayName: artifact.url.lastPathComponent,
-              allocatedByteCount: artifact.allocatedByteCount,
-              reason: .remainingReference,
-              installationIDs: [installation.id]
-            )
+          mergeRetained(
+            id: "ollama:retained:shared:\(physicalIdentifier)",
+            artifact: artifact,
+            installationID: installation.id,
+            reason: .remainingReference,
+            into: &retainedByID
           )
           continue
         }
@@ -154,7 +150,7 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
       providerID: id,
       models: selected.map(Self.summary),
       operations: operations,
-      retainedDependencies: retained,
+      retainedDependencies: Array(retainedByID.values),
       warnings: [.freeSpaceIsEstimated]
     )
   }
@@ -197,6 +193,23 @@ public struct OllamaStorageActionAdapter: StorageActionAdapter {
       ? String(normalized.dropLast(":latest".count))
       : normalized
     return loadedModels.contains(normalized) || loadedModels.contains(withoutLatest)
+  }
+
+  private func mergeRetained(
+    id: String,
+    artifact: Artifact,
+    installationID: ModelInstallation.ID,
+    reason: RetainedDependencyReason,
+    into dependencies: inout [String: RetainedDeletionDependency]
+  ) {
+    let existing = dependencies[id]
+    dependencies[id] = RetainedDeletionDependency(
+      id: id,
+      displayName: artifact.url.lastPathComponent,
+      allocatedByteCount: max(existing?.allocatedByteCount ?? 0, artifact.allocatedByteCount),
+      reason: reason,
+      installationIDs: Array(Set(existing?.installationIDs ?? []).union([installationID]))
+    )
   }
 
   private static func summary(_ installation: ModelInstallation) -> DeletionModelSummary {

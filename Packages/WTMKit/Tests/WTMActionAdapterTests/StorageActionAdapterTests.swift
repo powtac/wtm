@@ -46,6 +46,72 @@ func manualCleanupExcludesProtectedAndSharedFiles() async throws {
   #expect(plan.retainedDependencies.contains { $0.reason == .remainingReference })
 }
 
+@Test("Manual cleanup blocks a read-only source before building operations")
+func manualCleanupBlocksReadOnlySource() async throws {
+  let rootURL = temporaryActionDirectory()
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  let modelURL = rootURL.appending(path: "model.gguf")
+  try Data("model".utf8).write(to: modelURL)
+  let source = actionSource(id: "read-only", providerID: .manual, rootURL: rootURL)
+  let installation = try actionInstallation(
+    id: "selected",
+    providerID: .manual,
+    source: source,
+    files: [modelURL]
+  )
+  let adapter = ManualStorageActionAdapter(
+    targetPolicy: DeletionTargetPolicy(volumeIsReadOnly: { _ in true })
+  )
+
+  await #expect(throws: StorageActionAdapterError.sourceUnavailable(source.id)) {
+    try await adapter.makeDeletionPlan(
+      context: DeletionPlanningContext(
+        selectedInstallations: [installation],
+        currentInventory: [installation],
+        sources: [source]
+      )
+    )
+  }
+}
+
+@Test("Manual retained dependencies are unique across a batch")
+func manualRetainedDependenciesAreUnique() async throws {
+  let rootURL = temporaryActionDirectory()
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  let firstModelURL = rootURL.appending(path: "first.gguf")
+  let secondModelURL = rootURL.appending(path: "second.gguf")
+  let secretURL = rootURL.appending(path: "id_ed25519")
+  try Data("first".utf8).write(to: firstModelURL)
+  try Data("second".utf8).write(to: secondModelURL)
+  try Data("secret".utf8).write(to: secretURL)
+  let source = actionSource(id: "manual", providerID: .manual, rootURL: rootURL)
+  let first = try actionInstallation(
+    id: "first",
+    providerID: .manual,
+    source: source,
+    files: [firstModelURL, secretURL]
+  )
+  let second = try actionInstallation(
+    id: "second",
+    providerID: .manual,
+    source: source,
+    files: [secondModelURL, secretURL]
+  )
+
+  let plan = try await ManualStorageActionAdapter().makeDeletionPlan(
+    context: DeletionPlanningContext(
+      selectedInstallations: [first, second],
+      currentInventory: [first, second],
+      sources: [source]
+    )
+  )
+
+  #expect(plan.retainedDependencies.count == 1)
+  #expect(Set(plan.retainedDependencies[0].installationIDs) == [first.id, second.id])
+}
+
 @Test("Hugging Face retains a blob referenced by an unselected revision")
 func huggingFaceRetainsSharedBlob() async throws {
   let fixture = try HuggingFaceActionFixture()

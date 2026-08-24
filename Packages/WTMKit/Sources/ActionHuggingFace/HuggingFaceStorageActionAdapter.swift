@@ -132,6 +132,11 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
     else {
       throw StorageActionAdapterError.sourceUnavailable(installation.sourceID)
     }
+    do {
+      try targetPolicy.validateWritableVolume(containing: source.rootURL)
+    } catch {
+      throw StorageActionAdapterError.sourceUnavailable(installation.sourceID)
+    }
     let sourcePrefix = source.rootURL.standardizedFileURL.path + "/"
     guard installation.rootURL.standardizedFileURL.path.hasPrefix(sourcePrefix) else {
       throw StorageActionAdapterError.pathOutsideSource

@@ -1,6 +1,8 @@
 import Foundation
 import OSLog
 import Observation
+import WTMActions
+import WTMAdapterContracts
 import WTMDomain
 import WTMInventory
 
@@ -36,8 +38,14 @@ final class InventoryViewModel {
   private(set) var scanOnLaunch = true
   private(set) var oldModelThresholdDays = 90
   private(set) var mountedVolumes: [MountedVolumeInfo] = []
+  private(set) var deletionPlan: DeletionPlan?
+  private(set) var deletionReport: DeletionExecutionReport?
+  private(set) var deletionError: DeletionUIError?
+  private(set) var actionAuditEntries: [ActionAuditEntry] = []
+  private(set) var isPreparingDeletion = false
+  private(set) var isDeleting = false
   var selectedSection = InventorySection.all
-  var selectedInstallationID: ModelInstallation.ID?
+  var selectedInstallationIDs: Set<ModelInstallation.ID> = []
   var searchText = ""
   var selectedProviderID: ProviderID?
   var selectedFormat: ModelFormat?
@@ -50,7 +58,9 @@ final class InventoryViewModel {
   private let folderSelector: any FolderSelecting
   private let fileRevealer: any FileRevealing
   private let volumeCatalog: any VolumeCataloging
+  private let actionExecutor: ActionExecutor?
   private var scanTask: Task<Void, Never>?
+  private var actionTask: Task<Void, Never>?
   private var activeScanGenerationID: UUID?
   private var didPrepareForLaunch = false
   private var sourceSettingsRevision: UInt64 = 0
@@ -62,7 +72,8 @@ final class InventoryViewModel {
     sourceSettingsStore: any SourceSettingsStoring,
     folderSelector: any FolderSelecting,
     fileRevealer: any FileRevealing,
-    volumeCatalog: any VolumeCataloging
+    volumeCatalog: any VolumeCataloging,
+    actionExecutor: ActionExecutor? = nil
   ) {
     self.coordinator = coordinator
     sources = initialSources
@@ -71,10 +82,12 @@ final class InventoryViewModel {
     self.folderSelector = folderSelector
     self.fileRevealer = fileRevealer
     self.volumeCatalog = volumeCatalog
+    self.actionExecutor = actionExecutor
   }
 
   isolated deinit {
     scanTask?.cancel()
+    actionTask?.cancel()
   }
 
   var visibleInstallations: [ModelInstallation] {
@@ -127,8 +140,19 @@ final class InventoryViewModel {
   }
 
   var selectedInstallation: ModelInstallation? {
-    guard let selectedInstallationID else { return nil }
+    guard selectedInstallationIDs.count == 1,
+      let selectedInstallationID = selectedInstallationIDs.first
+    else { return nil }
     return installations.first { $0.id == selectedInstallationID }
+  }
+
+  var selectedInstallations: [ModelInstallation] {
+    installations.filter { selectedInstallationIDs.contains($0.id) }
+  }
+
+  var canPrepareDeletion: Bool {
+    actionExecutor != nil && !selectedInstallationIDs.isEmpty && !isScanning
+      && !isPreparingDeletion && !isDeleting
   }
 
   var storageBreakdown: InventoryStorageBreakdown {
@@ -201,6 +225,7 @@ final class InventoryViewModel {
     }
 
     refreshSourceAccess()
+    refreshActionAudit()
     isPreparingSources = false
     if hasCompletedOnboarding, scanOnLaunch, sources.contains(where: \.isEnabled) {
       startScan()
@@ -254,9 +279,13 @@ final class InventoryViewModel {
 
   func revokeSource(_ sourceID: ScanSource.ID) {
     if isScanning { cancelScan() }
+    let removedInstallationIDs = Set(
+      installations.filter { $0.sourceID == sourceID }.map(\.id)
+    )
     installations.removeAll { $0.sourceID == sourceID }
     issues.removeAll { $0.sourceID == sourceID }
-    if selectedInstallation?.sourceID == sourceID { selectedInstallationID = nil }
+    selectedInstallationIDs.subtract(removedInstallationIDs)
+    invalidateDeletionPreview()
 
     if let builtIn = defaultSources.first(where: { $0.id == sourceID }),
       let index = sources.firstIndex(where: { $0.id == sourceID })
@@ -296,6 +325,8 @@ final class InventoryViewModel {
       }
       installations.removeAll { newlyOffline.contains($0.sourceID) }
       issues.removeAll { newlyOffline.contains($0.sourceID) }
+      selectedInstallationIDs = selectedInstallationIDs.intersection(Set(installations.map(\.id)))
+      invalidateDeletionPreview()
     }
     if !newlyAvailable.isEmpty, !isScanning {
       startScan(sourceIDs: newlyAvailable)
@@ -324,7 +355,7 @@ final class InventoryViewModel {
   }
 
   private func startScan(sourceIDs: Set<ScanSource.ID>?) {
-    guard !isScanning else { return }
+    guard !isScanning, !isPreparingDeletion, !isDeleting else { return }
     guard let coordinator else {
       issues = [
         InventoryIssue(
@@ -347,16 +378,13 @@ final class InventoryViewModel {
     if let sourceIDs {
       installations.removeAll { sourceIDs.contains($0.sourceID) }
       issues.removeAll { sourceIDs.contains($0.sourceID) }
-      if let selectedInstallationID,
-        !installations.contains(where: { $0.id == selectedInstallationID })
-      {
-        self.selectedInstallationID = nil
-      }
+      selectedInstallationIDs = selectedInstallationIDs.intersection(Set(installations.map(\.id)))
     } else {
       installations = []
       issues = []
-      selectedInstallationID = nil
+      selectedInstallationIDs = []
     }
+    invalidateDeletionPreview()
     scanSummary = nil
     isScanning = true
     let generationID = UUID()
@@ -403,6 +431,95 @@ final class InventoryViewModel {
 
   func reveal(_ url: URL) {
     fileRevealer.reveal(url)
+  }
+
+  func prepareDeletion() {
+    guard canPrepareDeletion, let actionExecutor else { return }
+    let requestedIDs = selectedInstallationIDs
+    let inventory = installations
+    let currentSources = sources
+    isPreparingDeletion = true
+    deletionError = nil
+    deletionReport = nil
+    actionTask?.cancel()
+    actionTask = Task { [weak self, actionExecutor] in
+      do {
+        let plan = try await actionExecutor.prepareDeletion(
+          installationIDs: requestedIDs,
+          currentInventory: inventory,
+          sources: currentSources
+        )
+        guard let self, !Task.isCancelled, self.selectedInstallationIDs == requestedIDs else {
+          await actionExecutor.cancel(planID: plan.id)
+          return
+        }
+        self.deletionPlan = plan
+      } catch {
+        self?.deletionError = DeletionUIError(error)
+      }
+      self?.isPreparingDeletion = false
+      self?.actionTask = nil
+    }
+  }
+
+  func cancelDeletionPreview() {
+    guard let plan = deletionPlan else { return }
+    deletionPlan = nil
+    Task { [actionExecutor] in await actionExecutor?.cancel(planID: plan.id) }
+  }
+
+  func executeDeletion(confirmedIrreversible: Bool) {
+    guard let plan = deletionPlan, let actionExecutor, !isDeleting, !isScanning else { return }
+    let inventory = installations
+    let currentSources = sources
+    isDeleting = true
+    deletionError = nil
+    actionTask?.cancel()
+    actionTask = Task { [weak self, actionExecutor] in
+      do {
+        let report = try await actionExecutor.execute(
+          plan,
+          currentInventory: inventory,
+          sources: currentSources,
+          confirmedIrreversible: confirmedIrreversible
+        )
+        guard let self, !Task.isCancelled else { return }
+        self.deletionPlan = nil
+        self.deletionReport = report
+        self.selectedInstallationIDs = []
+        self.isDeleting = false
+        self.refreshActionAudit()
+        if !report.affectedSourceIDs.isEmpty {
+          self.startScan(sourceIDs: report.affectedSourceIDs)
+        }
+      } catch {
+        self?.deletionPlan = nil
+        self?.deletionError = DeletionUIError(error)
+        self?.isDeleting = false
+        self?.refreshActionAudit()
+      }
+      self?.actionTask = nil
+    }
+  }
+
+  func dismissDeletionReport() {
+    deletionReport = nil
+  }
+
+  func dismissDeletionError() {
+    deletionError = nil
+  }
+
+  func clearActionAudit() {
+    guard let actionExecutor else { return }
+    Task { [weak self, actionExecutor] in
+      do {
+        try await actionExecutor.clearAudit()
+        self?.actionAuditEntries = []
+      } catch {
+        self?.deletionError = .auditUnavailable
+      }
+    }
   }
 
   private func consume(_ event: InventoryScanEvent, generationID: UUID) {
@@ -553,6 +670,87 @@ final class InventoryViewModel {
         summary: "Source settings could not be read or saved."
       )
     ])
+  }
+
+  private func refreshActionAudit() {
+    guard let actionExecutor else { return }
+    Task { [weak self, actionExecutor] in
+      self?.actionAuditEntries = await actionExecutor.auditEntries()
+    }
+  }
+
+  private func invalidateDeletionPreview() {
+    guard let plan = deletionPlan else { return }
+    deletionPlan = nil
+    Task { [actionExecutor] in await actionExecutor?.cancel(planID: plan.id) }
+  }
+}
+
+enum DeletionUIError: String, Identifiable {
+  case noSelection
+  case adapterUnavailable
+  case sourceUnavailable
+  case modelInUse
+  case providerUnavailable
+  case noDeletableArtifacts
+  case planExpired
+  case planConflict
+  case irreversibleConfirmationRequired
+  case inventoryChanged
+  case revalidationFailed
+  case auditUnavailable
+  case unknown
+
+  var id: String { rawValue }
+
+  init(_ error: Error) {
+    switch error {
+    case ActionExecutorError.noSelection:
+      self = .noSelection
+    case ActionExecutorError.adapterUnavailable:
+      self = .adapterUnavailable
+    case ActionExecutorError.planExpired:
+      self = .planExpired
+    case ActionExecutorError.planConflict:
+      self = .planConflict
+    case ActionExecutorError.irreversibleConfirmationRequired:
+      self = .irreversibleConfirmationRequired
+    case ActionExecutorError.inventoryChanged, ActionExecutorError.planNotActive:
+      self = .inventoryChanged
+    case ActionExecutorError.sourceUnavailable:
+      self = .sourceUnavailable
+    case ActionExecutorError.targetRevalidationFailed,
+      ActionExecutorError.providerRevalidationFailed:
+      self = .revalidationFailed
+    case StorageActionAdapterError.modelInUse:
+      self = .modelInUse
+    case StorageActionAdapterError.providerUnavailable:
+      self = .providerUnavailable
+    case StorageActionAdapterError.noDeletableArtifacts:
+      self = .noDeletableArtifacts
+    case StorageActionAdapterError.sourceUnavailable:
+      self = .sourceUnavailable
+    default:
+      self = .unknown
+    }
+  }
+
+  var messageKey: LocalizedStringResource {
+    switch self {
+    case .noSelection: "deletion.error.no-selection"
+    case .adapterUnavailable: "deletion.error.adapter-unavailable"
+    case .sourceUnavailable: "deletion.error.source-unavailable"
+    case .modelInUse: "deletion.error.model-in-use"
+    case .providerUnavailable: "deletion.error.provider-unavailable"
+    case .noDeletableArtifacts: "deletion.error.no-artifacts"
+    case .planExpired: "deletion.error.plan-expired"
+    case .planConflict: "deletion.error.conflict"
+    case .irreversibleConfirmationRequired: "deletion.error.confirmation-required"
+    case .inventoryChanged: "deletion.error.inventory-changed"
+    case .revalidationFailed: "deletion.error.revalidation-failed"
+    case .auditUnavailable: "deletion.error.audit-unavailable"
+    case .unknown: "deletion.error.unknown"
+    }
   }
 }
 

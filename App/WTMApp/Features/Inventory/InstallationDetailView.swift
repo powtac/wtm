@@ -4,6 +4,8 @@ import WTMDomain
 struct InstallationDetailView: View {
   let installation: ModelInstallation?
   let revealAction: (URL) -> Void
+  let deleteAction: () -> Void
+  let canDelete: Bool
 
   var body: some View {
     if let installation {
@@ -74,6 +76,13 @@ struct InstallationDetailView: View {
 
         if let modelCardURL = validatedModelCardURL(installation.modelCard) {
           Link("detail.model-card.action", destination: modelCardURL)
+        }
+
+        Section {
+          Button("deletion.review.action", systemImage: "trash", role: .destructive) {
+            deleteAction()
+          }
+          .disabled(!canDelete)
         }
       }
       .formStyle(.grouped)

@@ -1,9 +1,14 @@
+import ActionHuggingFace
+import ActionManual
+import ActionOllama
 import AdapterHuggingFace
 import AdapterManual
 import AdapterOllama
 import Foundation
+import WTMActions
 import WTMAdapterContracts
 import WTMInventory
+import WTMPersistence
 
 @MainActor
 enum AppComposition {
@@ -17,7 +22,7 @@ enum AppComposition {
     let sources = DefaultSourceCatalog().suggestions(
       homeDirectory: FileManager.default.homeDirectoryForCurrentUser
     )
-    let applicationSupportURL = FileManager.default.urls(
+    let applicationSupportDirectory = FileManager.default.urls(
       for: .applicationSupportDirectory,
       in: .userDomainMask
     )[0]
@@ -26,14 +31,41 @@ enum AppComposition {
         ?? Bundle.main.bundleIdentifier ?? "de.powtac.whatthemodel",
       directoryHint: .isDirectory
     )
-    .appending(path: "source-settings.json", directoryHint: .notDirectory)
+    var actionAdapters: [any StorageActionAdapter] = [
+      HuggingFaceStorageActionAdapter(),
+      ManualStorageActionAdapter(),
+    ]
+    if let ollamaURL = URL(string: "http://127.0.0.1:11434"),
+      let ollamaActionAdapter = try? OllamaStorageActionAdapter(baseURL: ollamaURL)
+    {
+      actionAdapters.append(ollamaActionAdapter)
+    }
+    let actionRegistry = try? StorageActionAdapterRegistry(adapters: actionAdapters)
+    let actionExecutor = actionRegistry.map { registry in
+      ActionExecutor(
+        registry: registry,
+        trashMover: SystemTrashMover(),
+        auditStore: JSONActionAuditStore(
+          auditURL: applicationSupportDirectory.appending(
+            path: "action-audit.json",
+            directoryHint: .notDirectory
+          )
+        )
+      )
+    }
     return InventoryViewModel(
       coordinator: coordinator,
       initialSources: sources,
-      sourceSettingsStore: JSONSourceSettingsStore(settingsURL: applicationSupportURL),
+      sourceSettingsStore: JSONSourceSettingsStore(
+        settingsURL: applicationSupportDirectory.appending(
+          path: "source-settings.json",
+          directoryHint: .notDirectory
+        )
+      ),
       folderSelector: MacFolderSelector(),
       fileRevealer: MacFileRevealer(),
-      volumeCatalog: MacVolumeCatalog()
+      volumeCatalog: MacVolumeCatalog(),
+      actionExecutor: actionExecutor
     )
   }
 }

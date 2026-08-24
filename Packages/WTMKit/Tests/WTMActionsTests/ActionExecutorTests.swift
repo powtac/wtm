@@ -244,6 +244,15 @@ func pathContainmentRejectsTraversalCandidates() throws {
   }
 }
 
+@Test("Deletion target policy rejects read-only volumes")
+func deletionTargetPolicyRejectsReadOnlyVolumes() {
+  let policy = DeletionTargetPolicy(volumeIsReadOnly: { _ in true })
+
+  #expect(throws: DeletionTargetPolicyError.sourceVolumeReadOnly) {
+    try policy.validateWritableVolume(containing: URL(filePath: "/fixture"))
+  }
+}
+
 private func makeExecutor(
   adapter: any StorageActionAdapter,
   trashMover: any TrashMoving

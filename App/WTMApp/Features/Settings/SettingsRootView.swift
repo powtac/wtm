@@ -4,6 +4,7 @@ import WTMDomain
 struct SettingsRootView: View {
   @Bindable var model: InventoryViewModel
   @State private var pendingRevocationSourceID: ScanSource.ID?
+  @State private var isAuditClearConfirmationPresented = false
 
   var body: some View {
     TabView {
@@ -38,6 +39,18 @@ struct SettingsRootView: View {
       }
     } message: {
       Text("source.revoke.confirmation.message")
+    }
+    .confirmationDialog(
+      "settings.audit.clear-confirmation.title",
+      isPresented: $isAuditClearConfirmationPresented,
+      titleVisibility: .visible
+    ) {
+      Button("settings.audit.clear", role: .destructive) {
+        model.clearActionAudit()
+      }
+      Button("action.cancel", role: .cancel) {}
+    } message: {
+      Text("settings.audit.clear-confirmation.message")
     }
   }
 
@@ -175,6 +188,35 @@ struct SettingsRootView: View {
             }
           }
         }
+      }
+
+      Section("settings.audit.section") {
+        if model.actionAuditEntries.isEmpty {
+          Text("settings.audit.empty")
+            .foregroundStyle(.secondary)
+        } else {
+          ForEach(model.actionAuditEntries) { entry in
+            HStack {
+              VStack(alignment: .leading, spacing: 2) {
+                Text(entry.occurredAt, format: .dateTime.year().month().day().hour().minute())
+                Text(entry.providerIDs.map(\.localizedName).joined(separator: ", "))
+                  .font(.caption)
+                  .foregroundStyle(.secondary)
+              }
+              Spacer()
+              Text(deletionResultKey(entry.status))
+                .foregroundStyle(.secondary)
+              Text("\(entry.succeededCount)/\(entry.operationCount)")
+                .monospacedDigit()
+            }
+          }
+          Button("settings.audit.clear", role: .destructive) {
+            isAuditClearConfirmationPresented = true
+          }
+        }
+        Text("settings.audit.privacy")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
     }
   }

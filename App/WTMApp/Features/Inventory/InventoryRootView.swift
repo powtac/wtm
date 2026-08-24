@@ -13,30 +13,71 @@ struct InventoryRootView: View {
 
   @ViewBuilder
   var body: some View {
-    if model.isPreparingSources {
-      ProgressView("source.loading")
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    } else if !model.hasCompletedOnboarding {
-      SourceSetupView(model: model)
-        .frame(minWidth: 720, minHeight: 480)
-    } else {
-      NavigationSplitView {
-        List(InventorySection.allCases, selection: $model.selectedSection) { section in
-          Label(String(localized: section.localizedKey), systemImage: section.systemImage)
-            .tag(section)
+    Group {
+      if model.isPreparingSources {
+        ProgressView("source.loading")
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      } else if !model.hasCompletedOnboarding {
+        SourceSetupView(model: model)
+          .frame(minWidth: 720, minHeight: 480)
+      } else {
+        NavigationSplitView {
+          List(InventorySection.allCases, selection: $model.selectedSection) { section in
+            Label(String(localized: section.localizedKey), systemImage: section.systemImage)
+              .tag(section)
+          }
+          .navigationTitle(Text("app.name"))
+        } content: {
+          inventoryContent
+            .navigationTitle(Text("inventory.title"))
+            .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
+            .toolbar { inventoryToolbar }
+        } detail: {
+          if model.selectedInstallationIDs.count > 1 {
+            VStack(spacing: 14) {
+              ContentUnavailableView(
+                "deletion.batch-selection.title",
+                systemImage: "trash",
+                description: Text(
+                  "\(model.selectedInstallationIDs.count) \(String(localized: "deletion.models-selected"))"
+                )
+              )
+              Button("deletion.review.action", systemImage: "trash") {
+                model.prepareDeletion()
+              }
+              .buttonStyle(.borderedProminent)
+              .disabled(!model.canPrepareDeletion)
+            }
+          } else {
+            InstallationDetailView(
+              installation: model.selectedInstallation,
+              revealAction: model.reveal,
+              deleteAction: model.prepareDeletion,
+              canDelete: model.canPrepareDeletion
+            )
+          }
         }
-        .navigationTitle(Text("app.name"))
-      } content: {
-        inventoryContent
-          .navigationTitle(Text("inventory.title"))
-          .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
-          .toolbar { inventoryToolbar }
-      } detail: {
-        InstallationDetailView(
-          installation: model.selectedInstallation,
-          revealAction: model.reveal
+      }
+    }
+    .sheet(isPresented: deletionPlanIsPresented) {
+      if let plan = model.deletionPlan {
+        DeletionPreviewView(
+          plan: plan,
+          isExecuting: model.isDeleting,
+          cancelAction: model.cancelDeletionPreview,
+          executeAction: model.executeDeletion
         )
       }
+    }
+    .alert("deletion.error.title", isPresented: deletionErrorIsPresented) {
+      Button("action.ok") { model.dismissDeletionError() }
+    } message: {
+      if let error = model.deletionError { Text(error.messageKey) }
+    }
+    .alert("deletion.result.title", isPresented: deletionReportIsPresented) {
+      Button("action.ok") { model.dismissDeletionReport() }
+    } message: {
+      if let report = model.deletionReport { Text(deletionResultKey(report.status)) }
     }
   }
 
@@ -101,7 +142,7 @@ struct InventoryRootView: View {
 
         Table(
           rows.sorted(using: sortOrder),
-          selection: $model.selectedInstallationID,
+          selection: $model.selectedInstallationIDs,
           sortOrder: $sortOrder,
           columnCustomization: $columnCustomization
         ) {
@@ -314,6 +355,20 @@ struct InventoryRootView: View {
         }
       }
 
+      Button(role: .destructive) {
+        model.prepareDeletion()
+      } label: {
+        Label("deletion.review.action", systemImage: "trash")
+      }
+      .keyboardShortcut(.delete, modifiers: [.command])
+      .disabled(!model.canPrepareDeletion)
+
+      if model.isPreparingDeletion || model.isDeleting {
+        ProgressView()
+          .controlSize(.small)
+          .accessibilityLabel(Text("deletion.progress"))
+      }
+
       Menu {
         Picker("filter.provider", selection: $model.selectedProviderID) {
           Text("filter.any-provider").tag(nil as ProviderID?)
@@ -353,6 +408,27 @@ struct InventoryRootView: View {
 
   private func sourceName(for sourceID: ScanSource.ID) -> String {
     model.sources.first(where: { $0.id == sourceID })?.displayName ?? sourceID
+  }
+
+  private var deletionPlanIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.deletionPlan != nil },
+      set: { if !$0 { model.cancelDeletionPreview() } }
+    )
+  }
+
+  private var deletionErrorIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.deletionError != nil },
+      set: { if !$0 { model.dismissDeletionError() } }
+    )
+  }
+
+  private var deletionReportIsPresented: Binding<Bool> {
+    Binding(
+      get: { model.deletionReport != nil },
+      set: { if !$0 { model.dismissDeletionReport() } }
+    )
   }
 
   private func activeScanStatus(_ state: ActiveScanState) -> some View {

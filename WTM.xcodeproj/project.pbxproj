@@ -13,6 +13,11 @@
 		A00000000000000000000024 /* AdapterOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000014 /* AdapterOllama */; };
 		A00000000000000000000025 /* AdapterHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000015 /* AdapterHuggingFace */; };
 		A00000000000000000000026 /* AdapterManual in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000016 /* AdapterManual */; };
+		A00000000000000000000027 /* WTMActions in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000017 /* WTMActions */; };
+		A00000000000000000000028 /* WTMPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000018 /* WTMPersistence */; };
+		A00000000000000000000029 /* ActionOllama in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000019 /* ActionOllama */; };
+		A0000000000000000000002A /* ActionHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001A /* ActionHuggingFace */; };
+		A0000000000000000000002B /* ActionManual in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001B /* ActionManual */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +75,11 @@
 				A00000000000000000000024 /* AdapterOllama in Frameworks */,
 				A00000000000000000000025 /* AdapterHuggingFace in Frameworks */,
 				A00000000000000000000026 /* AdapterManual in Frameworks */,
+				A00000000000000000000027 /* WTMActions in Frameworks */,
+				A00000000000000000000028 /* WTMPersistence in Frameworks */,
+				A00000000000000000000029 /* ActionOllama in Frameworks */,
+				A0000000000000000000002A /* ActionHuggingFace in Frameworks */,
+				A0000000000000000000002B /* ActionManual in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -147,6 +157,11 @@
 				A00000000000000000000014 /* AdapterOllama */,
 				A00000000000000000000015 /* AdapterHuggingFace */,
 				A00000000000000000000016 /* AdapterManual */,
+				A00000000000000000000017 /* WTMActions */,
+				A00000000000000000000018 /* WTMPersistence */,
+				A00000000000000000000019 /* ActionOllama */,
+				A0000000000000000000001A /* ActionHuggingFace */,
+				A0000000000000000000001B /* ActionManual */,
 			);
 			productName = WTM;
 			productReference = A00000000000000000000008 /* WTM.app */;
@@ -466,6 +481,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = AdapterManual;
+		};
+		A00000000000000000000017 /* WTMActions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = WTMActions;
+		};
+		A00000000000000000000018 /* WTMPersistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = WTMPersistence;
+		};
+		A00000000000000000000019 /* ActionOllama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = ActionOllama;
+		};
+		A0000000000000000000001A /* ActionHuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = ActionHuggingFace;
+		};
+		A0000000000000000000001B /* ActionManual */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = ActionManual;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

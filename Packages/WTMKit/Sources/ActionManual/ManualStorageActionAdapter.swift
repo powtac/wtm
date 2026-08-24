@@ -34,41 +34,43 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
     )
 
     var aggregates: [String: TargetAggregate] = [:]
-    var retained: [RetainedDeletionDependency] = []
+    var retainedByID: [String: RetainedDeletionDependency] = [:]
     for installation in selected {
       guard let source = context.source(for: installation.sourceID), source.isEnabled,
         source.accessState == .allowed
       else {
         throw StorageActionAdapterError.sourceUnavailable(installation.sourceID)
       }
+      do {
+        try targetPolicy.validateWritableVolume(containing: source.rootURL)
+      } catch {
+        throw StorageActionAdapterError.sourceUnavailable(installation.sourceID)
+      }
       for artifact in installation.artifacts {
         if configurationPolicy.isSecretSuspect(artifact.url) {
-          retained.append(
-            retainedDependency(
-              artifact: artifact,
-              installationID: installation.id,
-              reason: .protectedIdentityOrSecret
-            )
+          mergeRetained(
+            artifact: artifact,
+            installationID: installation.id,
+            reason: .protectedIdentityOrSecret,
+            into: &retainedByID
           )
           continue
         }
         guard let physicalIdentifier = artifact.physicalIdentifier else {
-          retained.append(
-            retainedDependency(
-              artifact: artifact,
-              installationID: installation.id,
-              reason: .unknownOwnership
-            )
+          mergeRetained(
+            artifact: artifact,
+            installationID: installation.id,
+            reason: .unknownOwnership,
+            into: &retainedByID
           )
           continue
         }
         guard !remainingPhysicalIDs.contains(physicalIdentifier) else {
-          retained.append(
-            retainedDependency(
-              artifact: artifact,
-              installationID: installation.id,
-              reason: .remainingReference
-            )
+          mergeRetained(
+            artifact: artifact,
+            installationID: installation.id,
+            reason: .remainingReference,
+            into: &retainedByID
           )
           continue
         }
@@ -128,7 +130,7 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
       providerID: id,
       models: selected.map(Self.summary),
       operations: operations,
-      retainedDependencies: retained,
+      retainedDependencies: Array(retainedByID.values),
       warnings: [.externalUsageNotVerified, .freeSpaceIsEstimated]
     )
   }
@@ -144,17 +146,20 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
     )
   }
 
-  private func retainedDependency(
+  private func mergeRetained(
     artifact: Artifact,
     installationID: ModelInstallation.ID,
-    reason: RetainedDependencyReason
-  ) -> RetainedDeletionDependency {
-    RetainedDeletionDependency(
-      id: "manual:retained:\(reason.rawValue):\(artifact.url.standardizedFileURL.path)",
+    reason: RetainedDependencyReason,
+    into dependencies: inout [String: RetainedDeletionDependency]
+  ) {
+    let id = "manual:retained:\(reason.rawValue):\(artifact.url.standardizedFileURL.path)"
+    let existing = dependencies[id]
+    dependencies[id] = RetainedDeletionDependency(
+      id: id,
       displayName: artifact.url.lastPathComponent,
-      allocatedByteCount: artifact.allocatedByteCount,
+      allocatedByteCount: max(existing?.allocatedByteCount ?? 0, artifact.allocatedByteCount),
       reason: reason,
-      installationIDs: [installationID]
+      installationIDs: Array(Set(existing?.installationIDs ?? []).union([installationID]))
     )
   }
 }

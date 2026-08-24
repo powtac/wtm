@@ -1,6 +1,546 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "action.ok" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      }
+    },
+    "deletion.batch-selection.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Selected Models"
+          }
+        }
+      }
+    },
+    "deletion.conflict.in-use" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A selected model is currently in use."
+          }
+        }
+      }
+    },
+    "deletion.conflict.overlap" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected operations contain overlapping filesystem targets."
+          }
+        }
+      }
+    },
+    "deletion.conflict.provider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Different providers claim the same cleanup target."
+          }
+        }
+      }
+    },
+    "deletion.error.adapter-unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reviewed cleanup adapter is available for this provider."
+          }
+        }
+      }
+    },
+    "deletion.error.audit-unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The local cleanup audit could not be updated."
+          }
+        }
+      }
+    },
+    "deletion.error.confirmation-required" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm the irreversible provider operation before continuing."
+          }
+        }
+      }
+    },
+    "deletion.error.conflict" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The batch contains unresolved target conflicts."
+          }
+        }
+      }
+    },
+    "deletion.error.inventory-changed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The inventory changed after the preview. Scan and create a new preview."
+          }
+        }
+      }
+    },
+    "deletion.error.model-in-use" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provider reports that this model is currently loaded. Stop it before cleanup."
+          }
+        }
+      }
+    },
+    "deletion.error.no-artifacts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No artifact can be removed safely. Shared, unknown, and protected files were retained."
+          }
+        }
+      }
+    },
+    "deletion.error.no-selection" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select at least one model."
+          }
+        }
+      }
+    },
+    "deletion.error.plan-expired" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cleanup preview expired. Create a new preview from the current inventory."
+          }
+        }
+      }
+    },
+    "deletion.error.provider-unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provider’s local API is unavailable. No fallback file deletion was attempted."
+          }
+        }
+      }
+    },
+    "deletion.error.revalidation-failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A path, file identity, shared reference, or provider state changed after the preview. Nothing further was removed."
+          }
+        }
+      }
+    },
+    "deletion.error.source-unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model source is offline, disabled, read-only, or no longer authorized."
+          }
+        }
+      }
+    },
+    "deletion.error.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Could Not Continue"
+          }
+        }
+      }
+    },
+    "deletion.error.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup stopped safely because an unexpected error occurred."
+          }
+        }
+      }
+    },
+    "deletion.execute.irreversible" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute Cleanup"
+          }
+        }
+      }
+    },
+    "deletion.execute.trash" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move to Trash"
+          }
+        }
+      }
+    },
+    "deletion.executing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revalidating and cleaning up…"
+          }
+        }
+      }
+    },
+    "deletion.irreversible.confirmation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I understand that the provider deletion is irreversible."
+          }
+        }
+      }
+    },
+    "deletion.irreversible.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At least one provider operation cannot be restored from Trash."
+          }
+        }
+      }
+    },
+    "deletion.irreversible.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irreversible Provider Deletion"
+          }
+        }
+      }
+    },
+    "deletion.models-selected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "models selected"
+          }
+        }
+      }
+    },
+    "deletion.preview.conflicts" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blocking Conflicts"
+          }
+        }
+      }
+    },
+    "deletion.preview.estimate" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimate"
+          }
+        }
+      }
+    },
+    "deletion.preview.estimate-help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is a conservative estimate. Trash-backed storage is reclaimed only after Trash is emptied; free volume space is not proof of success."
+          }
+        }
+      }
+    },
+    "deletion.preview.expected-reclaim" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expected Reclaimable"
+          }
+        }
+      }
+    },
+    "deletion.preview.expires" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview Expires"
+          }
+        }
+      }
+    },
+    "deletion.preview.models" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Models"
+          }
+        }
+      }
+    },
+    "deletion.preview.operations" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned Operations"
+          }
+        }
+      }
+    },
+    "deletion.preview.retained" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained Dependencies"
+          }
+        }
+      }
+    },
+    "deletion.preview.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Cleanup"
+          }
+        }
+      }
+    },
+    "deletion.progress" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing cleanup"
+          }
+        }
+      }
+    },
+    "deletion.result.blocked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup was blocked before any operation ran."
+          }
+        }
+      }
+    },
+    "deletion.result.failed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup failed. WTM rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.partial" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup completed only partially. WTM stopped after the first failure and rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.succeeded" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup completed. WTM rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Result"
+          }
+        }
+      }
+    },
+    "deletion.retained.protected" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protected identity, credential, or secret-like file"
+          }
+        }
+      }
+    },
+    "deletion.retained.remaining-reference" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained because another model still references it"
+          }
+        }
+      }
+    },
+    "deletion.retained.unknown" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained because ownership could not be verified"
+          }
+        }
+      }
+    },
+    "deletion.reversible.irreversible" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irreversible provider operation"
+          }
+        }
+      }
+    },
+    "deletion.reversible.trash" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recoverable from Trash"
+          }
+        }
+      }
+    },
+    "deletion.review.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Cleanup…"
+          }
+        }
+      }
+    },
+    "deletion.warning.external-usage" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM cannot verify whether another app has this file open. Close model tools before continuing."
+          }
+        }
+      }
+    },
+    "settings.audit.clear" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Audit…"
+          }
+        }
+      }
+    },
+    "settings.audit.clear-confirmation.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This permanently removes the local cleanup history."
+          }
+        }
+      }
+    },
+    "settings.audit.clear-confirmation.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Cleanup Audit?"
+          }
+        }
+      }
+    },
+    "settings.audit.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cleanup actions recorded."
+          }
+        }
+      }
+    },
+    "settings.audit.privacy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The audit stores time, provider, operation counts, and result only. It never stores model names, paths, payloads, credentials, or file contents."
+          }
+        }
+      }
+    },
+    "settings.audit.section" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Audit"
+          }
+        }
+      }
+    },
     "action.cancel" : {
       "localizations" : {
         "en" : {

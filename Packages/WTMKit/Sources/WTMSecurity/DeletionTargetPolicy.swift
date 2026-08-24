@@ -7,11 +7,26 @@ public enum DeletionTargetPolicyError: Error, Equatable, Sendable {
   case targetOutsideSource
   case targetMissing
   case identityChanged
+  case sourceVolumeReadOnly
 }
 
 /// Validates a deletion target lexically and reads its no-follow identity with `lstat`.
 public struct DeletionTargetPolicy: Sendable {
-  public init() {}
+  private let volumeIsReadOnly: @Sendable (URL) throws -> Bool
+
+  public init(
+    volumeIsReadOnly: @escaping @Sendable (URL) throws -> Bool = { url in
+      try url.resourceValues(forKeys: [.volumeIsReadOnlyKey]).volumeIsReadOnly == true
+    }
+  ) {
+    self.volumeIsReadOnly = volumeIsReadOnly
+  }
+
+  public func validateWritableVolume(containing sourceRootURL: URL) throws {
+    guard try !volumeIsReadOnly(sourceRootURL) else {
+      throw DeletionTargetPolicyError.sourceVolumeReadOnly
+    }
+  }
 
   public func captureIdentity(for targetURL: URL, under sourceRootURL: URL) throws
     -> DeletionFileIdentity

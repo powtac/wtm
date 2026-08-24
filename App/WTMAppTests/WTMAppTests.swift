@@ -1,5 +1,7 @@
+import ActionManual
 import Foundation
 import Testing
+import WTMActions
 import WTMAdapterContracts
 import WTMDomain
 import WTMInventory
@@ -318,6 +320,67 @@ func launchScanCanBeDisabled() async throws {
 }
 
 @MainActor
+@Test("Cleanup executes only after preview and triggers a targeted verification scan")
+func cleanupRequiresPreviewAndTriggersTargetedVerification() async throws {
+  let rootURL = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  let modelURL = rootURL.appending(path: "model.gguf")
+  try Data("model".utf8).write(to: modelURL)
+  let source = ScanSource(
+    id: "cleanup-source",
+    displayName: "Cleanup Fixture",
+    providerID: .manual,
+    rootURL: rootURL,
+    accessState: .allowed,
+    isEnabled: true
+  )
+  let scanAdapter = FileBackedManualAdapter(modelURL: modelURL)
+  let actionExecutor = ActionExecutor(
+    registry: try StorageActionAdapterRegistry(adapters: [ManualStorageActionAdapter()]),
+    trashMover: RemovingTrashMover(),
+    auditStore: InMemoryActionAuditStore()
+  )
+  let model = InventoryViewModel(
+    coordinator: InventoryCoordinator(registry: try AdapterRegistry(adapters: [scanAdapter])),
+    initialSources: [source],
+    sourceSettingsStore: FixtureSourceSettingsStore(snapshot: nil),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog(),
+    actionExecutor: actionExecutor
+  )
+
+  model.startScan()
+  for _ in 0..<100 where model.isScanning {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+  #expect(model.installations.map(\.id) == [FileBackedManualAdapter.installationID])
+
+  model.selectedInstallationIDs = [FileBackedManualAdapter.installationID]
+  model.prepareDeletion()
+  for _ in 0..<100 where model.deletionPlan == nil && model.deletionError == nil {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+  #expect(model.deletionPlan?.operations.count == 1)
+  #expect(FileManager.default.fileExists(atPath: modelURL.path))
+
+  model.executeDeletion(confirmedIrreversible: false)
+  for _ in 0..<200 where model.isDeleting || model.isScanning || model.deletionReport == nil {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+
+  #expect(model.deletionReport?.status == .succeeded)
+  #expect(!FileManager.default.fileExists(atPath: modelURL.path))
+  #expect(model.installations.isEmpty)
+  #expect(model.scanSummary?.scannedSourceCount == 1)
+  #expect(model.actionAuditEntries.count == 1)
+}
+
+@MainActor
 @Test("A cancelled scan generation cannot finish its replacement")
 func cancelledScanGenerationCannotMutateReplacement() async throws {
   let source = ScanSource(
@@ -605,6 +668,51 @@ private struct LaunchFixtureAdapter: StorageProviderAdapter {
       ]
     )
     return AdapterScanResult(source: source, installations: [installation])
+  }
+}
+
+private struct FileBackedManualAdapter: StorageProviderAdapter {
+  static let installationID = "manual:cleanup-fixture"
+  let id = ProviderID.manual
+  let displayName = "File-backed Manual Fixture"
+  let modelURL: URL
+
+  func scan(source: ScanSource) async -> AdapterScanResult {
+    guard FileManager.default.fileExists(atPath: modelURL.path) else {
+      return AdapterScanResult(source: source, installations: [])
+    }
+    let identity = ModelIdentity(id: Self.installationID, displayName: "Cleanup Fixture")
+    let variant = ModelVariant(
+      id: "\(Self.installationID):variant",
+      identityID: identity.id,
+      format: .gguf
+    )
+    let installation = ModelInstallation(
+      id: Self.installationID,
+      identity: identity,
+      variant: variant,
+      sourceID: source.id,
+      providerID: id,
+      rootURL: source.rootURL,
+      state: .stored,
+      artifacts: [
+        Artifact(
+          id: "cleanup-artifact",
+          url: modelURL,
+          kind: .weights,
+          logicalByteCount: 5,
+          allocatedByteCount: 4_096,
+          physicalIdentifier: "cleanup-artifact"
+        )
+      ]
+    )
+    return AdapterScanResult(source: source, installations: [installation])
+  }
+}
+
+private actor RemovingTrashMover: TrashMoving {
+  func moveToTrash(_ url: URL) throws {
+    try FileManager.default.removeItem(at: url)
   }
 }
 
