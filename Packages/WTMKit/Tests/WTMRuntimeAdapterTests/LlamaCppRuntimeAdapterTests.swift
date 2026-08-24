@@ -147,7 +147,7 @@ func llamaCppReadinessSeparatesMemoryEstimate() async throws {
 
   let readiness = await adapter.readiness(
     for: ggufInstallation(),
-    environment: RuntimeEnvironment(architecture: "arm64", availableMemoryByteCount: 1)
+    environment: RuntimeEnvironment(architecture: "arm64", memoryCapacityByteCount: 1)
   )
 
   #expect(readiness.compatibility.value == .insufficientMemory)

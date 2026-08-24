@@ -19,7 +19,7 @@ public struct LlamaCppToolConvention: Sendable {
       })
     else { return nil }
     return ToolDefinition(
-      id: UUID(),
+      id: Self.definitionID,
       displayName: "llama.cpp Server",
       role: .runtime,
       origin: .builtIn,
@@ -33,4 +33,10 @@ public struct LlamaCppToolConvention: Sendable {
       supportedFormats: [.gguf]
     )
   }
+
+  private static let definitionID = UUID(
+    uuid: (
+      0x77, 0x74, 0x6D, 0x00, 0x6C, 0x6C, 0x61, 0x6D, 0x61, 0x63, 0x70, 0x70, 0x00, 0x00, 0x00, 0x01
+    )
+  )
 }

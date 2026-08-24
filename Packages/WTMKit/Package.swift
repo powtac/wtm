@@ -43,7 +43,7 @@ let package = Package(
       name: "RuntimeLlamaCpp",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
     ),
-    .target(name: "WTMPersistence", dependencies: ["WTMActions"]),
+    .target(name: "WTMPersistence", dependencies: ["WTMDomain", "WTMActions"]),
     .target(
       name: "WTMInventory",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
@@ -119,7 +119,7 @@ let package = Package(
     ),
     .testTarget(
       name: "WTMPersistenceTests",
-      dependencies: ["WTMDomain", "WTMActions", "WTMPersistence"]
+      dependencies: ["WTMDomain", "WTMActions", "WTMPersistence", "WTMRuntime"]
     ),
   ],
   swiftLanguageModes: [.v6]

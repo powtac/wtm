@@ -3,11 +3,20 @@ import WTMDomain
 
 public struct RuntimeEnvironment: Hashable, Sendable {
   public let architecture: String
-  public let availableMemoryByteCount: Int64?
+  public let memoryCapacityByteCount: Int64?
+  public let toolDefinition: ToolDefinition?
+  public let toolApproval: ToolExecutionApproval?
 
-  public init(architecture: String, availableMemoryByteCount: Int64? = nil) {
+  public init(
+    architecture: String,
+    memoryCapacityByteCount: Int64? = nil,
+    toolDefinition: ToolDefinition? = nil,
+    toolApproval: ToolExecutionApproval? = nil
+  ) {
     self.architecture = architecture
-    self.availableMemoryByteCount = availableMemoryByteCount
+    self.memoryCapacityByteCount = memoryCapacityByteCount
+    self.toolDefinition = toolDefinition
+    self.toolApproval = toolApproval
   }
 }
 

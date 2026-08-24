@@ -44,12 +44,12 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       compatibilityValue = .unsupportedFormat
       validationValue = .blocked
       blockers.append("llama.cpp requires a GGUF model.")
-    } else if let configuredDefinition {
+    } else if let definition = environment.toolDefinition ?? configuredDefinition {
       do {
-        _ = try invocationBuilder.inspect(configuredDefinition, checkedAt: checkedAt)
+        _ = try invocationBuilder.inspect(definition, checkedAt: checkedAt)
         compatibilityValue = .compatible
         validationValue = .staticCompatible
-        if !configuredDefinition.isEnabled || configuredApproval == nil {
+        if !definition.isEnabled || (environment.toolApproval ?? configuredApproval) == nil {
           blockers.append("Enable and approve the discovered llama.cpp executable before launch.")
         }
       } catch {
@@ -63,12 +63,12 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       blockers.append("No llama.cpp executable is configured.")
     }
 
-    if let available = environment.availableMemoryByteCount,
-      estimate.byteCount > available,
+    if let capacity = environment.memoryCapacityByteCount,
+      estimate.byteCount > capacity,
       compatibilityValue == .compatible
     {
       compatibilityValue = .insufficientMemory
-      blockers.append("Estimated model memory exceeds currently available memory.")
+      blockers.append("Estimated model memory exceeds installed unified-memory capacity.")
     }
 
     return RuntimeReadiness(
