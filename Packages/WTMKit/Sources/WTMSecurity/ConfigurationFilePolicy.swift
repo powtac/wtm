@@ -22,7 +22,18 @@ public struct ConfigurationFilePolicy: Sendable {
 
   public func isSecretSuspect(_ url: URL) -> Bool {
     let name = url.lastPathComponent.lowercased()
-    if [".env", ".netrc", "credentials", "credentials.json"].contains(name) { return true }
+    if [
+      ".env",
+      ".netrc",
+      "credentials",
+      "credentials.json",
+      "id_dsa",
+      "id_ecdsa",
+      "id_ed25519",
+      "id_rsa",
+    ].contains(name) {
+      return true
+    }
     if [".pem", ".key", ".p12", ".pfx"].contains(where: name.hasSuffix) { return true }
     return name.contains("private_key") || name.contains("access_token")
       || name.contains("api_key")

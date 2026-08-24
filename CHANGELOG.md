@@ -44,6 +44,10 @@ first public release is tagged.
 
 - Revalidated Phase 1 against Requirements 0.2.0 with a current Developer ID archive,
   accepted Apple notarization, stapled ticket, and successful Gatekeeper assessment.
+- Added the Phase 2 capability boundary: immutable deletion plans, no-follow identity
+  revalidation, conflict detection, centralized Trash dispatch, and redacted local audit.
+- Added compiled cleanup adapters for manual files, Hugging Face revision/reference graphs,
+  and irreversible Ollama loopback API deletion with loaded-model blocking.
 
 ### Fixed
 

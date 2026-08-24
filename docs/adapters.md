@@ -27,8 +27,15 @@ artifact paths and suppresses only the generic duplicate.
 
 ### Storage action adapter
 
-Provider-aware deletion planning and verification. This capability starts in Phase 2 and
-is not present in the Phase 1 target graph.
+Provider-aware deletion planning, revalidation, and reviewed provider requests. Phase 2
+ships separate action adapters for Ollama, Hugging Face, and manual folders. Adapters return
+data-only operations; `ActionExecutor` owns plan lifetime, conflict detection, filesystem
+identity checks, Trash dispatch, serialization, and audit.
+
+Ollama uses its loopback delete API. Hugging Face builds a revision/reference graph and
+offers a blob only after its final snapshot reference is selected. Manual cleanup excludes
+shared, unknown-ownership, credential, identity, and secret-like files. See
+[ADR-023](decisions/ADR-023-revalidated-deletion-transactions.md).
 
 ### Runtime adapter
 

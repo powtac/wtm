@@ -9,13 +9,34 @@ if rg -n 'import Adapter' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sour
   exit 1
 fi
 
-if rg -n 'ActionExecutor|RuntimeBroker|StorageActionAdapter|RuntimeAdapter|ClientAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
-  echo "Phase 1 must not contain action, runtime, or client capabilities." >&2
+if rg -n 'RuntimeBroker|RuntimeAdapter|ClientAdapter|DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
+  echo "Phase 2 must not contain runtime, client, or download capabilities." >&2
   exit 1
 fi
 
-if rg -n 'Process\s*\(|/bin/(zsh|bash|sh)|FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
-  echo "A forbidden process or source-mutation API entered the scan-only graph." >&2
+if rg -n 'Process\s*\(|/bin/(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
+  echo "Process and shell capabilities remain forbidden in Phase 2." >&2
+  exit 1
+fi
+
+if rg -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
+  echo "A source-mutation API entered the read-only inventory graph." >&2
+  exit 1
+fi
+
+if rg -n 'FileManager\.default\.(removeItem|moveItem|replaceItem)' Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/ActionOllama Packages/WTMKit/Sources/ActionHuggingFace Packages/WTMKit/Sources/ActionManual; then
+  echo "Raw filesystem deletion or movement is forbidden in the action graph." >&2
+  exit 1
+fi
+
+trash_calls="$(rg -l 'FileManager\.default\.trashItem' Packages/WTMKit/Sources App/WTMApp || true)"
+if [[ "$trash_calls" != "Packages/WTMKit/Sources/WTMActions/TrashMover.swift" ]]; then
+  echo "macOS Trash must be reachable only through WTMActions/TrashMover.swift." >&2
+  exit 1
+fi
+
+if rg -n 'URLSession' Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/ActionHuggingFace Packages/WTMKit/Sources/ActionManual App/WTMApp; then
+  echo "Only a reviewed provider action adapter may access a local API." >&2
   exit 1
 fi
 
@@ -24,4 +45,4 @@ if rg -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechReco
   exit 1
 fi
 
-echo "Phase-1 architecture boundary is intact."
+echo "Phase-2 architecture boundary is intact."

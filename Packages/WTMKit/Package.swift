@@ -10,14 +10,24 @@ let package = Package(
     .library(name: "WTMAdapterContracts", targets: ["WTMAdapterContracts"]),
     .library(name: "WTMInventory", targets: ["WTMInventory"]),
     .library(name: "WTMSecurity", targets: ["WTMSecurity"]),
+    .library(name: "WTMActions", targets: ["WTMActions"]),
+    .library(name: "WTMPersistence", targets: ["WTMPersistence"]),
     .library(name: "AdapterOllama", targets: ["AdapterOllama"]),
     .library(name: "AdapterHuggingFace", targets: ["AdapterHuggingFace"]),
     .library(name: "AdapterManual", targets: ["AdapterManual"]),
+    .library(name: "ActionOllama", targets: ["ActionOllama"]),
+    .library(name: "ActionHuggingFace", targets: ["ActionHuggingFace"]),
+    .library(name: "ActionManual", targets: ["ActionManual"]),
   ],
   targets: [
     .target(name: "WTMDomain"),
     .target(name: "WTMAdapterContracts", dependencies: ["WTMDomain"]),
-    .target(name: "WTMSecurity"),
+    .target(name: "WTMSecurity", dependencies: ["WTMDomain"]),
+    .target(
+      name: "WTMActions",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
+    ),
+    .target(name: "WTMPersistence", dependencies: ["WTMActions"]),
     .target(
       name: "WTMInventory",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
@@ -32,6 +42,18 @@ let package = Package(
     ),
     .target(
       name: "AdapterManual",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
+    ),
+    .target(
+      name: "ActionOllama",
+      dependencies: ["WTMDomain", "WTMAdapterContracts"]
+    ),
+    .target(
+      name: "ActionHuggingFace",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
+    ),
+    .target(
+      name: "ActionManual",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
     ),
     .testTarget(name: "WTMDomainTests", dependencies: ["WTMDomain"]),
@@ -50,6 +72,23 @@ let package = Package(
         "WTMInventory",
       ],
       resources: [.copy("Fixtures")]
+    ),
+    .testTarget(
+      name: "WTMActionsTests",
+      dependencies: [
+        "WTMDomain", "WTMAdapterContracts", "WTMSecurity", "WTMActions",
+      ]
+    ),
+    .testTarget(
+      name: "WTMActionAdapterTests",
+      dependencies: [
+        "WTMDomain", "WTMAdapterContracts", "WTMSecurity", "WTMActions",
+        "ActionOllama", "ActionHuggingFace", "ActionManual",
+      ]
+    ),
+    .testTarget(
+      name: "WTMPersistenceTests",
+      dependencies: ["WTMDomain", "WTMActions", "WTMPersistence"]
     ),
   ],
   swiftLanguageModes: [.v6]
