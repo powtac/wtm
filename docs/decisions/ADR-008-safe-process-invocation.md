@@ -31,5 +31,6 @@ minimal inference verification.
 
 ## Validation
 
-Phase 1 architecture checks reject `Process` and shell entry points. Phase 3 must add
-negative argument, lifecycle, health-check, and ownership tests before linking runtime code.
+Phase 3 architecture checks permit `Process` only in the reviewed `WTMRuntime` launcher and
+reject shell entry points everywhere. Negative argument, lifecycle, health-check, and
+ownership tests are required before runtime code is linked into the app.

@@ -4,18 +4,24 @@ set -euo pipefail
 repository_root="${0:A:h:h}"
 cd "$repository_root"
 
-if rg -n 'import Adapter' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory; then
+if rg -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp)' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMRuntime 2>/dev/null; then
   echo "Core targets must not import concrete adapters." >&2
   exit 1
 fi
 
-if rg -n 'RuntimeBroker|RuntimeAdapter|ClientAdapter|DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
-  echo "Phase 2 must not contain runtime, client, or download capabilities." >&2
+if rg -n 'ClientAdapter|DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
+  echo "Phase 3 must not contain client or download capabilities." >&2
   exit 1
 fi
 
-if rg -n 'Process\s*\(|/bin/(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
-  echo "Process and shell capabilities remain forbidden in Phase 2." >&2
+if rg -n '/bin/(zsh|bash|sh)|/usr/bin/env[[:space:]]+(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
+  echo "Shell capabilities remain forbidden in Phase 3." >&2
+  exit 1
+fi
+
+process_files="$(rg -l 'Process\s*\(' App/WTMApp Packages/WTMKit/Sources || true)"
+if [[ -n "$process_files" && "$process_files" != "Packages/WTMKit/Sources/WTMRuntime/FoundationProcessLauncher.swift" ]]; then
+  echo "Foundation Process is allowed only in WTMRuntime/FoundationProcessLauncher.swift." >&2
   exit 1
 fi
 
@@ -35,8 +41,21 @@ if [[ "$trash_calls" != "Packages/WTMKit/Sources/WTMActions/TrashMover.swift" ]]
   exit 1
 fi
 
-if rg -n 'URLSession' Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/ActionHuggingFace Packages/WTMKit/Sources/ActionManual App/WTMApp; then
-  echo "Only a reviewed provider action adapter may access a local API." >&2
+network_files="$(rg -l 'URLSession' Packages/WTMKit/Sources App/WTMApp || true)"
+if [[ -n "$network_files" ]]; then
+  while IFS= read -r network_file; do
+    case "$network_file" in
+      Packages/WTMKit/Sources/ActionOllama/*|Packages/WTMKit/Sources/RuntimeOllama/*|Packages/WTMKit/Sources/RuntimeLlamaCpp/*) ;;
+      *)
+        echo "URLSession entered an unreviewed target: $network_file" >&2
+        exit 1
+        ;;
+    esac
+  done <<< "$network_files"
+fi
+
+if rg -n 'Process\s*\(|URLSession' App/WTMApp Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/WTMAdapterContracts; then
+  echo "UI, inventory, actions, and adapter contracts cannot execute processes or runtime HTTP." >&2
   exit 1
 fi
 
@@ -45,4 +64,4 @@ if rg -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechReco
   exit 1
 fi
 
-echo "Phase-2 architecture boundary is intact."
+echo "Phase-3 architecture boundary is intact."

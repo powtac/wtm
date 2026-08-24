@@ -58,6 +58,10 @@ let package = Package(
     ),
     .testTarget(name: "WTMDomainTests", dependencies: ["WTMDomain"]),
     .testTarget(
+      name: "WTMAdapterContractsTests",
+      dependencies: ["WTMDomain", "WTMAdapterContracts"]
+    ),
+    .testTarget(
       name: "WTMInventoryTests",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMInventory", "WTMSecurity"]
     ),
