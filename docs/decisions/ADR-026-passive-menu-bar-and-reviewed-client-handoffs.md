@@ -47,6 +47,12 @@ unrelated tools or public-tunnel behaviour.
   installations receive an actionable unavailable state rather than a best-effort launch.
 - Provider/API drift still requires adapter maintenance and contract tests.
 
+## Requirements impact
+
+This decision binds the passive menu-bar requirements and the Phase 4 client-integration
+requirements. It keeps launch-at-login independent, external execution centralized, and
+client capabilities narrower than runtime ownership.
+
 ## Validation
 
 Tests cover menu summary derivation, insertion preference, adapter registry uniqueness,

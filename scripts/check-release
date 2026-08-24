@@ -1,0 +1,43 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+temporary_root="$(mktemp -d "${TMPDIR:-/tmp}/wtm-release-check.XXXXXX")"
+trap 'rm -rf "$temporary_root"' EXIT INT TERM
+
+for script in build-distribution generate-sbom audit-release-artifacts check-release; do
+  /bin/zsh -n "$repository_root/scripts/$script"
+done
+/usr/bin/osacompile -o "$temporary_root/layout.scpt" "$repository_root/scripts/layout-dmg.applescript"
+
+version="$(sed -n 's/^MARKETING_VERSION = //p' "$repository_root/Config/Base.xcconfig")"
+commit="$(git -C "$repository_root" rev-parse HEAD)"
+epoch="$(git -C "$repository_root" show -s --format=%ct HEAD)"
+xcrun swift "$repository_root/scripts/render-dmg-background.swift" "$temporary_root/background.png" "$version"
+"$repository_root/scripts/generate-sbom" "$temporary_root/WTM-$version.spdx.json" "$version" "$commit" "$epoch"
+
+/usr/bin/file "$temporary_root/background.png" | /usr/bin/grep -q 'PNG image data'
+/usr/bin/ruby -rjson -e 'JSON.parse(File.read(ARGV.fetch(0)))' \
+  "$temporary_root/WTM-$version.spdx.json"
+
+asset_fixture="$temporary_root/release-assets"
+mkdir "$asset_fixture"
+touch "$asset_fixture/WTM-$version-arm64.dmg"
+cp "$temporary_root/WTM-$version.spdx.json" "$asset_fixture/WTM-$version.spdx.json"
+echo "fixture  WTM-$version-arm64.dmg" > "$asset_fixture/WTM-$version.sha256"
+echo '{"schemaVersion":1}' > "$asset_fixture/release-metadata.json"
+"$repository_root/scripts/audit-release-artifacts" "$asset_fixture" >/dev/null
+
+workflow="$repository_root/.github/workflows/release.yml"
+[[ -f "$workflow" ]] || { echo "Missing release workflow." >&2; exit 1; }
+for gate in 'environment: release' 'build-distribution' 'audit-release-artifacts' 'actions/attest@' 'gh release create'; do
+  /usr/bin/grep -Fq "$gate" "$workflow" || { echo "Missing release gate: $gate" >&2; exit 1; }
+done
+for gate in 'notarytool' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts'; do
+  /usr/bin/grep -Fq "$gate" "$repository_root/scripts/build-distribution" || {
+    echo "Missing distribution gate: $gate" >&2
+    exit 1
+  }
+done
+
+echo "Release scripts, generated artwork, SBOM, and workflow gates are valid."

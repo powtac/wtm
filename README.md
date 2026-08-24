@@ -1,6 +1,7 @@
 # What The Model
 
 [![CI](https://github.com/powtac/wtm/actions/workflows/ci.yml/badge.svg)](https://github.com/powtac/wtm/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/powtac/wtm/ci.yml?branch=main&label=tests)](https://github.com/powtac/wtm/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/powtac/wtm?display_name=tag&sort=semver)](https://github.com/powtac/wtm/releases/latest)
 [![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)](https://support.apple.com/macos)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
@@ -72,6 +73,13 @@ sudo DevToolsSecurity -enable
 
 The local configuration is ignored by Git. Signing certificates, Team IDs, and
 notarization credentials must never be committed.
+
+## Release
+
+Stable releases are created only by an exact `vMAJOR.MINOR.PATCH` tag through the protected
+`release` Environment. The workflow signs, notarizes, staples, mounts, copies, and starts
+the DMG payload before it publishes a GitHub Release. See
+[GitHub configuration](docs/github-configuration.md) for the required Environment secrets.
 
 ## Extend WTM
 

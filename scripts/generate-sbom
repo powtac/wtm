@@ -1,0 +1,52 @@
+#!/bin/zsh
+set -euo pipefail
+
+if [[ $# -ne 4 ]]; then
+  echo "Usage: generate-sbom OUTPUT VERSION COMMIT SOURCE_DATE_EPOCH" >&2
+  exit 64
+fi
+
+output_path="$1"
+version="$2"
+commit="$3"
+source_date_epoch="$4"
+
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid SemVer: $version" >&2; exit 1; }
+[[ "$commit" =~ ^[0-9a-f]{40}$ ]] || { echo "Invalid commit SHA: $commit" >&2; exit 1; }
+[[ "$source_date_epoch" =~ ^[0-9]+$ ]] || { echo "Invalid SOURCE_DATE_EPOCH" >&2; exit 1; }
+
+/usr/bin/ruby -rjson -rtime -e '
+  output, version, commit, epoch = ARGV
+  document = {
+    "spdxVersion" => "SPDX-2.3",
+    "dataLicense" => "CC0-1.0",
+    "SPDXID" => "SPDXRef-DOCUMENT",
+    "name" => "WTM-#{version}",
+    "documentNamespace" => "https://github.com/powtac/wtm/releases/tag/v#{version}/spdx/#{commit}",
+    "creationInfo" => {
+      "created" => Time.at(Integer(epoch)).utc.iso8601,
+      "creators" => ["Tool: WTM release pipeline"]
+    },
+    "packages" => [{
+      "name" => "What The Model",
+      "SPDXID" => "SPDXRef-Package-WTM",
+      "versionInfo" => version,
+      "downloadLocation" => "https://github.com/powtac/wtm/releases/tag/v#{version}",
+      "filesAnalyzed" => false,
+      "licenseConcluded" => "Apache-2.0",
+      "licenseDeclared" => "Apache-2.0",
+      "copyrightText" => "NOASSERTION",
+      "externalRefs" => [{
+        "referenceCategory" => "PACKAGE-MANAGER",
+        "referenceType" => "purl",
+        "referenceLocator" => "pkg:github/powtac/wtm@#{version}"
+      }]
+    }],
+    "relationships" => [{
+      "spdxElementId" => "SPDXRef-DOCUMENT",
+      "relationshipType" => "DESCRIBES",
+      "relatedSpdxElement" => "SPDXRef-Package-WTM"
+    }]
+  }
+  File.write(output, JSON.pretty_generate(document) + "\n")
+' "$output_path" "$version" "$commit" "$source_date_epoch"

@@ -48,6 +48,7 @@ before merge.
 | [ADR-024](ADR-024-pane-scoped-inventory-actions.md) | Pane-scoped inventory actions and truthful empty states | Phase 2 UX learning |
 | [ADR-025](ADR-025-owned-runtime-sessions.md) | Owned runtime sessions and evidence-gated verification | Phase 3 boundary |
 | [ADR-026](ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md) | Passive menu bar and reviewed client handoffs | Phase 4 boundary |
+| [ADR-027](ADR-027-fail-closed-public-release-chain.md) | Fail-closed public release chain | Phase 5 boundary |
 
 ## Requirements revision checklist
 

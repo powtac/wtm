@@ -1,0 +1,115 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Sign, notarize, verify, and publish
+    if: github.repository == 'powtac/wtm'
+    runs-on: macos-15
+    timeout-minutes: 60
+    environment: release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - name: Check out release commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 0
+
+      - name: Validate immutable release input
+        run: |
+          [[ "$GITHUB_REF_TYPE" == "tag" ]]
+          [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$(git rev-list -n 1 "$GITHUB_REF_NAME")" == "$GITHUB_SHA" ]]
+          project_version="$(sed -n 's/^MARKETING_VERSION = //p' Config/Base.xcconfig)"
+          [[ "$GITHUB_REF_NAME" == "v$project_version" ]]
+
+      - name: Verify toolchain and release configuration
+        run: |
+          xcodebuild -version
+          swift --version
+          sudo /usr/sbin/DevToolsSecurity -enable
+          ./scripts/test
+          ./scripts/test-ui
+
+      - name: Import ephemeral Developer ID certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/wtm-signing.keychain-db"
+          certificate="$RUNNER_TEMP/developer-id-application.p12"
+          keychain_password="$(openssl rand -hex 32)"
+          printf '%s' "$CERTIFICATE_BASE64" | /usr/bin/base64 -D > "$certificate"
+          /usr/bin/security create-keychain -p "$keychain_password" "$keychain"
+          /usr/bin/security set-keychain-settings -lut 21600 "$keychain"
+          /usr/bin/security unlock-keychain -p "$keychain_password" "$keychain"
+          /usr/bin/security import "$certificate" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12
+          /usr/bin/security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain"
+          /usr/bin/security list-keychains -d user -s "$keychain"
+          identity="$(/usr/bin/security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -1)"
+          [[ -n "$identity" ]]
+          echo "WTM_SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
+          rm -f "$certificate"
+
+      - name: Build notarized distribution
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          WTM_RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          mkdir "$RUNNER_TEMP/release-assets"
+          ./scripts/build-distribution "$RUNNER_TEMP/release-assets"
+          ./scripts/audit-release-artifacts "$RUNNER_TEMP/release-assets"
+
+      - name: Upload verified release backup
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: release-${{ github.ref_name }}
+          path: ${{ runner.temp }}/release-assets
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attest public release artifacts
+        if: github.event.repository.visibility == 'public'
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: ${{ runner.temp }}/release-assets/*
+
+      - name: Create draft release after all gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/release-assets/* \
+            --draft \
+            --verify-tag \
+            --generate-notes \
+            --title "WTM ${GITHUB_REF_NAME#v}"
+
+      - name: Publish release atomically
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
+
+      - name: Remove ephemeral signing keychain
+        if: always()
+        run: |
+          keychain="$RUNNER_TEMP/wtm-signing.keychain-db"
+          /usr/bin/security delete-keychain "$keychain" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/developer-id-application.p12"

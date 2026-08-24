@@ -1,0 +1,29 @@
+#!/bin/zsh
+set -euo pipefail
+
+if [[ $# -ne 1 || ! -d "$1" ]]; then
+  echo "Usage: audit-release-artifacts RELEASE_DIRECTORY" >&2
+  exit 64
+fi
+
+release_directory="${1:A}"
+
+for required_pattern in 'WTM-*.dmg' 'WTM-*.spdx.json' 'WTM-*.sha256' 'release-metadata.json'; do
+  matches=("$release_directory"/$~required_pattern(N))
+  (( ${#matches} > 0 )) || { echo "Missing release asset: $required_pattern" >&2; exit 1; }
+done
+
+if find "$release_directory" -type f \( -name '*.p12' -o -name '*.keychain*' -o -name '*.mobileprovision' -o -name '.env' \) -print -quit | /usr/bin/grep -q .; then
+  echo "Credential-bearing file type found in release assets." >&2
+  exit 1
+fi
+
+secret_pattern='-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{30,}|hf_[A-Za-z0-9]{30,}'
+for candidate in "$release_directory"/*.json(N) "$release_directory"/*.sha256(N); do
+  if LC_ALL=C /usr/bin/grep -E -n -- "$secret_pattern" "$candidate"; then
+    echo "Secret-like material found in $(basename "$candidate")." >&2
+    exit 1
+  fi
+done
+
+echo "Release asset structure and secret patterns are clean."

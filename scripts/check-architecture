@@ -10,12 +10,12 @@ if rg -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp)' Packages/WTMKit
 fi
 
 if rg -n 'DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
-  echo "Phase 4 must not contain download capabilities." >&2
+  echo "Phase 5 must not contain download capabilities." >&2
   exit 1
 fi
 
 if rg -n '/bin/(zsh|bash|sh)|/usr/bin/env[[:space:]]+(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
-  echo "Shell capabilities remain forbidden in Phase 4." >&2
+  echo "Shell capabilities remain forbidden in the shipped Phase 5 app." >&2
   exit 1
 fi
 
@@ -64,4 +64,4 @@ if rg -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechReco
   exit 1
 fi
 
-echo "Phase-4 architecture boundary is intact."
+echo "Phase-5 architecture boundary is intact."

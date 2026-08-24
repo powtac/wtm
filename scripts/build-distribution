@@ -1,0 +1,201 @@
+#!/bin/zsh
+set -euo pipefail
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: build-distribution OUTPUT_DIRECTORY" >&2
+  exit 64
+fi
+
+repository_root="${0:A:h:h}"
+output_directory="${1:A}"
+base_configuration="$repository_root/Config/Base.xcconfig"
+
+required_environment=(
+  WTM_SIGNING_IDENTITY
+  APPLE_TEAM_ID
+  APPLE_ID
+  APPLE_APP_PASSWORD
+)
+for variable_name in $required_environment; do
+  [[ -n "${(P)variable_name:-}" ]] || { echo "Missing environment: $variable_name" >&2; exit 1; }
+done
+
+version="$(sed -n 's/^MARKETING_VERSION = //p' "$base_configuration")"
+build_number="$(sed -n 's/^CURRENT_PROJECT_VERSION = //p' "$base_configuration")"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid project version: $version" >&2; exit 1; }
+[[ "${WTM_RELEASE_TAG:-v$version}" == "v$version" ]] || {
+  echo "Tag ${WTM_RELEASE_TAG:-<unset>} does not match project version v$version." >&2
+  exit 1
+}
+
+mkdir -p "$output_directory"
+if [[ -n "$(find "$output_directory" -mindepth 1 -maxdepth 1 -print -quit)" ]]; then
+  echo "Output directory must be empty: $output_directory" >&2
+  exit 1
+fi
+
+temporary_root="$(mktemp -d "${TMPDIR:-/tmp}/wtm-release.XXXXXX")"
+mounted_path=""
+smoke_pid=""
+cleanup() {
+  if [[ -n "$smoke_pid" ]] && kill -0 "$smoke_pid" 2>/dev/null; then
+    kill "$smoke_pid" 2>/dev/null || true
+  fi
+  if [[ -n "$mounted_path" && -d "$mounted_path" ]]; then
+    /usr/bin/hdiutil detach "$mounted_path" -quiet 2>/dev/null || true
+  fi
+  rm -rf "$temporary_root"
+}
+trap cleanup EXIT INT TERM
+
+archive_path="$temporary_root/WTM.xcarchive"
+app_path="$archive_path/Products/Applications/WTM.app"
+app_zip="$temporary_root/WTM.app.zip"
+volume_name="WTM $version"
+staging_directory="$temporary_root/dmg-root"
+read_write_dmg="$temporary_root/WTM-rw.dmg"
+dmg_path="$output_directory/WTM-$version-arm64.dmg"
+app_notary_report="$temporary_root/app-notary.json"
+dmg_notary_report="$temporary_root/dmg-notary.json"
+
+notarize() {
+  local artifact_path="$1"
+  local report_path="$2"
+  xcrun notarytool submit "$artifact_path" \
+    --apple-id "$APPLE_ID" \
+    --team-id "$APPLE_TEAM_ID" \
+    --password "$APPLE_APP_PASSWORD" \
+    --wait \
+    --output-format json > "$report_path"
+  local status
+  status="$(/usr/bin/ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("status")' "$report_path")"
+  [[ "$status" == "Accepted" ]] || { echo "Notarization failed: $status" >&2; exit 1; }
+}
+
+cd "$repository_root"
+xcodebuild archive \
+  -project WTM.xcodeproj \
+  -scheme WTM \
+  -configuration Release \
+  -destination 'generic/platform=macOS' \
+  -archivePath "$archive_path" \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="$WTM_SIGNING_IDENTITY" \
+  DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+  ARCHS=arm64 \
+  ONLY_ACTIVE_ARCH=NO \
+  OTHER_CODE_SIGN_FLAGS='--timestamp' \
+  archive
+
+[[ -d "$app_path" ]] || { echo "Archive did not contain WTM.app." >&2; exit 1; }
+archive_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$app_path/Contents/Info.plist")"
+archive_build="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$app_path/Contents/Info.plist")"
+[[ "$archive_version" == "$version" && "$archive_build" == "$build_number" ]] || {
+  echo "Archive version $archive_version ($archive_build) does not match configuration." >&2
+  exit 1
+}
+
+/usr/bin/codesign --verify --deep --strict --verbose=2 "$app_path"
+/usr/bin/codesign -dvv "$app_path" 2>&1 | /usr/bin/grep -q 'runtime'
+if /usr/bin/codesign -d --entitlements :- "$app_path" 2>/dev/null | /usr/bin/grep -q 'com.apple.security.app-sandbox'; then
+  echo "Direct-distribution build unexpectedly enables App Sandbox." >&2
+  exit 1
+fi
+
+/usr/bin/ditto -c -k --keepParent "$app_path" "$app_zip"
+notarize "$app_zip" "$app_notary_report"
+xcrun stapler staple "$app_path"
+xcrun stapler validate "$app_path"
+/usr/sbin/spctl --assess --type execute --verbose=4 "$app_path"
+
+mkdir -p "$staging_directory/.background"
+/usr/bin/ditto "$app_path" "$staging_directory/WTM.app"
+ln -s /Applications "$staging_directory/Applications"
+xcrun swift "$repository_root/scripts/render-dmg-background.swift" \
+  "$staging_directory/.background/background.png" "$version"
+
+/usr/bin/hdiutil create \
+  -fs APFS \
+  -format UDRW \
+  -volname "$volume_name" \
+  -srcfolder "$staging_directory" \
+  "$read_write_dmg"
+
+mounted_path="$temporary_root/mounted-layout"
+mkdir -p "$mounted_path"
+/usr/bin/hdiutil attach "$read_write_dmg" -readwrite -noverify -noautoopen -mountpoint "$mounted_path" -quiet
+/usr/bin/osascript "$repository_root/scripts/layout-dmg.applescript" "$volume_name"
+/usr/bin/sync
+/usr/bin/hdiutil detach "$mounted_path" -quiet
+mounted_path=""
+
+/usr/bin/hdiutil convert "$read_write_dmg" -format UDZO -imagekey zlib-level=9 -o "$dmg_path"
+/usr/bin/codesign --force --sign "$WTM_SIGNING_IDENTITY" --timestamp "$dmg_path"
+/usr/bin/codesign --verify --verbose=2 "$dmg_path"
+notarize "$dmg_path" "$dmg_notary_report"
+xcrun stapler staple "$dmg_path"
+xcrun stapler validate "$dmg_path"
+/usr/sbin/spctl --assess --type open --context context:primary-signature --verbose=4 "$dmg_path"
+
+mounted_path="$temporary_root/mounted-verification"
+mkdir -p "$mounted_path"
+/usr/bin/hdiutil attach "$dmg_path" -readonly -nobrowse -mountpoint "$mounted_path" -quiet
+mounted_app="$mounted_path/WTM.app"
+/usr/bin/codesign --verify --deep --strict --verbose=2 "$mounted_app"
+xcrun stapler validate "$mounted_app"
+/usr/sbin/spctl --assess --type execute --verbose=4 "$mounted_app"
+
+copied_app="$temporary_root/copied/WTM.app"
+mkdir -p "${copied_app:h}"
+/usr/bin/ditto "$mounted_app" "$copied_app"
+"$copied_app/Contents/MacOS/WTM" > "$temporary_root/smoke.stdout" 2> "$temporary_root/smoke.stderr" &
+smoke_pid=$!
+sleep 5
+kill -0 "$smoke_pid" 2>/dev/null || { echo "Copied app exited during start smoke test." >&2; exit 1; }
+kill "$smoke_pid"
+wait "$smoke_pid" 2>/dev/null || true
+smoke_pid=""
+
+/usr/bin/hdiutil detach "$mounted_path" -quiet
+mounted_path=""
+
+commit="$(git rev-parse HEAD)"
+source_date_epoch="$(git show -s --format=%ct HEAD)"
+sbom_path="$output_directory/WTM-$version.spdx.json"
+metadata_path="$output_directory/release-metadata.json"
+checksum_path="$output_directory/WTM-$version.sha256"
+"$repository_root/scripts/generate-sbom" "$sbom_path" "$version" "$commit" "$source_date_epoch"
+
+dmg_sha256="$(/usr/bin/shasum -a 256 "$dmg_path" | /usr/bin/awk '{print $1}')"
+xcode_version="$(xcodebuild -version | /usr/bin/tr '\n' ';' | sed 's/;$//')"
+swift_version="$(swift --version | /usr/bin/head -1)"
+workflow_run="${GITHUB_SERVER_URL:-local}/${GITHUB_REPOSITORY:-powtac/wtm}/actions/runs/${GITHUB_RUN_ID:-local}"
+/usr/bin/ruby -rjson -rtime -e '
+  output, version, build, commit, dmg_sha, xcode, swift, workflow, epoch = ARGV
+  metadata = {
+    "schemaVersion" => 1,
+    "product" => "What The Model",
+    "bundleIdentifier" => "de.powtac.whatthemodel",
+    "version" => version,
+    "build" => build,
+    "commit" => commit,
+    "createdAt" => Time.at(Integer(epoch)).utc.iso8601,
+    "platform" => "macOS 15+, Apple Silicon",
+    "xcode" => xcode,
+    "swift" => swift,
+    "dependencyLockfile" => "none; all Swift package targets are local",
+    "workflowRun" => workflow,
+    "notarization" => {"application" => "Accepted", "dmg" => "Accepted"},
+    "artifacts" => {"WTM-#{version}-arm64.dmg" => {"sha256" => dmg_sha}}
+  }
+  File.write(output, JSON.pretty_generate(metadata) + "\n")
+' "$metadata_path" "$version" "$build_number" "$commit" "$dmg_sha256" \
+  "$xcode_version" "$swift_version" "$workflow_run" "$source_date_epoch"
+
+(
+  cd "$output_directory"
+  /usr/bin/shasum -a 256 "${dmg_path:t}" "${sbom_path:t}" "${metadata_path:t}" > "${checksum_path:t}"
+)
+"$repository_root/scripts/audit-release-artifacts" "$output_directory"
+
+echo "Release assets created in $output_directory"

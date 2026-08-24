@@ -91,6 +91,8 @@ pane-scoped actions are governed by
 verification are governed by [ADR-025](decisions/ADR-025-owned-runtime-sessions.md).
 Phase 4 menu projections and client trust boundaries are governed by
 [ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
+Phase 5 release publication and private-to-public gates are governed by
+[ADR-027](decisions/ADR-027-fail-closed-public-release-chain.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
 neither document may silently contradict the other.
