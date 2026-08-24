@@ -79,6 +79,8 @@ Phase 1 implementation specifically validated:
 
 Phase 2 cleanup transactions are governed by
 [ADR-023](decisions/ADR-023-revalidated-deletion-transactions.md).
+Inventory collection controls, selection actions, and empty-state truthfulness are governed
+by [ADR-024](decisions/ADR-024-pane-scoped-inventory-actions.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
 neither document may silently contradict the other.

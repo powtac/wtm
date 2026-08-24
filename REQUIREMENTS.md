@@ -3,7 +3,7 @@
 | Feld | Wert |
 |---|---|
 | Status | **Accepted Baseline** |
-| Version | 0.2.0 |
+| Version | 0.2.1 |
 | Datum | 2026-08-24 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
@@ -116,6 +116,8 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-020](docs/decisions/ADR-020-confirmed-external-model-links.md) | Externe Modelllinks benötigen kanonische Provider-ID oder reviewten Alias | Ein Modellname allein darf keinen bestätigten Owner oder Link erzeugen. |
 | [ADR-021](docs/decisions/ADR-021-phase-capability-isolation.md) | Shipping-Phasen werden im Targetgraph isoliert | Versteckte UI oder Feature Flags ersetzen keine Capability-Grenze. |
 | [ADR-022](docs/decisions/ADR-022-no-unrelated-media-capabilities.md) | Keine fachfremden Media- oder Audio-Berechtigungen | Inventarisierung benötigt weder Mikrofon noch Media Library, Apple Music oder Speech. |
+| [ADR-023](docs/decisions/ADR-023-revalidated-deletion-transactions.md) | Löschungen sind kurzlebige, unmittelbar revalidierte Transaktionen | Vorschau und Bestätigung ersetzen keine Revalidierung von Identität, Scope, Referenzen und Providerzustand. |
+| [ADR-024](docs/decisions/ADR-024-pane-scoped-inventory-actions.md) | Inventar- und Auswahlaktionen folgen dem Scope ihres Split-View-Bereichs | Leere Filterergebnisse dürfen weder ein leeres Inventar behaupten noch einen Scan als falsche Abhilfe anbieten. |
 
 ### 5.1 Entscheidungs- und Requirements-Governance
 
@@ -385,14 +387,15 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-INV-017 (P1):** Nutzer MAY die Prozentansicht explizit auf einen Provider oder ein Volume begrenzen; der aktive Scope und neue Nenner müssen deutlich sichtbar sein.
 - **FR-INV-018 (P0):** Eine aktive, aber nicht verbundene Quelle MUST als `Offline` erscheinen und aus Modellliste sowie aktuellen Speicherprozenten ausgeschlossen sein. Phase 1 speichert keinen früheren Modellbestand und bietet keinen historischen Inventory-Scope; nach erneutem Mounten wird die Quelle neu gescannt.
 - **FR-INV-019 (P1):** Bei unvollständiger Zuordnung MUST die UI Messqualität oder bekannte Abdeckung sichtbar machen. Eine grobe Schätzung ist zulässig, eine unbelegte Exaktheit nicht.
-- **FR-INV-020 (P0):** Ohne Inventardaten MUST die Hauptansicht einen kompakten erklärenden Empty State mit Scan-Zweck, lokalem Datenschutzversprechen, ausgewählten Wurzeln und prominenter primärer Aktion `Start Scan` beziehungsweise `Scan Now` zeigen. Der Zustand darf weder einen Fehler noch bereits gefundene Modelle vortäuschen.
-- **FR-INV-021 (P0):** `Scan Now` beziehungsweise `Rescan` ist eine dauerhaft sichtbare, prominente globale Toolbar-Aktion. Während eines Scans ist diese Aktion deaktiviert und ein separater `Cancel Scan`-Button verfügbar; derselbe Button darf nicht unbeschriftet zwischen Start und Abbruch wechseln. `Reveal in Finder` ist eine getrennte kontextabhängige Aktion im Inspector, in der ausgewählten Tabellenzeile oder im Kontextmenü und ohne Modellauswahl deaktiviert. Scan und Finder dürfen weder denselben Buttonplatz noch wechselnde Semantik teilen.
+- **FR-INV-020 (P0):** Nur wenn das vollständige flüchtige Sitzungsinventar keine Modelle enthält, MUST die Hauptansicht `No Models Found` mit Scan-Zweck, lokalem Datenschutzversprechen, ausgewählten Wurzeln und prominenter primärer Aktion `Start Scan` beziehungsweise `Scan Now` zeigen. Der Zustand darf weder einen Fehler noch bereits gefundene Modelle vortäuschen.
+- **FR-INV-021 (P0):** `Scan Now` beziehungsweise `Rescan` und `Filters` MUST dauerhaft sichtbar im Kopf des Inventar-Listenbereichs liegen und damit ihren Collection-Scope kenntlich machen. Während eines Scans ist Scan deaktiviert und ein separat beschrifteter `Cancel Scan`-Button verfügbar. `Reveal in Finder` bleibt eine getrennte kontextabhängige Aktion im Detailbereich, in der ausgewählten Tabellenzeile oder im Kontextmenü. Scan und Finder dürfen weder denselben Buttonplatz noch wechselnde Semantik teilen.
 - **FR-INV-022 (P0):** Solange mindestens eine Quelle aktiv gescannt wird, MUST die Hauptansicht einen globalen Aktivitätsstatus mit System-`ProgressView`, dem Text `Scanning`, aktuell geprüfter Quelle, kompakter Scan-Wurzel, neu gefundenen beziehungsweise aktualisierten Einträgen und Startzeit zeigen. Benutzerpfade werden mit `~` beziehungsweise Volumename plus relativem Pfad gekürzt; der konkrete Root-Pfad bleibt über Detail/Help zugänglich. Der gerade gelesene Einzeldateipfad wird standardmäßig weder animiert durchgeschaltet noch als Fortschrittsersatz angezeigt.
 - **FR-INV-023 (P0):** Ist der Gesamtumfang belastbar bekannt, MAY der Scanstatus determinierten Fortschritt zeigen. Andernfalls MUST er unbestimmt bleiben und darf keine erfundene Prozentzahl verwenden. Nach Abschluss oder Abbruch ersetzt eine knappe Zusammenfassung den Aktivitätsstatus und nennt Zeitpunkt, geprüfte Quellen, gefundene Installationen, best-effort eindeutig gezählte allokierte Gesamtgröße, Probleme und Abbruchzustand.
 - **FR-INV-024 (P0):** Die Artefaktsektion der Modelldetailansicht MUST die Anzahl der dem ausgewählten `ModelInstallation` zugeordneten Artefaktzeilen direkt links in der Überschrift anzeigen: `1 Artifact` beziehungsweise `<n> Artifacts`. Die Zahl bezeichnet Referenzen in dieser Installation, nicht behauptete physisch eindeutige Dateien; `Shared`- und `Unknown`-Zuordnung bleiben pro Zeile sichtbar und beeinflussen die Anzahl nicht still.
 - **FR-INV-025 (P0):** Artefaktzeilen MUST nach sichtbarem Dateinamen aufsteigend und Finder-ähnlich alphabetisch beziehungsweise natürlich sortiert erscheinen; gleiche Dateinamen werden deterministisch über den vollständigen Pfad geordnet. Jede sichtbare Spaltenüberschrift der Modellliste MUST per Klick auf- und absteigend sortierbar sein und die native Sortierrichtung anzeigen.
 - **FR-INV-026 (P0):** Allokierte Größen MUST in Tabelle, Scan-Zusammenfassung und Detail-Artefaktliste ohne Dezimalstellen in einer lokalisierten, adaptiven Einheit erscheinen. Die Detailansicht MUST zusätzlich die exakte Bytezahl des ausgewählten Modells anzeigen; Rundung darf weder Summierung noch Sortierung beeinflussen.
 - **FR-INV-027 (P0):** IDs für Identität, Variante, Installation und Artefakt sind opaque und kollisionsfrei in ihrem dokumentierten Namespace. Phase 1 MUST sie innerhalb einer Scan-Generation deterministisch bilden, darf aber ohne persistenten Index keine sitzungsübergreifende Stabilität versprechen. UI-Auswahl und Batch-Reconciliation dürfen deshalb keine zufällig bei jedem Batch neu erzeugten IDs verwenden.
+- **FR-INV-028 (P0):** Enthält das Sitzungsinventar Modelle, aber Seitenleistenscope, Suche oder strukturierte Filter liefern keine sichtbaren Treffer, MUST der Listenbereich `No Models Match This View` anzeigen und die einschränkenden Mechanismen nennen. Die primäre Recovery-Aktion `Show All Models` MUST `All Models` wählen sowie Suche und strukturierte Filter atomar leeren; der Empty State darf keinen zusätzlichen Scan als Abhilfe anbieten.
 
 ### 9.5 Model Cards und externe Links
 
@@ -459,6 +462,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-DEL-009 (P0):** Nach der Aktion MUST ein gezielter Rescan prüfen, ob Zielartefakte entfernt, Providerzustand aktualisiert und verbleibende Referenzen konsistent sind. Die Änderung des freien Volume-Speichers MAY als Best-effort-Beobachtung erscheinen, gilt aber nicht als exakter Erfolgsnachweis.
 - **FR-DEL-010 (P1):** Batch-Löschung MUST pro Modell einen Plan erzeugen und vor Ausführung einen Konfliktgraphen bilden.
 - **FR-DEL-011 (P1):** Die App SHOULD einen lokalen, secrets-freien Auditverlauf mit Zeit, Aktion, Adapter und Ergebnis führen; Nutzer können ihn löschen.
+- **FR-DEL-012 (P0):** Der sichtbare Cleanup-/Papierkorb-Button MUST ausschließlich im rechten Detailbereich einer konkreten Einzel- oder Mehrfachauswahl liegen. Der Listenbereich und seine Kopfzeile dürfen keinen destruktiven Button zeigen; ohne Modellauswahl wird keine Cleanup-Aktion angeboten.
 
 ### 9.11 Starten, Stoppen und Toolkonfiguration
 
@@ -524,10 +528,10 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 ### 11.1 Fenster und Navigation
 
 - Native `NavigationSplitView`-Struktur: Sidebar, sortierbare Tabelle, Inspector/Detail.
-- Standard-Toolbar mit einer prominenten globalen Scan-/Rescan-Aktion, Suche und Filter. Modellbezogene Aktionen wie `Reveal in Finder` liegen sichtbar getrennt im Inspector beziehungsweise Zeilenkontext.
-- Ein aktiver Scan erhält neben der Toolbar-Aktion einen nativen Fortschrittsindikator, `Scanning`, die kompakte aktuelle Scan-Wurzel und einen separat beschrifteten Abbruchbutton. Aktivität wird nie ausschließlich durch Rotation, Farbe oder Animation vermittelt.
+- Der Kopf des Inventar-Listenbereichs enthält die prominente Scan-/Rescan-Aktion und Filter; Suche ist an denselben Collection-Scope gebunden. Modellbezogene und destruktive Aktionen liegen sichtbar getrennt im rechten Detailbereich beziehungsweise erlaubten Zeilenkontexten.
+- Ein aktiver Scan erhält neben der Listenaktion einen nativen Fortschrittsindikator, `Scanning`, die kompakte aktuelle Scan-Wurzel und einen separat beschrifteten Abbruchbutton. Aktivität wird nie ausschließlich durch Rotation, Farbe oder Animation vermittelt.
 - Alle Aktionen zusätzlich über Menüleiste und sinnvolle Tastaturkürzel.
-- Kontextmenüs für Finder, Config öffnen, Readiness prüfen, Start/Stop und Löschen.
+- Kontextmenüs für Finder, Config öffnen, Readiness prüfen und Start/Stop; die sichtbare Cleanup-Aktion bleibt im Detailbereich.
 - Sidebar muss ein-/ausblendbar sein und System-Akzentfarbe respektieren.
 - Window-Restore darf keine bereits entfernten Pfade oder Secrets serialisieren.
 
@@ -555,6 +559,7 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 
 - Vollständig mit VoiceOver und Tastatur bedienbar.
 - Fokusreihenfolge entspricht visueller Hierarchie.
+- VoiceOver-Reihenfolge und Gruppierung MUST Sidebar-Scope, Collection-Aktionen und Auswahlaktionen als getrennte Bereiche vermitteln.
 - Keine ausschließlich farbcodierten Zustände.
 - Dynamische Systemschrift, ausreichender Kontrast und Unterstützung von Reduce Motion/Transparency.
 - Custom Icons benötigen Accessibility-Labels; dekorative Elemente werden ausgeblendet.
@@ -740,7 +745,8 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Tests für deterministische Standardquellen-Reihenfolge und die Invariante, dass `~`, `~/.cache`, `~/Library` und andere breite Elternpfade nicht als automatische Scanwurzeln verwendet werden.
 - Tests für überlappende Provider-/manuelle Quellen: kanonischer Providerfund statt generischem `local`-Duplikat, aber Erhalt tatsächlich getrennter Installationspfade.
 - Tests für Scan-Generationen: Abbruch, sofortiger Rescan und verspätete Batches einer älteren Generation dürfen den aktiven Snapshot, Auswahl, Zähler und Abschlussstatus nicht verändern.
-- UI-Tests für fortlaufende Batch-Ergebnisse bei stabiler Auswahl sowie die dauerhafte Trennung von globalem Scan und kontextbezogenem `Reveal in Finder`.
+- UI-Tests für fortlaufende Batch-Ergebnisse bei stabiler Auswahl sowie die dauerhafte Trennung von listenbezogenem Scan und kontextbezogenem `Reveal in Finder`.
+- View-Model- und UI-Tests für wahres leeres Inventar, laufenden Scan und null Treffer durch Sidebar, Suche oder Filter; `Show All Models` setzt den vollständigen sichtbaren Scope wieder her.
 - UI-Tests für sichtbaren Scan-Aktivitätsstatus, aktuelle gekürzte Scan-Wurzel, unbestimmten und bestimmten Fortschritt, separaten Abbruch sowie Abschluss- und Abbruchzusammenfassung.
 - Präsentations- und UI-Tests für `0 Artifacts`, `1 Artifact` und pluralisierte Artefaktanzahlen sowie unveränderte `Shared`-/`Unknown`-Kennzeichnung.
 - Präsentations- und UI-Tests für dezimalstellenfreie adaptive Größen, exakte Detailbytes, deduplizierte Scansumme sowie Altersrundung, Altersquelle und `Age Unknown`.
@@ -764,7 +770,8 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Bestätigte, mehrdeutige und manuell ergänzte Model-Card-Links ohne automatischen Netzwerkabruf.
 - Erstfreigabe, Ablehnung, Recovery, Widerruf und read-only Preflight auf einem sauberen Benutzerkonto.
 - Erster Start mit Empty State und `Start Scan`, Folgestart ohne früheren Modellbestand und mit vollständigem Auto-Scan sowie deaktivierter Launch-Scan-Einstellung.
-- Prominente Scan-/Rescan-Aktion ohne Auswahl und getrennte Finder-Aktion mit und ohne ausgewähltes Modell.
+- Prominente Scan-/Rescan- und Filteraktionen im Listenbereich ohne Auswahl; getrennte Finder- und Cleanup-Aktionen im rechten Detailbereich mit und ohne ausgewähltes Modell.
+- Null Treffer durch Sidebar, Suche und strukturierte Filter zeigen `No Models Match This View`; `Show All Models` stellt das vorhandene Inventar ohne erneuten Scan wieder dar.
 - Aktiver Scan mit Text, Fortschrittsindikator, wechselnden Quellen, gekürzten Home-/Volume-Pfaden, VoiceOver-Ausgabe und funktionierendem `Cancel Scan`.
 - Settings-Erweiterungen, Reset auf Defaults, ungültige/neue Schemas und Export ohne persönliche Pfade.
 - Gatekeeper-Test auf sauberem Mac-Benutzerkonto.

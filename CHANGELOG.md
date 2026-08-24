@@ -51,6 +51,10 @@ first public release is tagged.
 
 ### Changed
 
+- Moved Scan, Cancel, and Filters into the inventory-list header while keeping Cleanup in
+  the selected-model detail pane.
+- Split true empty inventory from zero visible filter matches; the latter now explains the
+  active view scope and restores it through `Show All Models` without rescanning.
 - Revalidated Phase 1 against Requirements 0.2.0 with a current Developer ID archive,
   accepted Apple notarization, stapled ticket, and successful Gatekeeper assessment.
 - Added the Phase 2 capability boundary: immutable deletion plans, no-follow identity

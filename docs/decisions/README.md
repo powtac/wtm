@@ -45,6 +45,7 @@ before merge.
 | [ADR-021](ADR-021-phase-capability-isolation.md) | Compile-time phase capability isolation | Phase 1 learning |
 | [ADR-022](ADR-022-no-unrelated-media-capabilities.md) | No unrelated media capabilities | Phase 1 learning |
 | [ADR-023](ADR-023-revalidated-deletion-transactions.md) | Revalidated deletion transactions | Phase 2 boundary |
+| [ADR-024](ADR-024-pane-scoped-inventory-actions.md) | Pane-scoped inventory actions and truthful empty states | Phase 2 UX learning |
 
 ## Requirements revision checklist
 
