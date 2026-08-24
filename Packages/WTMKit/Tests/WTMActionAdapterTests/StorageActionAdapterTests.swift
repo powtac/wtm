@@ -2,7 +2,9 @@ import ActionHuggingFace
 import ActionManual
 import ActionOllama
 import Foundation
+import Synchronization
 import Testing
+import WTMActions
 import WTMAdapterContracts
 import WTMDomain
 import WTMSecurity
@@ -175,6 +177,97 @@ func ollamaBlocksLoadedModelsAndDeletesThroughProvider() async throws {
   #expect(await transport.deletedModels() == ["tiny:latest"])
 }
 
+@Test("Ollama provider failure is recoverable through a fresh reviewed plan")
+func ollamaProviderFailureCanBeRetried() async throws {
+  let fixture = try OllamaActionFixture()
+  defer { fixture.cleanup() }
+  let transport = RecoveringOllamaTransport()
+  let adapter = OllamaStorageActionAdapter(transport: transport)
+  let executor = ActionExecutor(
+    registry: try StorageActionAdapterRegistry(adapters: [adapter]),
+    trashMover: NoopTrashMover(),
+    auditStore: InMemoryActionAuditStore()
+  )
+  let firstPlan = try await executor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+
+  let failedReport = try await executor.execute(
+    firstPlan,
+    currentInventory: [fixture.installation],
+    sources: [fixture.source],
+    confirmedIrreversible: true
+  )
+  #expect(failedReport.status == .failed)
+
+  await transport.recover()
+  let retryPlan = try await executor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+  let recoveredReport = try await executor.execute(
+    retryPlan,
+    currentInventory: [fixture.installation],
+    sources: [fixture.source],
+    confirmedIrreversible: true
+  )
+
+  #expect(recoveredReport.status == .succeeded)
+  #expect(await transport.deletedModels() == ["tiny:latest"])
+}
+
+@Test("Ollama HTTP transport is loopback-only and uses the official delete contract")
+func ollamaHTTPTransportUsesLoopbackDeleteContract() async throws {
+  #expect(throws: OllamaActionTransportError.endpointMustBeLoopback) {
+    try OllamaHTTPActionTransport(baseURL: URL(string: "http://example.com:11434")!)
+  }
+  #expect(throws: OllamaActionTransportError.endpointMustBeLoopback) {
+    try OllamaHTTPActionTransport(baseURL: URL(string: "https://127.0.0.1:11434")!)
+  }
+
+  let capturedRequests = Mutex<[CapturedHTTPRequest]>([])
+  OllamaURLProtocolStub.handler = { request in
+    capturedRequests.withLock {
+      $0.append(
+        CapturedHTTPRequest(
+          method: request.httpMethod ?? "GET",
+          path: request.url?.path ?? "",
+          body: requestBodyData(request)
+        )
+      )
+    }
+    let body = request.url?.path == "/api/ps" ? Data(#"{"models":[]}"#.utf8) : Data()
+    let response = HTTPURLResponse(
+      url: request.url!,
+      statusCode: 200,
+      httpVersion: "HTTP/1.1",
+      headerFields: ["Content-Type": "application/json"]
+    )!
+    return (response, body)
+  }
+  defer { OllamaURLProtocolStub.handler = nil }
+  let configuration = URLSessionConfiguration.ephemeral
+  configuration.protocolClasses = [OllamaURLProtocolStub.self]
+  let transport = try OllamaHTTPActionTransport(
+    baseURL: URL(string: "http://127.0.0.1:11434")!,
+    session: URLSession(configuration: configuration)
+  )
+
+  #expect(try await transport.loadedModelNames().isEmpty)
+  try await transport.deleteModel(named: "tiny:latest")
+
+  let requests = capturedRequests.withLock { $0 }
+  #expect(requests.map(\.method) == ["GET", "DELETE"])
+  #expect(requests.map(\.path) == ["/api/ps", "/api/delete"])
+  #expect(
+    try JSONSerialization.jsonObject(with: requests[1].body) as? [String: String]
+      == ["model": "tiny:latest"]
+  )
+}
+
 private extension DeletionOperation {
   var fileURL: URL? {
     guard case .trash(let target) = payload else { return nil }
@@ -197,6 +290,75 @@ private actor RecordingOllamaTransport: OllamaActionTransport {
   }
 
   func deletedModels() -> [String] { deleted }
+}
+
+private enum OllamaRecoveryFixtureError: Error {
+  case unavailable
+}
+
+private actor RecoveringOllamaTransport: OllamaActionTransport {
+  private var shouldFail = true
+  private var deleted: [String] = []
+
+  func loadedModelNames() -> Set<String> { [] }
+
+  func deleteModel(named name: String) throws {
+    guard !shouldFail else { throw OllamaRecoveryFixtureError.unavailable }
+    deleted.append(name)
+  }
+
+  func recover() { shouldFail = false }
+  func deletedModels() -> [String] { deleted }
+}
+
+private struct NoopTrashMover: TrashMoving {
+  func moveToTrash(_: URL) async throws {}
+}
+
+private struct CapturedHTTPRequest: Sendable {
+  let method: String
+  let path: String
+  let body: Data
+}
+
+private func requestBodyData(_ request: URLRequest) -> Data {
+  if let body = request.httpBody { return body }
+  guard let stream = request.httpBodyStream else { return Data() }
+  stream.open()
+  defer { stream.close() }
+  var body = Data()
+  var buffer = [UInt8](repeating: 0, count: 1_024)
+  while stream.hasBytesAvailable {
+    let count = stream.read(&buffer, maxLength: buffer.count)
+    guard count > 0 else { break }
+    body.append(buffer, count: count)
+  }
+  return body
+}
+
+private final class OllamaURLProtocolStub: URLProtocol, @unchecked Sendable {
+  nonisolated(unsafe) static var handler:
+    (@Sendable (URLRequest) throws -> (HTTPURLResponse, Data))?
+
+  override class func canInit(with _: URLRequest) -> Bool { true }
+
+  override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+  override func startLoading() {
+    do {
+      guard let handler = Self.handler else {
+        throw OllamaRecoveryFixtureError.unavailable
+      }
+      let (response, data) = try handler(request)
+      client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+      client?.urlProtocol(self, didLoad: data)
+      client?.urlProtocolDidFinishLoading(self)
+    } catch {
+      client?.urlProtocol(self, didFailWithError: error)
+    }
+  }
+
+  override func stopLoading() {}
 }
 
 private struct HuggingFaceActionFixture {

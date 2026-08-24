@@ -188,6 +188,37 @@ func partialFailureStopsLaterOperations() async throws {
   #expect(report.operationResults.count { $0.status == .failed } == 1)
 }
 
+@Test("A Trash operation remains recoverable in an isolated fixture")
+func trashOperationCanBeRecovered() async throws {
+  let fixture = try ActionFixture()
+  defer { fixture.cleanup() }
+  let trashMover = RecoverableTrashMover(
+    trashDirectoryURL: fixture.rootURL.appending(path: ".Trash", directoryHint: .isDirectory)
+  )
+  let executor = try makeExecutor(
+    adapter: FixtureActionAdapter(providerID: .manual),
+    trashMover: trashMover
+  )
+  let plan = try await executor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+
+  let report = try await executor.execute(
+    plan,
+    currentInventory: [fixture.installation],
+    sources: [fixture.source],
+    confirmedIrreversible: false
+  )
+
+  #expect(report.status == .succeeded)
+  #expect(!FileManager.default.fileExists(atPath: fixture.fileURL.path))
+  try await trashMover.restoreAll()
+  #expect(FileManager.default.fileExists(atPath: fixture.fileURL.path))
+  #expect(try Data(contentsOf: fixture.fileURL) == Data("model".utf8))
+}
+
 @Test("Overlapping batch targets form a blocking conflict graph")
 func overlappingTargetsBlockBatch() async throws {
   let rootURL = temporaryDirectory()
@@ -383,6 +414,32 @@ private actor RecordingTrashMover: TrashMoving {
   }
 
   func movedURLs() -> [URL] { calls }
+}
+
+private actor RecoverableTrashMover: TrashMoving {
+  private let trashDirectoryURL: URL
+  private var moves: [(original: URL, trashed: URL)] = []
+
+  init(trashDirectoryURL: URL) {
+    self.trashDirectoryURL = trashDirectoryURL
+  }
+
+  func moveToTrash(_ url: URL) throws {
+    try FileManager.default.createDirectory(
+      at: trashDirectoryURL,
+      withIntermediateDirectories: true
+    )
+    let trashedURL = trashDirectoryURL.appending(path: UUID().uuidString)
+    try FileManager.default.moveItem(at: url, to: trashedURL)
+    moves.append((url, trashedURL))
+  }
+
+  func restoreAll() throws {
+    for move in moves.reversed() {
+      try FileManager.default.moveItem(at: move.trashed, to: move.original)
+    }
+    moves = []
+  }
 }
 
 private struct ActionFixture {
