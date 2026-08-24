@@ -11,6 +11,7 @@ cd "$repository_root"
 ./scripts/check-language
 ./scripts/check-website
 ./scripts/check-release
+bash -n script/build_and_run.sh
 swift test --package-path Packages/WTMKit
 xcodebuild \
   -project WTM.xcodeproj \

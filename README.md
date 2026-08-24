@@ -63,6 +63,16 @@ Command-line verification:
 ./scripts/test
 ```
 
+Build and launch the current Debug app through the project-local entrypoint:
+
+```sh
+./script/build_and_run.sh --verify
+```
+
+The Codex workspace exposes the same entrypoint as its `Run` action. The script also accepts
+`--debug`, `--logs`, and `--telemetry`; every mode stops an older WTM process and rebuilds
+before launching.
+
 The labeled-control UI smoke test additionally requires macOS Developer Tools security.
 Hosted CI falls back to ad-hoc test-runner signing without hardened runtime:
 
