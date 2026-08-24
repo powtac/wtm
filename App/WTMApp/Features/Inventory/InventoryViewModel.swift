@@ -80,6 +80,7 @@ final class InventoryViewModel {
   private let runtimeBroker: RuntimeBroker?
   private let toolSettingsStore: (any ToolSettingsStoring)?
   private let initialToolDefinitions: [ToolDefinition]
+  private let runtimeToolTemplates: [RuntimeToolTemplate]
   private let executableSelector: (any ExecutableSelecting)?
   private let invocationBuilder: ToolInvocationBuilder
   private var scanTask: Task<Void, Never>?
@@ -103,6 +104,7 @@ final class InventoryViewModel {
     runtimeBroker: RuntimeBroker? = nil,
     toolSettingsStore: (any ToolSettingsStoring)? = nil,
     initialToolDefinitions: [ToolDefinition] = [],
+    runtimeToolTemplates: [RuntimeToolTemplate] = [],
     executableSelector: (any ExecutableSelecting)? = nil,
     invocationBuilder: ToolInvocationBuilder = ToolInvocationBuilder()
   ) {
@@ -118,6 +120,7 @@ final class InventoryViewModel {
     self.runtimeBroker = runtimeBroker
     self.toolSettingsStore = toolSettingsStore
     self.initialToolDefinitions = initialToolDefinitions
+    self.runtimeToolTemplates = runtimeToolTemplates
     self.executableSelector = executableSelector
     self.invocationBuilder = invocationBuilder
     toolDefinitions = initialToolDefinitions
@@ -500,30 +503,40 @@ final class InventoryViewModel {
     }
   }
 
-  func chooseLlamaCppExecutable() {
+  var missingRuntimeToolTemplates: [RuntimeToolTemplate] {
+    runtimeToolTemplates.filter { template in
+      !toolDefinitions.contains { $0.runtimeAdapterID == template.runtimeAdapterID }
+    }
+  }
+
+  func chooseRuntimeExecutable(_ runtimeID: RuntimeAdapterID) {
+    guard let template = runtimeToolTemplates.first(where: { $0.runtimeAdapterID == runtimeID })
+    else { return }
     guard
       let executableURL = executableSelector?.chooseExecutable(
-        startingAt: toolDefinition(for: .llamaCpp)?.executableURL
+        startingAt: toolDefinition(for: runtimeID)?.executableURL
       )
     else { return }
-    let definition = ToolDefinition(
-      id: llamaCppDefinitionID,
-      displayName: "llama.cpp Server",
-      role: .runtime,
-      runtimeAdapterID: .llamaCpp,
-      origin: .userCreated,
-      isEnabled: false,
-      executableURL: executableURL.standardizedFileURL,
-      arguments: [
-        .literal("--model"), .placeholder(.modelPath),
-        .literal("--host"), .literal("127.0.0.1"),
-        .literal("--port"), .placeholder(.port),
-      ],
-      supportedFormats: [.gguf]
-    )
+    let definition = template.makeDefinition(executableURL.standardizedFileURL)
     toolApprovals.removeValue(forKey: definition.id)
     replaceToolDefinition(definition)
     validateTool(definition.id)
+  }
+
+  func resetRuntimeTool(_ runtimeID: RuntimeAdapterID) {
+    guard let template = runtimeToolTemplates.first(where: { $0.runtimeAdapterID == runtimeID })
+    else { return }
+    let definitionIDs = Set(
+      toolDefinitions.filter { $0.runtimeAdapterID == runtimeID }.map(\.id)
+    )
+    toolDefinitions.removeAll { definitionIDs.contains($0.id) }
+    for definitionID in definitionIDs {
+      toolApprovals.removeValue(forKey: definitionID)
+    }
+    if let defaultDefinition = template.defaultDefinition {
+      toolDefinitions.append(defaultDefinition)
+    }
+    persistToolSettings()
   }
 
   func revealTool(_ definitionID: ToolDefinition.ID) {
@@ -989,15 +1002,6 @@ final class InventoryViewModel {
     guard let plan = deletionPlan else { return }
     deletionPlan = nil
     Task { [actionExecutor] in await actionExecutor?.cancel(planID: plan.id) }
-  }
-
-  private var llamaCppDefinitionID: UUID {
-    UUID(
-      uuid: (
-        0x77, 0x74, 0x6D, 0x00, 0x6C, 0x6C, 0x61, 0x6D,
-        0x61, 0x63, 0x70, 0x70, 0x00, 0x00, 0x00, 0x01
-      )
-    )
   }
 
   private func toolDefinition(for runtimeID: RuntimeAdapterID) -> ToolDefinition? {

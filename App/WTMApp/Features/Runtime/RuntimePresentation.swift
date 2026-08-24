@@ -7,6 +7,15 @@ struct RuntimeReadinessKey: Hashable {
   let adapterID: RuntimeAdapterID
 }
 
+struct RuntimeToolTemplate: Identifiable {
+  var id: RuntimeAdapterID { runtimeAdapterID }
+
+  let runtimeAdapterID: RuntimeAdapterID
+  let displayName: String
+  let defaultDefinition: ToolDefinition?
+  let makeDefinition: (URL) -> ToolDefinition
+}
+
 struct RuntimePlanPreview: Identifiable {
   var id: RuntimeTestPlan.ID { plan.id }
 
@@ -51,6 +60,16 @@ extension RuntimeAdapterID {
     case .ollama: "Ollama"
     case .llamaCpp: "llama.cpp"
     default: rawValue
+    }
+  }
+}
+
+extension ToolDefinitionOrigin {
+  var displayName: String {
+    switch self {
+    case .builtIn: String(localized: "tool.origin.built-in")
+    case .userCreated: String(localized: "tool.origin.user-override")
+    case .imported: String(localized: "tool.origin.imported")
     }
   }
 }

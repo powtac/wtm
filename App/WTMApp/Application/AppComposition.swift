@@ -70,7 +70,18 @@ enum AppComposition {
     }
     let runtimeRegistry = try? RuntimeAdapterRegistry(adapters: runtimeAdapters)
     let runtimeBroker = runtimeRegistry.map { RuntimeBroker(registry: $0) }
-    let initialToolDefinitions = LlamaCppToolConvention().discoveredDefinition().map { [$0] } ?? []
+    let llamaCppConvention = LlamaCppToolConvention()
+    let discoveredLlamaCppDefinition = llamaCppConvention.discoveredDefinition()
+    let runtimeToolTemplates = [
+      RuntimeToolTemplate(
+        runtimeAdapterID: .llamaCpp,
+        displayName: "llama.cpp Server",
+        defaultDefinition: discoveredLlamaCppDefinition,
+        makeDefinition: { executableURL in
+          llamaCppConvention.definition(executableURL: executableURL, origin: .userCreated)
+        }
+      )
+    ]
     return InventoryViewModel(
       coordinator: coordinator,
       initialSources: sources,
@@ -92,7 +103,8 @@ enum AppComposition {
           directoryHint: .notDirectory
         )
       ),
-      initialToolDefinitions: initialToolDefinitions,
+      initialToolDefinitions: discoveredLlamaCppDefinition.map { [$0] } ?? [],
+      runtimeToolTemplates: runtimeToolTemplates,
       executableSelector: MacExecutableSelector()
     )
   }

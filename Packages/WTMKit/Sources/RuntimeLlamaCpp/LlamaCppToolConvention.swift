@@ -2,6 +2,13 @@ import Foundation
 import WTMDomain
 
 public struct LlamaCppToolConvention: Sendable {
+  public static let definitionID = UUID(
+    uuid: (
+      0x77, 0x74, 0x6D, 0x00, 0x6C, 0x6C, 0x61, 0x6D,
+      0x61, 0x63, 0x70, 0x70, 0x00, 0x00, 0x00, 0x01
+    )
+  )
+
   public init() {}
 
   public func discoveredDefinition(
@@ -18,7 +25,14 @@ public struct LlamaCppToolConvention: Sendable {
         fileManager.isExecutableFile(atPath: candidate.path)
       })
     else { return nil }
-    return ToolDefinition(
+    return definition(executableURL: executableURL, origin: .builtIn)
+  }
+
+  public func definition(
+    executableURL: URL,
+    origin: ToolDefinitionOrigin
+  ) -> ToolDefinition {
+    ToolDefinition(
       id: Self.definitionID,
       displayName: "llama.cpp Server",
       role: .runtime,
@@ -34,10 +48,4 @@ public struct LlamaCppToolConvention: Sendable {
       supportedFormats: [.gguf]
     )
   }
-
-  private static let definitionID = UUID(
-    uuid: (
-      0x77, 0x74, 0x6D, 0x00, 0x6C, 0x6C, 0x61, 0x6D, 0x61, 0x63, 0x70, 0x70, 0x00, 0x00, 0x00, 0x01
-    )
-  )
 }

@@ -177,6 +177,12 @@ struct SettingsRootView: View {
                 model.isToolApproved(definition) ? Color.secondary : Color.orange
               )
               Spacer()
+              Button("tool.choose.action") {
+                if let runtimeID = definition.runtimeAdapterID {
+                  model.chooseRuntimeExecutable(runtimeID)
+                }
+              }
+              .disabled(definition.runtimeAdapterID == nil)
               Button("tool.validate.action") {
                 model.validateTool(definition.id)
               }
@@ -184,6 +190,12 @@ struct SettingsRootView: View {
                 model.revealTool(definition.id)
               }
               .labelStyle(.iconOnly)
+              Button("tool.reset.action") {
+                if let runtimeID = definition.runtimeAdapterID {
+                  model.resetRuntimeTool(runtimeID)
+                }
+              }
+              .disabled(definition.runtimeAdapterID == nil)
             }
 
             if let validation = definition.lastValidation {
@@ -201,11 +213,21 @@ struct SettingsRootView: View {
               .font(.caption)
               .foregroundStyle(.secondary)
             }
+            LabeledContent("tool.origin", value: definition.origin.displayName)
+              .font(.caption)
+              .foregroundStyle(.secondary)
           }
         }
 
-        Button("tool.choose-llama.action") {
-          model.chooseLlamaCppExecutable()
+        ForEach(model.missingRuntimeToolTemplates) { template in
+          Button {
+            model.chooseRuntimeExecutable(template.runtimeAdapterID)
+          } label: {
+            Label(
+              "\(String(localized: "tool.choose.action")) \(template.displayName)…",
+              systemImage: "plus"
+            )
+          }
         }
         adapterGuideLink
       }

@@ -1,711 +1,18 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "runtime.check.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Check Readiness" } } }
-    },
-    "runtime.compatibility" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Compatibility" } } }
-    },
-    "runtime.endpoint" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Endpoint" } } }
-    },
-    "runtime.error.executable-changed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The executable changed after approval. Review it again." } } }
-    },
-    "runtime.error.launch-failed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The runtime could not start or did not pass its health check." } } }
-    },
-    "runtime.error.plan-failed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM could not create a safe runtime plan for this model." } } }
-    },
-    "runtime.error.settings-failed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime tool settings could not be read or saved." } } }
-    },
-    "runtime.error.stop-failed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM could not stop the process it started." } } }
-    },
-    "runtime.error.title" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Error" } } }
-    },
-    "runtime.error.tool-disabled" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Enable this runtime tool in Settings before testing it." } } }
-    },
-    "runtime.error.tool-invalid" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The selected executable or tool definition failed validation." } } }
-    },
-    "runtime.error.unavailable" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "This runtime adapter is unavailable." } } }
-    },
-    "runtime.health" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Health Check" } } }
-    },
-    "runtime.inference" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Inference Check" } } }
-    },
-    "runtime.integrity" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Integrity" } } }
-    },
-    "runtime.logs" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Session Logs" } } }
-    },
-    "runtime.memory-estimate" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Estimated Memory" } } }
-    },
-    "runtime.not-checked" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Readiness has not been checked in this app session." } } }
-    },
-    "runtime.ownership" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Ownership" } } }
-    },
-    "runtime.plan.approval-required" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Confirming stores approval for this exact executable and argument template." } } }
-    },
-    "runtime.plan.arguments" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Final Arguments" } } }
-    },
-    "runtime.plan.execute" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Start and Verify" } } }
-    },
-    "runtime.plan.executable" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Executable" } } }
-    },
-    "runtime.plan.inference" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will perform a bounded one-token inference check." } } }
-    },
-    "runtime.plan.model" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Model" } } }
-    },
-    "runtime.plan.path" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Canonical Path" } } }
-    },
-    "runtime.plan.provider-managed" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will call the provider's existing local API and will not own or stop its process." } } }
-    },
-    "runtime.plan.runtime" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime" } } }
-    },
-    "runtime.plan.signature" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Signature" } } }
-    },
-    "runtime.plan.stop-behavior" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop Behavior" } } }
-    },
-    "runtime.plan.version" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } } }
-    },
-    "runtime.plan.warning" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Review Runtime Test" } } }
-    },
-    "runtime.plan.warning-detail" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Starting this test may load the full model into memory. WTM executes no shell and connects only to the numeric loopback endpoint shown below." } } }
-    },
-    "runtime.refresh.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Refresh Logs" } } }
-    },
-    "runtime.section" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Verification" } } }
-    },
-    "runtime.state" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime State" } } }
-    },
-    "runtime.stop.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Stop" } } }
-    },
-    "runtime.stop.owned" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM can stop only this process instance." } } }
-    },
-    "runtime.stop.provider" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "The provider API can stop this model instance." } } }
-    },
-    "runtime.stop.unavailable" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "WTM will not stop the provider-managed process." } } }
-    },
-    "runtime.test.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Run Test" } } }
-    },
-    "runtime.unsupported" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "No installed runtime adapter supports this model format." } } }
-    },
-    "runtime.validation" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Validation" } } }
-    },
-    "settings.runtime.local-api" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Built-in · Numeric loopback API" } } }
-    },
-    "settings.runtimes.section" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Runtime Tools" } } }
-    },
-    "tool.approved" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Approved for this exact configuration" } } }
-    },
-    "tool.choose-llama.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose llama-server…" } } }
-    },
-    "tool.choose.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose" } } }
-    },
-    "tool.choose.message" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose the llama-server executable. WTM validates it before enabling execution." } } }
-    },
-    "tool.not-approved" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Approval required before execution" } } }
-    },
-    "tool.validate.action" : {
-      "localizations" : { "en" : { "stringUnit" : { "state" : "translated", "value" : "Validate" } } }
-    },
-    "action.ok" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        }
-      }
-    },
-    "deletion.batch-selection.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Selected Models"
-          }
-        }
-      }
-    },
-    "deletion.conflict.in-use" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A selected model is currently in use."
-          }
-        }
-      }
-    },
-    "deletion.conflict.overlap" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Selected operations contain overlapping filesystem targets."
-          }
-        }
-      }
-    },
-    "deletion.conflict.provider" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Different providers claim the same cleanup target."
-          }
-        }
-      }
-    },
-    "deletion.error.adapter-unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No reviewed cleanup adapter is available for this provider."
-          }
-        }
-      }
-    },
-    "deletion.error.audit-unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The local cleanup audit could not be updated."
-          }
-        }
-      }
-    },
-    "deletion.error.confirmation-required" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirm the irreversible provider operation before continuing."
-          }
-        }
-      }
-    },
-    "deletion.error.conflict" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The batch contains unresolved target conflicts."
-          }
-        }
-      }
-    },
-    "deletion.error.inventory-changed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The inventory changed after the preview. Scan and create a new preview."
-          }
-        }
-      }
-    },
-    "deletion.error.model-in-use" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The provider reports that this model is currently loaded. Stop it before cleanup."
-          }
-        }
-      }
-    },
-    "deletion.error.no-artifacts" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No artifact can be removed safely. Shared, unknown, and protected files were retained."
-          }
-        }
-      }
-    },
-    "deletion.error.no-selection" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select at least one model."
-          }
-        }
-      }
-    },
-    "deletion.error.plan-expired" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The cleanup preview expired. Create a new preview from the current inventory."
-          }
-        }
-      }
-    },
-    "deletion.error.provider-unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The provider’s local API is unavailable. No fallback file deletion was attempted."
-          }
-        }
-      }
-    },
-    "deletion.error.revalidation-failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A path, file identity, shared reference, or provider state changed after the preview. Nothing further was removed."
-          }
-        }
-      }
-    },
-    "deletion.error.source-unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The model source is offline, disabled, read-only, or no longer authorized."
-          }
-        }
-      }
-    },
-    "deletion.error.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup Could Not Continue"
-          }
-        }
-      }
-    },
-    "deletion.error.unknown" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup stopped safely because an unexpected error occurred."
-          }
-        }
-      }
-    },
-    "deletion.execute.irreversible" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Execute Cleanup"
-          }
-        }
-      }
-    },
-    "deletion.execute.trash" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move to Trash"
-          }
-        }
-      }
-    },
-    "deletion.executing" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Revalidating and cleaning up…"
-          }
-        }
-      }
-    },
-    "deletion.irreversible.confirmation" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I understand that the provider deletion is irreversible."
-          }
-        }
-      }
-    },
-    "deletion.irreversible.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "At least one provider operation cannot be restored from Trash."
-          }
-        }
-      }
-    },
-    "deletion.irreversible.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Irreversible Provider Deletion"
-          }
-        }
-      }
-    },
-    "deletion.models-selected" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "models selected"
-          }
-        }
-      }
-    },
-    "deletion.preview.conflicts" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blocking Conflicts"
-          }
-        }
-      }
-    },
-    "deletion.preview.estimate" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Estimate"
-          }
-        }
-      }
-    },
-    "deletion.preview.estimate-help" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This is a conservative estimate. Trash-backed storage is reclaimed only after Trash is emptied; free volume space is not proof of success."
-          }
-        }
-      }
-    },
-    "deletion.preview.expected-reclaim" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expected Reclaimable"
-          }
-        }
-      }
-    },
-    "deletion.preview.expires" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preview Expires"
-          }
-        }
-      }
-    },
-    "deletion.preview.models" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Models"
-          }
-        }
-      }
-    },
-    "deletion.preview.operations" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Planned Operations"
-          }
-        }
-      }
-    },
-    "deletion.preview.retained" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retained Dependencies"
-          }
-        }
-      }
-    },
-    "deletion.preview.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Cleanup"
-          }
-        }
-      }
-    },
-    "deletion.progress" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preparing cleanup"
-          }
-        }
-      }
-    },
-    "deletion.result.blocked" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup was blocked before any operation ran."
-          }
-        }
-      }
-    },
-    "deletion.result.failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup failed. WTM rescanned the affected sources."
-          }
-        }
-      }
-    },
-    "deletion.result.partial" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup completed only partially. WTM stopped after the first failure and rescanned the affected sources."
-          }
-        }
-      }
-    },
-    "deletion.result.succeeded" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup completed. WTM rescanned the affected sources."
-          }
-        }
-      }
-    },
-    "deletion.result.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup Result"
-          }
-        }
-      }
-    },
-    "deletion.retained.protected" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Protected identity, credential, or secret-like file"
-          }
-        }
-      }
-    },
-    "deletion.retained.remaining-reference" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retained because another model still references it"
-          }
-        }
-      }
-    },
-    "deletion.retained.unknown" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retained because ownership could not be verified"
-          }
-        }
-      }
-    },
-    "deletion.reversible.irreversible" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Irreversible provider operation"
-          }
-        }
-      }
-    },
-    "deletion.reversible.trash" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recoverable from Trash"
-          }
-        }
-      }
-    },
-    "deletion.review.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Cleanup…"
-          }
-        }
-      }
-    },
-    "deletion.warning.external-usage" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WTM cannot verify whether another app has this file open. Close model tools before continuing."
-          }
-        }
-      }
-    },
-    "settings.audit.clear" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Audit…"
-          }
-        }
-      }
-    },
-    "settings.audit.clear-confirmation.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This permanently removes the local cleanup history."
-          }
-        }
-      }
-    },
-    "settings.audit.clear-confirmation.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Cleanup Audit?"
-          }
-        }
-      }
-    },
-    "settings.audit.empty" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No cleanup actions recorded."
-          }
-        }
-      }
-    },
-    "settings.audit.privacy" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The audit stores time, provider, operation counts, and result only. It never stores model names, paths, payloads, credentials, or file contents."
-          }
-        }
-      }
-    },
-    "settings.audit.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cleanup Audit"
-          }
-        }
-      }
-    },
-    "action.cancel" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
-          }
-        }
-      }
-    },
     "·" : {
 
+    },
+    "[%@] %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "[%1$@] %2$@"
+          }
+        }
+      }
     },
     "%@" : {
 
@@ -720,12 +27,64 @@
         }
       }
     },
+    "%@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ v%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ v%2$@"
+          }
+        }
+      }
+    },
     "%@/%@" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "new",
             "value" : "%1$@/%2$@"
+          }
+        }
+      }
+    },
+    "action.cancel" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "action.ok" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -859,6 +218,518 @@
         }
       }
     },
+    "deletion.batch-selection.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Selected Models"
+          }
+        }
+      }
+    },
+    "deletion.conflict.in-use" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A selected model is currently in use."
+          }
+        }
+      }
+    },
+    "deletion.conflict.overlap" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected operations contain overlapping filesystem targets."
+          }
+        }
+      }
+    },
+    "deletion.conflict.provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Different providers claim the same cleanup target."
+          }
+        }
+      }
+    },
+    "deletion.error.adapter-unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No reviewed cleanup adapter is available for this provider."
+          }
+        }
+      }
+    },
+    "deletion.error.audit-unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The local cleanup audit could not be updated."
+          }
+        }
+      }
+    },
+    "deletion.error.confirmation-required" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm the irreversible provider operation before continuing."
+          }
+        }
+      }
+    },
+    "deletion.error.conflict" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The batch contains unresolved target conflicts."
+          }
+        }
+      }
+    },
+    "deletion.error.inventory-changed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The inventory changed after the preview. Scan and create a new preview."
+          }
+        }
+      }
+    },
+    "deletion.error.model-in-use" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provider reports that this model is currently loaded. Stop it before cleanup."
+          }
+        }
+      }
+    },
+    "deletion.error.no-artifacts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No artifact can be removed safely. Shared, unknown, and protected files were retained."
+          }
+        }
+      }
+    },
+    "deletion.error.no-selection" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select at least one model."
+          }
+        }
+      }
+    },
+    "deletion.error.plan-expired" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The cleanup preview expired. Create a new preview from the current inventory."
+          }
+        }
+      }
+    },
+    "deletion.error.provider-unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provider’s local API is unavailable. No fallback file deletion was attempted."
+          }
+        }
+      }
+    },
+    "deletion.error.revalidation-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A path, file identity, shared reference, or provider state changed after the preview. Nothing further was removed."
+          }
+        }
+      }
+    },
+    "deletion.error.source-unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The model source is offline, disabled, read-only, or no longer authorized."
+          }
+        }
+      }
+    },
+    "deletion.error.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Could Not Continue"
+          }
+        }
+      }
+    },
+    "deletion.error.unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup stopped safely because an unexpected error occurred."
+          }
+        }
+      }
+    },
+    "deletion.execute.irreversible" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute Cleanup"
+          }
+        }
+      }
+    },
+    "deletion.execute.trash" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move to Trash"
+          }
+        }
+      }
+    },
+    "deletion.executing" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revalidating and cleaning up…"
+          }
+        }
+      }
+    },
+    "deletion.irreversible.confirmation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I understand that the provider deletion is irreversible."
+          }
+        }
+      }
+    },
+    "deletion.irreversible.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At least one provider operation cannot be restored from Trash."
+          }
+        }
+      }
+    },
+    "deletion.irreversible.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irreversible Provider Deletion"
+          }
+        }
+      }
+    },
+    "deletion.models-selected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "models selected"
+          }
+        }
+      }
+    },
+    "deletion.preview.conflicts" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blocking Conflicts"
+          }
+        }
+      }
+    },
+    "deletion.preview.estimate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimate"
+          }
+        }
+      }
+    },
+    "deletion.preview.estimate-help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is a conservative estimate. Trash-backed storage is reclaimed only after Trash is emptied; free volume space is not proof of success."
+          }
+        }
+      }
+    },
+    "deletion.preview.expected-reclaim" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expected Reclaimable"
+          }
+        }
+      }
+    },
+    "deletion.preview.expires" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview Expires"
+          }
+        }
+      }
+    },
+    "deletion.preview.models" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Models"
+          }
+        }
+      }
+    },
+    "deletion.preview.operations" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Planned Operations"
+          }
+        }
+      }
+    },
+    "deletion.preview.retained" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained Dependencies"
+          }
+        }
+      }
+    },
+    "deletion.preview.title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Cleanup"
+          }
+        }
+      }
+    },
+    "deletion.progress" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preparing cleanup"
+          }
+        }
+      }
+    },
+    "deletion.result.blocked" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup was blocked before any operation ran."
+          }
+        }
+      }
+    },
+    "deletion.result.failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup failed. WTM rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.partial" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup completed only partially. WTM stopped after the first failure and rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.succeeded" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup completed. WTM rescanned the affected sources."
+          }
+        }
+      }
+    },
+    "deletion.result.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Result"
+          }
+        }
+      }
+    },
+    "deletion.retained.protected" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Protected identity, credential, or secret-like file"
+          }
+        }
+      }
+    },
+    "deletion.retained.remaining-reference" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained because another model still references it"
+          }
+        }
+      }
+    },
+    "deletion.retained.unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retained because ownership could not be verified"
+          }
+        }
+      }
+    },
+    "deletion.reversible.irreversible" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irreversible provider operation"
+          }
+        }
+      }
+    },
+    "deletion.reversible.trash" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recoverable from Trash"
+          }
+        }
+      }
+    },
+    "deletion.review.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Cleanup…"
+          }
+        }
+      }
+    },
+    "deletion.warning.external-usage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM cannot verify whether another app has this file open. Close model tools before continuing."
+          }
+        }
+      }
+    },
     "detail.age" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -904,6 +775,7 @@
       }
     },
     "detail.configurations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1011,6 +883,123 @@
         }
       }
     },
+    "filter.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filters"
+          }
+        }
+      }
+    },
+    "filter.any-format" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Format"
+          }
+        }
+      }
+    },
+    "filter.any-provider" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Provider"
+          }
+        }
+      }
+    },
+    "filter.any-source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Source"
+          }
+        }
+      }
+    },
+    "filter.any-state" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any State"
+          }
+        }
+      }
+    },
+    "filter.clear" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Filters"
+          }
+        }
+      }
+    },
+    "filter.format" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        }
+      }
+    },
+    "filter.provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provider"
+          }
+        }
+      }
+    },
+    "filter.show-all" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All Models"
+          }
+        }
+      }
+    },
+    "filter.source" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
+    "filter.state" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "State"
+          }
+        }
+      }
+    },
     "format.gguf" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1110,206 +1099,6 @@
         }
       }
     },
-    "filter.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Filters"
-          }
-        }
-      }
-    },
-    "filter.any-format" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Any Format"
-          }
-        }
-      }
-    },
-    "filter.any-provider" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Any Provider"
-          }
-        }
-      }
-    },
-    "filter.any-source" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Any Source"
-          }
-        }
-      }
-    },
-    "filter.any-state" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Any State"
-          }
-        }
-      }
-    },
-    "filter.clear" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clear Filters"
-          }
-        }
-      }
-    },
-    "filter.format" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Format"
-          }
-        }
-      }
-    },
-    "filter.provider" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Provider"
-          }
-        }
-      }
-    },
-    "filter.source" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source"
-          }
-        }
-      }
-    },
-    "filter.show-all" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show All Models"
-          }
-        }
-      }
-    },
-    "filter.state" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "State"
-          }
-        }
-      }
-    },
-    "issue.generic" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inventory data could not be read."
-          }
-        }
-      }
-    },
-    "issue.hugging-face" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hugging Face cache data is incomplete or invalid."
-          }
-        }
-      }
-    },
-    "issue.manual" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The selected folder could not be inventoried."
-          }
-        }
-      }
-    },
-    "issue.ollama" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ollama inventory data is incomplete or invalid."
-          }
-        }
-      }
-    },
-    "issue.source-access" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This source needs renewed read access."
-          }
-        }
-      }
-    },
-    "issue.source-offline" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This source is offline."
-          }
-        }
-      }
-    },
-    "issue.source-settings" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source settings could not be read or saved."
-          }
-        }
-      }
-    },
-    "issues.empty.description" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The latest scan reported no inventory issues."
-          }
-        }
-      }
-    },
-    "issues.empty.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No Issues"
-          }
-        }
-      }
-    },
     "inventory.column.age" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1321,6 +1110,17 @@
         }
       }
     },
+    "inventory.column.date" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First Change"
+          }
+        }
+      }
+    },
     "inventory.column.format" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1328,16 +1128,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Format"
-          }
-        }
-      }
-    },
-    "inventory.column.date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "First Change"
           }
         }
       }
@@ -1376,6 +1166,7 @@
       }
     },
     "inventory.column.reclaimable" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1386,6 +1177,7 @@
       }
     },
     "inventory.column.share" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1406,6 +1198,17 @@
         }
       }
     },
+    "inventory.column.source" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
     "inventory.column.state" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1417,18 +1220,7 @@
         }
       }
     },
-    "inventory.column.source" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source"
-          }
-        }
-      }
-    },
     "inventory.empty.description" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1460,6 +1252,7 @@
       }
     },
     "inventory.filtered-empty.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1500,6 +1293,104 @@
         }
       }
     },
+    "issue.generic" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory data could not be read."
+          }
+        }
+      }
+    },
+    "issue.hugging-face" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hugging Face cache data is incomplete or invalid."
+          }
+        }
+      }
+    },
+    "issue.manual" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected folder could not be inventoried."
+          }
+        }
+      }
+    },
+    "issue.ollama" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama inventory data is incomplete or invalid."
+          }
+        }
+      }
+    },
+    "issue.source-access" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This source needs renewed read access."
+          }
+        }
+      }
+    },
+    "issue.source-offline" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This source is offline."
+          }
+        }
+      }
+    },
+    "issue.source-settings" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source settings could not be read or saved."
+          }
+        }
+      }
+    },
+    "issues.empty.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The latest scan reported no inventory issues."
+          }
+        }
+      }
+    },
+    "issues.empty.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Issues"
+          }
+        }
+      }
+    },
     "provider.hugging-face" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1529,6 +1420,475 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ollama"
+          }
+        }
+      }
+    },
+    "runtime.check.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check Readiness"
+          }
+        }
+      }
+    },
+    "runtime.compatibility" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compatibility"
+          }
+        }
+      }
+    },
+    "runtime.endpoint" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endpoint"
+          }
+        }
+      }
+    },
+    "runtime.error.executable-changed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The executable changed after approval. Review it again."
+          }
+        }
+      }
+    },
+    "runtime.error.launch-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The runtime could not start or did not pass its health check."
+          }
+        }
+      }
+    },
+    "runtime.error.plan-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM could not create a safe runtime plan for this model."
+          }
+        }
+      }
+    },
+    "runtime.error.settings-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime tool settings could not be read or saved."
+          }
+        }
+      }
+    },
+    "runtime.error.stop-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM could not stop the process it started."
+          }
+        }
+      }
+    },
+    "runtime.error.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime Error"
+          }
+        }
+      }
+    },
+    "runtime.error.tool-disabled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable this runtime tool in Settings before testing it."
+          }
+        }
+      }
+    },
+    "runtime.error.tool-invalid" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected executable or tool definition failed validation."
+          }
+        }
+      }
+    },
+    "runtime.error.unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This runtime adapter is unavailable."
+          }
+        }
+      }
+    },
+    "runtime.health" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health Check"
+          }
+        }
+      }
+    },
+    "runtime.inference" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inference Check"
+          }
+        }
+      }
+    },
+    "runtime.integrity" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integrity"
+          }
+        }
+      }
+    },
+    "runtime.logs" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Logs"
+          }
+        }
+      }
+    },
+    "runtime.memory-estimate" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estimated Memory"
+          }
+        }
+      }
+    },
+    "runtime.not-checked" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Readiness has not been checked in this app session."
+          }
+        }
+      }
+    },
+    "runtime.ownership" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ownership"
+          }
+        }
+      }
+    },
+    "runtime.plan.approval-required" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirming stores approval for this exact executable and argument template."
+          }
+        }
+      }
+    },
+    "runtime.plan.arguments" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Final Arguments"
+          }
+        }
+      }
+    },
+    "runtime.plan.executable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Executable"
+          }
+        }
+      }
+    },
+    "runtime.plan.execute" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start and Verify"
+          }
+        }
+      }
+    },
+    "runtime.plan.inference" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will perform a bounded one-token inference check."
+          }
+        }
+      }
+    },
+    "runtime.plan.model" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model"
+          }
+        }
+      }
+    },
+    "runtime.plan.path" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Canonical Path"
+          }
+        }
+      }
+    },
+    "runtime.plan.provider-managed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will call the provider's existing local API and will not own or stop its process."
+          }
+        }
+      }
+    },
+    "runtime.plan.runtime" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime"
+          }
+        }
+      }
+    },
+    "runtime.plan.signature" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signature"
+          }
+        }
+      }
+    },
+    "runtime.plan.stop-behavior" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop Behavior"
+          }
+        }
+      }
+    },
+    "runtime.plan.version" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        }
+      }
+    },
+    "runtime.plan.warning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Runtime Test"
+          }
+        }
+      }
+    },
+    "runtime.plan.warning-detail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting this test may load the full model into memory. WTM executes no shell and connects only to the numeric loopback endpoint shown below."
+          }
+        }
+      }
+    },
+    "runtime.refresh.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh Logs"
+          }
+        }
+      }
+    },
+    "runtime.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime Verification"
+          }
+        }
+      }
+    },
+    "runtime.state" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime State"
+          }
+        }
+      }
+    },
+    "runtime.stop.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop"
+          }
+        }
+      }
+    },
+    "runtime.stop.owned" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM can stop only this process instance."
+          }
+        }
+      }
+    },
+    "runtime.stop.provider" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The provider API can stop this model instance."
+          }
+        }
+      }
+    },
+    "runtime.stop.unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will not stop the provider-managed process."
+          }
+        }
+      }
+    },
+    "runtime.test.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run Test"
+          }
+        }
+      }
+    },
+    "runtime.unsupported" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No installed runtime adapter supports this model format."
+          }
+        }
+      }
+    },
+    "runtime.validation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Validation"
           }
         }
       }
@@ -1567,7 +1927,6 @@
       }
     },
     "scan.status.empty-description" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1649,22 +2008,24 @@
         }
       }
     },
-    "settings.advanced" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advanced"
-          }
-        }
-      }
-    },
     "settings.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Settings…"
+          }
+        }
+      }
+    },
+    "settings.advanced" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced"
           }
         }
       }
@@ -1686,6 +2047,69 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Model Age"
+          }
+        }
+      }
+    },
+    "settings.audit.clear" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Audit…"
+          }
+        }
+      }
+    },
+    "settings.audit.clear-confirmation.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This permanently removes the local cleanup history."
+          }
+        }
+      }
+    },
+    "settings.audit.clear-confirmation.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear Cleanup Audit?"
+          }
+        }
+      }
+    },
+    "settings.audit.empty" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No cleanup actions recorded."
+          }
+        }
+      }
+    },
+    "settings.audit.privacy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The audit stores time, provider, operation counts, and result only. It never stores model names, paths, payloads, credentials, or file contents."
+          }
+        }
+      }
+    },
+    "settings.audit.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cleanup Audit"
           }
         }
       }
@@ -1722,6 +2146,7 @@
       }
     },
     "settings.extension.section" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1732,6 +2157,7 @@
       }
     },
     "settings.general" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1752,6 +2178,7 @@
       }
     },
     "settings.integrations" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1772,6 +2199,7 @@
       }
     },
     "settings.inventory.section" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1791,6 +2219,27 @@
         }
       }
     },
+    "settings.runtime.local-api" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in · Numeric loopback API"
+          }
+        }
+      }
+    },
+    "settings.runtimes.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Runtime Tools"
+          }
+        }
+      }
+    },
     "settings.scan-on-launch" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1803,6 +2252,7 @@
       }
     },
     "settings.scanning.section" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1867,11 +2317,23 @@
       }
     },
     "settings.storage-providers.section" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Storage Providers"
+          }
+        }
+      }
+    },
+    "settings.volumes.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mounted Volumes"
           }
         }
       }
@@ -1943,6 +2405,7 @@
       }
     },
     "source.access.allowed" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1953,6 +2416,7 @@
       }
     },
     "source.access.denied" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1963,6 +2427,7 @@
       }
     },
     "source.access.limited" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1973,6 +2438,7 @@
       }
     },
     "source.access.not-set-up" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1983,6 +2449,7 @@
       }
     },
     "source.access.offline" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1993,6 +2460,7 @@
       }
     },
     "source.access.stale" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2036,6 +2504,7 @@
       }
     },
     "source.grant-again.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2057,6 +2526,7 @@
       }
     },
     "source.revoke.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2067,6 +2537,7 @@
       }
     },
     "source.revoke.confirmation.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2087,6 +2558,7 @@
       }
     },
     "source.revoke.confirmation.title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2138,66 +2610,6 @@
         }
       }
     },
-    "value.unknown" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unknown"
-          }
-        }
-      }
-    },
-    "volume.add.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add…"
-          }
-        }
-      }
-    },
-    "volume.read-only" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Read Only"
-          }
-        }
-      }
-    },
-    "volume.read-write" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Read/Write"
-          }
-        }
-      }
-    },
-    "volume.refresh.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Refresh Volumes"
-          }
-        }
-      }
-    },
-    "settings.volumes.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mounted Volumes"
-          }
-        }
-      }
-    },
     "storage.active-scope" : {
       "localizations" : {
         "en" : {
@@ -2219,6 +2631,7 @@
       }
     },
     "storage.mode.label" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2239,6 +2652,7 @@
       }
     },
     "storage.share.help" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2308,6 +2722,177 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Provider Downloaded"
+          }
+        }
+      }
+    },
+    "tool.approved" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approved for this exact configuration"
+          }
+        }
+      }
+    },
+    "tool.choose-llama.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose llama-server…"
+          }
+        }
+      }
+    },
+    "tool.choose.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose"
+          }
+        }
+      }
+    },
+    "tool.choose.message" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the runtime executable. WTM validates it before enabling execution."
+          }
+        }
+      }
+    },
+    "tool.not-approved" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Approval required before execution"
+          }
+        }
+      }
+    },
+    "tool.origin" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Origin"
+          }
+        }
+      }
+    },
+    "tool.origin.built-in" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discovered default"
+          }
+        }
+      }
+    },
+    "tool.origin.imported" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imported"
+          }
+        }
+      }
+    },
+    "tool.origin.user-override" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "User override"
+          }
+        }
+      }
+    },
+    "tool.reset.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset"
+          }
+        }
+      }
+    },
+    "tool.validate.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Validate"
+          }
+        }
+      }
+    },
+    "value.unknown" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
+    "volume.add.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add…"
+          }
+        }
+      }
+    },
+    "volume.read-only" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read Only"
+          }
+        }
+      }
+    },
+    "volume.read-write" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Read/Write"
+          }
+        }
+      }
+    },
+    "volume.refresh.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh Volumes"
           }
         }
       }
