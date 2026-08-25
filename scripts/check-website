@@ -67,4 +67,20 @@ while IFS= read -r reference; do
   fi
 done < <(search -o 'href="[a-zA-Z0-9._-]+\.html(#[a-zA-Z0-9._-]+)?"' "$website_root"/*.html | sed -E 's/.*href="([^"]+)"/\1/' | sort -u)
 
-echo "Website structure, local links, and baseline accessibility are valid."
+search -Fq 'shasum -a 256 --ignore-missing -c checksums.sha256' "$website_root/index.html" || {
+  echo "Installer must verify the downloaded DMG without requiring every release asset." >&2
+  exit 1
+}
+
+checksum_fixture="$(mktemp -d "${TMPDIR:-/tmp}/wtm-installer-check.XXXXXX")"
+trap 'rm -rf "$checksum_fixture"' EXIT INT TERM
+printf 'fixture DMG\n' > "$checksum_fixture/WTM-0.0.0-arm64.dmg"
+(
+  cd "$checksum_fixture"
+  shasum -a 256 WTM-0.0.0-arm64.dmg > checksums.sha256
+  printf '%064d  WTM-0.0.0.spdx.json\n' 0 >> checksums.sha256
+  printf '%064d  release-metadata.json\n' 0 >> checksums.sha256
+  shasum -a 256 --ignore-missing -c checksums.sha256 >/dev/null
+)
+
+echo "Website structure, local links, baseline accessibility, and installer verification are valid."

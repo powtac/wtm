@@ -53,6 +53,11 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+### Fixed
+
+- Verify only downloaded files from the multi-asset release checksum manifest in the
+  website's Terminal installer.
+
 ### Added
 
 - A fixed `Settings…` footer below the collapsible inventory sidebar, backed by the native
