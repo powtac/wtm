@@ -1,7 +1,7 @@
 # What The Model
 
-[![CI](https://github.com/powtac/wtm/actions/workflows/ci.yml/badge.svg)](https://github.com/powtac/wtm/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/github/actions/workflow/status/powtac/wtm/ci.yml?branch=main&label=tests)](https://github.com/powtac/wtm/actions/workflows/ci.yml)
+[![CI](https://github.com/powtac/wtm/actions/workflows/ci.yml/badge.svg?branch=main&event=push)](https://github.com/powtac/wtm/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
+[![Tests](https://img.shields.io/github/actions/workflow/status/powtac/wtm/ci.yml?branch=main&event=push&label=tests)](https://github.com/powtac/wtm/actions/workflows/ci.yml?query=branch%3Amain+event%3Apush)
 [![Latest Release](https://img.shields.io/github/v/release/powtac/wtm?display_name=tag&sort=semver)](https://github.com/powtac/wtm/releases/latest)
 [![macOS 15+](https://img.shields.io/badge/macOS-15%2B-black?logo=apple)](https://support.apple.com/macos)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
