@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.2] - 2026-08-25
+
+### Fixed
+
+- Isolated the client-broker ownership test from hosted-runner process-exit timing by using
+  a deterministic process launcher; real process execution remains covered separately.
+
 ## [0.3.1] - 2026-08-25
 
 ### Fixed

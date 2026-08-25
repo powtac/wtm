@@ -53,6 +53,27 @@ private func verifiedOllamaRuntime(at now: Date) -> RuntimeInstance {
   )
 }
 
+private actor ExitingProcessHandle: RuntimeProcessHandle {
+  func processIdentifier() async -> Int32 { 42 }
+
+  func isRunning() async -> Bool { false }
+
+  func terminate() async {}
+
+  func waitForExit() async -> Int32 { 0 }
+}
+
+private struct ExitingProcessLauncher: RuntimeProcessLaunching, Sendable {
+  let handle = ExitingProcessHandle()
+
+  func launch(
+    _ invocation: RuntimeExecutableInvocation,
+    outputHandler: @escaping RuntimeProcessOutputHandler
+  ) throws -> any RuntimeProcessHandle {
+    handle
+  }
+}
+
 @Test("Client registry rejects duplicate capability IDs")
 func registryRejectsDuplicates() {
   let first = OpenClawClientAdapter(nodeURL: nil, scriptURL: nil, environment: [:])
@@ -149,7 +170,7 @@ func clientBrokerStartsReviewedPlan() async throws {
       )
     )
   )
-  let broker = ClientHandoffBroker()
+  let broker = ClientHandoffBroker(launcher: ExitingProcessLauncher())
   let started = try await broker.start(plan: plan, installation: model)
   #expect(started.processIdentifier > 0)
   var finished = try await broker.snapshot(sessionID: started.id)
