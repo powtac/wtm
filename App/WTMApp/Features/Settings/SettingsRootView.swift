@@ -3,6 +3,7 @@ import WTMDomain
 
 struct SettingsRootView: View {
   @Bindable var model: InventoryViewModel
+  let updateChecker: UpdateChecker
   @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
   @State private var pendingRevocationSourceID: ScanSource.ID?
   @State private var isAuditClearConfirmationPresented = false
@@ -84,6 +85,10 @@ struct SettingsRootView: View {
             set: { model.setScanOnLaunch($0) }
           )
         )
+      }
+
+      Section("Updates") {
+        UpdateStatusView(checker: updateChecker)
       }
 
       Section("settings.menu-bar.section") {

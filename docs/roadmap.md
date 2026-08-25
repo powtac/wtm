@@ -18,7 +18,9 @@ The normative scope and acceptance criteria are in
 copies only and are not maintained by the project.
 
 Phase 4 is implementation-complete but does not become `Completed` until its manual evidence
-is recorded in [Phase 4 Acceptance](phase-4-acceptance.md). Phase 5 also owns the WTM application update path: a weekly, privacy-preserving
+is recorded in [Phase 4 Acceptance](phase-4-acceptance.md). Phase 5 implementation and
+automated gates are recorded in [Phase 5 Acceptance](phase-5-acceptance.md), while its
+protected public-launch evidence remains open. Phase 5 also owns the WTM application update path: a weekly, privacy-preserving
 check against the stable GitHub Release plus manual `Check for Updates…` and
 `Download Latest Release` links in About, Settings, the app menu, website, and README.
 Provider- and model acquisition are currently backlog and have no committed shipping phase.

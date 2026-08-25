@@ -46,6 +46,7 @@ if [[ -n "$network_files" ]]; then
   while IFS= read -r network_file; do
     case "$network_file" in
       Packages/WTMKit/Sources/ActionOllama/*|Packages/WTMKit/Sources/RuntimeOllama/*|Packages/WTMKit/Sources/RuntimeLlamaCpp/*) ;;
+      App/WTMApp/Application/UpdateService.swift) ;;
       *)
         echo "URLSession entered an unreviewed target: $network_file" >&2
         exit 1
@@ -54,7 +55,7 @@ if [[ -n "$network_files" ]]; then
   done <<< "$network_files"
 fi
 
-if rg -n 'Process\s*\(|URLSession' App/WTMApp Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/WTMAdapterContracts; then
+if rg -n 'Process\s*\(' App/WTMApp Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/WTMAdapterContracts; then
   echo "UI, inventory, actions, and adapter contracts cannot execute processes or runtime HTTP." >&2
   exit 1
 fi

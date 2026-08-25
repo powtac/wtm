@@ -267,6 +267,132 @@ func allocatedSizesUseWholeUnits() {
   #expect(!value.contains("."))
 }
 
+private enum UpdateFixtureResponse: Sendable {
+  case releases([UpdateRelease])
+  case offline
+  case rateLimited
+  case invalidMetadata
+}
+
+private struct UpdateFixtureFetcher: UpdateReleaseFetching {
+  let response: UpdateFixtureResponse
+
+  func fetchReleases() async throws -> [UpdateRelease] {
+    switch response {
+    case let .releases(releases): return releases
+    case .offline: throw URLError(.notConnectedToInternet)
+    case .rateLimited: throw UpdateFetchError.rateLimited(retryAfter: nil)
+    case .invalidMetadata: throw UpdateFetchError.invalidMetadata
+    }
+  }
+}
+
+private func updateVersion(_ value: String) -> SemanticVersion {
+  guard let version = SemanticVersion(value) else { fatalError("Invalid fixture version") }
+  return version
+}
+
+private func updateRelease(
+  _ version: String,
+  publishedAt: Date = Date(timeIntervalSince1970: 1_700_000_000),
+  isPrerelease: Bool = false
+) -> UpdateRelease {
+  UpdateRelease(
+    version: updateVersion(version),
+    title: "WTM \(version)",
+    htmlURL: UpdateChecker.releasesURL,
+    publishedAt: publishedAt,
+    releaseNotes: "Fixture notes",
+    isPrerelease: isPrerelease
+  )
+}
+
+private func updateDefaults() -> UserDefaults {
+  UserDefaults(suiteName: "wtm-update-tests-\(UUID().uuidString)") ?? UserDefaults.standard
+}
+
+@Test("Update SemVer compares prereleases below the stable release")
+func updateSemVerComparison() {
+  #expect(updateVersion("1.0.0-rc.1") < updateVersion("1.0.0"))
+  #expect(updateVersion("1.2.0") > updateVersion("1.1.9"))
+  #expect(SemanticVersion("1.2") == nil)
+}
+
+@MainActor
+@Test("Update checker selects the newest stable release and ignores prereleases")
+func updateCheckerSelectsStableRelease() async {
+  let checker = UpdateChecker(
+    currentVersion: updateVersion("1.0.0"),
+    fetcher: UpdateFixtureFetcher(
+      response: .releases([
+        updateRelease("2.0.0-rc.1", isPrerelease: true),
+        updateRelease("1.1.0"),
+        updateRelease("1.0.1"),
+      ])
+    ),
+    defaults: updateDefaults()
+  )
+
+  await checker.check(now: Date(timeIntervalSince1970: 1_800_000_000))
+
+  guard case let .updateAvailable(release) = checker.state else {
+    Issue.record("Expected an available stable update")
+    return
+  }
+  #expect(release.version == updateVersion("1.1.0"))
+}
+
+@MainActor
+@Test("Update checker distinguishes current, empty, invalid, offline, and rate-limited results")
+func updateCheckerDistinguishesFailureStates() async {
+  let now = Date(timeIntervalSince1970: 1_800_000_000)
+  let cases: [(UpdateFixtureResponse, UpdateCheckState)] = [
+    (.releases([updateRelease("1.0.0")]), .upToDate),
+    (.releases([]), .noReleaseAvailable),
+    (.invalidMetadata, .failed),
+    (.offline, .offline),
+    (.rateLimited, .rateLimited(retryAfter: nil)),
+  ]
+
+  for (response, expectedState) in cases {
+    let checker = UpdateChecker(
+      currentVersion: updateVersion("1.0.0"),
+      fetcher: UpdateFixtureFetcher(response: response),
+      defaults: updateDefaults()
+    )
+    await checker.check(now: now)
+    #expect(checker.state == expectedState)
+  }
+}
+
+@MainActor
+@Test("Automatic update checks use a seven-day cache")
+func automaticUpdateChecksUseSevenDayCache() async {
+  let defaults = updateDefaults()
+  let firstChecker = UpdateChecker(
+    currentVersion: updateVersion("1.0.0"),
+    fetcher: UpdateFixtureFetcher(response: .releases([updateRelease("1.0.1")])),
+    defaults: defaults
+  )
+  let checkedAt = Date(timeIntervalSince1970: 1_800_000_000)
+  await firstChecker.check(now: checkedAt)
+
+  let secondChecker = UpdateChecker(
+    currentVersion: updateVersion("1.0.0"),
+    fetcher: UpdateFixtureFetcher(response: .invalidMetadata),
+    defaults: defaults
+  )
+  #expect(!secondChecker.shouldAutomaticallyCheck)
+  await secondChecker.checkAutomaticallyIfDue(
+    now: checkedAt.addingTimeInterval(UpdateChecker.automaticCheckInterval - 1)
+  )
+  #expect(secondChecker.state == .idle)
+  await secondChecker.checkAutomaticallyIfDue(
+    now: checkedAt.addingTimeInterval(UpdateChecker.automaticCheckInterval)
+  )
+  #expect(secondChecker.state == .failed)
+}
+
 @Test("Model ages use whole hours and days and keep unknown explicit")
 func modelAgesUseWholeUnits() {
   let referenceDate = Date(timeIntervalSince1970: 20_000_000)

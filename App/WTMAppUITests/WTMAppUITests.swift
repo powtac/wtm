@@ -5,6 +5,7 @@ final class WTMAppUITests: XCTestCase {
   @MainActor
   private func launch(_ application: XCUIApplication) {
     application.launchEnvironment["WTM_UI_TEST_MODE"] = "1"
+    application.launchEnvironment["WTM_DISABLE_AUTOMATIC_UPDATE_CHECK"] = "1"
     application.launch()
 
     // A previous crashed local run can leave macOS' recovery alert in front of the app.
@@ -12,6 +13,33 @@ final class WTMAppUITests: XCTestCase {
     if recoveryButton.waitForExistence(timeout: 1) {
       recoveryButton.click()
     }
+  }
+
+  @MainActor
+  func testUpdateEntryPointsAreVisible() throws {
+    let application = XCUIApplication()
+    application.launchEnvironment["WTM_SETTINGS_NAMESPACE"] =
+      "de.powtac.whatthemodel.ui-tests.updates.\(UUID().uuidString)"
+    application.launchEnvironment["WTM_UI_TEST_SHOW_ABOUT"] = "1"
+    launch(application)
+    defer { application.terminate() }
+
+    XCTAssertTrue(application.staticTexts["Choose Model Sources"].waitForExistence(timeout: 5))
+
+    XCTAssertTrue(
+      application.staticTexts["Local LLM Inventory for macOS"].waitForExistence(timeout: 5),
+      "About window is missing"
+    )
+    XCTAssertTrue(
+      application.buttons["Check for Updates…"].exists,
+      "About update button is missing"
+    )
+    XCTAssertTrue(application.links["Repository on GitHub"].exists, "Repository link is missing")
+    XCTAssertTrue(application.links["Apache License 2.0"].exists, "License link is missing")
+    XCTAssertTrue(
+      application.links["Download Latest Release"].exists,
+      "Download link is missing"
+    )
   }
 
   @MainActor
@@ -124,6 +152,7 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(
       application.descendants(matching: .any)["Scan on Launch"].waitForExistence(timeout: 5)
     )
+    XCTAssertTrue(application.buttons["Check for Updates…"].exists)
   }
 
   @MainActor

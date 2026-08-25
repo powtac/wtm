@@ -66,6 +66,10 @@ first public release is tagged.
   issues, stapling, Gatekeeper, and controlled launch smoke.
 - A native model-table context menu with newline-safe multi-selection copying for the model
   name, confirmed provider model reference, or standardized absolute model path.
+- Phase 5 update checking against official GitHub Releases with strict stable SemVer
+  selection, seven-day automatic caching, offline/rate-limit states, and no telemetry.
+- Native About window with version/build metadata, repository and license links, release
+  notes, and manual GitHub download actions.
 
 ### Changed
 

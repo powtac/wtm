@@ -12,8 +12,9 @@ models are present, where their files live, how much storage they occupy, whethe
 download is incomplete, and which provider metadata belongs to each installation.
 
 The current beta adds explicit runtime verification, a passive menu bar inventory, and
-reviewed OpenClaw and Unsloth handoffs. WTM never opens a shell, automates Terminal, or
-downloads models.
+reviewed OpenClaw and Unsloth handoffs. Stable-release builds include a weekly privacy-
+preserving check against official GitHub Releases; WTM never auto-installs updates, opens
+a shell, automates Terminal, or downloads models.
 
 ## Current scope
 
@@ -37,6 +38,7 @@ downloads models.
   privacy-redacted exports
 - Passive menu bar status and an independent Launch at Login setting
 - Reviewed OpenClaw and Unsloth client handoffs with visible executable and argument plans
+- Native About window and official GitHub release/update links with stable-only SemVer checks
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The
@@ -93,6 +95,8 @@ Stable releases are created only by an exact `vMAJOR.MINOR.PATCH` tag through th
 `release` Environment. The workflow signs, notarizes, staples, mounts, copies, and starts
 the DMG payload before it publishes a GitHub Release. See
 [GitHub configuration](docs/github-configuration.md) for the required Environment secrets.
+WTM checks that same official stable release channel at most once per seven days. Downloads
+open the GitHub Release page; installation remains manual.
 
 ## Extend WTM
 

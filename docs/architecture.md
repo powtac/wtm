@@ -25,6 +25,11 @@ The app target is the only composition root. It constructs discovery, action, an
 registries and injects them into `InventoryCoordinator`, `ActionExecutor`, and
 `RuntimeBroker`. Views neither enumerate or mutate the file system nor create a `Process`.
 
+The only app-level network request is `UpdateService`, which sends anonymous GitHub release
+metadata requests without inventory context, model names, local paths, hardware data,
+account identifiers, or telemetry. It accepts only official `powtac/wtm` release URLs and
+never downloads or installs a binary.
+
 Provider sources scan before generic manual sources. The inventory coordinator reconciles
 overlapping artifact paths so provider-backed identity replaces a generic cache view while
 distinct installation paths and volumes remain separate.
