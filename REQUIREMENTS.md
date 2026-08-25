@@ -3,8 +3,8 @@
 | Feld | Wert |
 |---|---|
 | Status | **Accepted Baseline** |
-| Version | 0.3.0 |
-| Datum | 2026-08-24 |
+| Version | 0.4.0 |
+| Datum | 2026-08-25 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
 | Dokumentsprache | Deutsch |
@@ -53,7 +53,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 ### 3.2 Nicht-Ziele der Read-only Beta
 
 - Kein vollständiger Dateisystem- oder Duplikat-Scanner.
-- Kein eigener Model-Downloader oder Model-Hub-Browser.
+- Kein eigener Model-Downloader oder Model-Hub-Browser im freigegebenen Scope bis einschließlich Phase 6.
 - Kein eigener Inference-, Training- oder Chat-Stack.
 - Keine Windows- oder Linux-Version.
 - Keine Cloud-Synchronisierung, Accounts oder Telemetrie.
@@ -121,6 +121,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-025](docs/decisions/ADR-025-owned-runtime-sessions.md) | Laufzeitsitzungen sind eigentumsgebunden und Verifikation bleibt evidenzgestuft | Providerzustand, WTM-eigene Prozesse, Healthcheck und echte Inferenz dürfen keine gemeinsame Wahrheitsaussage vortäuschen. |
 | [ADR-026](docs/decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md) | Menüleiste ist eine passive Projektion; Client-Handoffs sind kurzlebig und reviewt | Kein zweiter Scanner, keine implizite Clientkonfiguration und keine ungeprüfte Skript- oder Interpreterausführung. |
 | [ADR-027](docs/decisions/ADR-027-fail-closed-public-release-chain.md) | Öffentliche Releases werden fail-closed aus einem exakten Tag erzeugt | Signierung, Notarisierung, DMG-Prüfung, SBOM, Attestation und Veröffentlichung bilden eine geordnete Trust Chain; private Vorbereitung veröffentlicht nichts implizit. |
+| [ADR-028](docs/decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md) | MLX erhält nach dem stabilen Public Release eine eigene Phase | MLX-Inventar und Python-basierte Runtimeausführung benötigen andere Evidenz- und Trust-Grenzen als Phase-4-Client-Handoffs; Downloads bleiben nochmals getrennt. |
 
 ### 5.1 Entscheidungs- und Requirements-Governance
 
@@ -196,11 +197,11 @@ Jeder effektive Wert MUST in Settings seine Herkunft zeigen und auf den Default 
 |---|---|---:|---|
 | Ollama | Storage + Runtime | 1 Storage / 3 Runtime | Dateisystem- und API-Inventar; Löschen sowie Start/Stop erst in den jeweiligen späteren Phasen |
 | Hugging Face Hub Cache | Storage | 1 Inventar / 2 Löschen | Repos, Revisionen, Shared Blobs, `.incomplete`, später Löschplan |
-| Manuelle Ordner | Storage | 1 Inventar / 2 Löschen | GGUF, Safetensors-Ordner, MLX-Strukturen, Config-Zuordnung, später Papierkorb |
+| Manuelle Ordner | Storage | 1 Inventar / 2 Löschen | GGUF, Safetensors-Ordner, Config-Zuordnung, später Papierkorb; MLX-Strukturen erst über den Phase-6-Adapter |
 | llama.cpp | Runtime | 3 | GGUF-Kompatibilität, Start über validiertes Executable, lokaler Endpoint |
 | Unsloth Studio | Runtime + Tool | 4 | Installation erkennen, Modell übergeben oder Studio öffnen |
 | OpenClaw | Client | 4 | Installation erkennen, über Ollama oder konfigurierten Endpoint starten |
-| MLX-basierte Stores/Runtimes | Storage + Runtime | 4 | Allgemeiner Adapter für dokumentierte MLX-Strukturen ohne produktspezifische Sonderlogik im Core |
+| MLX-basierte Stores/Runtimes | Storage + Runtime | 6 | Zuerst kompilierter read-only Storage-Adapter; Runtime erst nach eigener Python-/Package-Trust-Prüfung gemäß ADR-028 |
 | Weitere Tools | Runtime/Client | 3–4 | Nutzerkonfiguration über versioniertes, validiertes Schema |
 
 Diese Integrationsmatrix definiert Shipping Defaults, keine geschlossene Allowlist. Providerpfade, Tools, Runtimes, Clients und sichere Linkresolver MUST konfigurierbar und erweiterbar sein. Standardwerte sind nur Vorschläge, weil Umgebungsvariablen, Versionen und externe Volumes sie ändern können.
@@ -308,7 +309,8 @@ Die UI MUST Begriff, Scope und Messzeitpunkt nennen. Sie darf eine unsichere Sch
 | 3 | `FR-HLT-*`, `FR-RUN-*`, `RuntimeAdapter` und ausführbare Tooldefinitionen |
 | 4 | `ClientAdapter`, OpenClaw, Unsloth, weitere Integrationen sowie `FR-INV-010`–`FR-INV-012` für das Menüleisten-Symbol |
 | 5 | stabile Public-Release-, Community-, Website- und vollständige Release-Pipeline-Gates |
-| 6 | `FR-DWN-*` und weitere ausdrücklich optionale Funktionen |
+| 6 | `FR-MLX-*`; Storage zuerst, Runtime nur nach eigenem Security-Gate |
+| 7 | `FR-DWN-*` und weitere ausdrücklich freigegebene Downloadfunktionen |
 
 Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 darf daraus keine Mutations- oder Prozessfähigkeit ableiten.
 
@@ -486,14 +488,29 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-RUN-014 (P0):** Vor der ersten Ausführung eines benutzerdefinierten Executables erfolgt ausschließlich eine statische Prüfung von kanonischem Pfad, Symlink-Ziel, Eigentümer/Dateimodus, Signaturstatus, Version und optionalem Hash. Die anschließende echte Ausführung ist eine getrennte bewusste Nutzeraktion; bei geänderter Binäridentität ist erneut zu bestätigen.
 - **FR-RUN-015 (P0):** Ein Test gilt erst nach erfolgreichem Prozess-/Runtime-Start, lokalem Healthcheck und optionalem minimalen Inference-Request als entsprechend verifiziert. Timeout beendet nur eine von WTM gestartete Instanz; fremde Providerprozesse werden nicht ungefragt beendet.
 
-### 9.12 Downloads — optionale spätere Phase
+### 9.12 MLX — Phase 6
+
+- **FR-MLX-001 (P0):** MLX-Inventarisierung MUST über einen eigenen kompilierten `StorageProviderAdapter` erfolgen. Dateiendung `.mlx`, Ordnername oder installierte Python-Pakete allein dürfen weder Modellidentität noch Vollständigkeit oder Lauffähigkeit bestätigen.
+- **FR-MLX-002 (P0):** Der Storage-Adapter MUST dokumentierte lokale Weight-, Config-, Tokenizer- und Metadatenstrukturen, partielle Bestände, physische Speicheridentität und Evidenzquelle getrennt ausweisen. Unbekannte Strukturen bleiben `Unknown` statt heuristisch `Usable`.
+- **FR-MLX-003 (P0):** MLX-Storage MUST vor MLX-Runtime als getrenntes Gate implementiert und testbar ausgeliefert werden können. Fehlende sichere Runtimeausführung darf das read-only Inventar nicht blockieren.
+- **FR-MLX-004 (P0):** Eine MLX-Runtime MUST kanonischen Interpreter, Entry Point, Package-/Distribution-Identität, geschützte Modellressourcen, Arbeitsordner, Argumente und allowlist-basierte Umgebung gemeinsam binden und unmittelbar vor Start revalidieren. `PATH`-Suche, Shell-Aktivierung, geerbte Python-Modulpfade und ungeprüfte virtuelle Umgebungen sind verboten.
+- **FR-MLX-005 (P0):** Runtimepläne MUST einen bestätigten kanonischen lokalen Modellpfad verwenden. Hub-IDs, URL-Eingaben oder sonstige Fallbacks, die einen impliziten Download auslösen können, werden abgewiesen.
+- **FR-MLX-006 (P0):** WTM darf in Phase 6 keine Python-Pakete oder Modelle installieren beziehungsweise aktualisieren und weder Training, Remote Bind, Public Tunnel noch Remote Code aktivieren.
+- **FR-MLX-007 (P0):** MLX-Runtimeverifikation folgt `FR-RUN-*`: numerischer Loopback, explizite Vorschau, WTM-eigener Prozess, begrenzte redigierte Logs sowie getrennte Health- und Minimal-Inference-Evidenz. Eine geänderte Interpreter-, Package- oder Ressourcenidentität erfordert erneute Bestätigung.
+- **FR-MLX-008 (P0):** Kann die Ausführungsidentität einer Python-basierten MLX-Runtime nicht vollständig und unmittelbar revalidiert werden, MUST Phase 6 storage-only bleiben; ein best-effort Prozessstart ist unzulässig.
+
+### 9.13 Downloads — optionale Phase 7
 
 - **FR-DWN-001 (P2):** Direkte Downloads MAY erst nach separatem Threat Model und Lizenz-UX ergänzt werden.
 - **FR-DWN-002 (P2):** Downloads MUST pausierbar, wiederaufnehmbar, atomar finalisierbar und checksum-verifiziert sein.
 - **FR-DWN-003 (P2):** Die UI MUST Lizenz, Quelle, erwartete Größe, freien Platz und Zielprovider vor Start anzeigen.
 - **FR-DWN-004 (P2):** Authentifizierung MUST über Keychain bzw. offizielle Providermechanismen erfolgen; Tokens dürfen nie in Projekt- oder Toolconfigs geschrieben werden.
+- **FR-DWN-005 (P2):** Downloadquellen MUST über HTTPS, kanonische erlaubte Hosts, feste Modell-ID und nach Möglichkeit unveränderliche Revision adressiert werden; jeder Redirect wird erneut gegen dieselbe Policy geprüft.
+- **FR-DWN-006 (P2):** Staging-Dateien MUST außerhalb vollständiger Installationen bleiben, nach Abbruch eindeutig als partiell erkennbar sein und erst nach Größen-/Checksumprüfung atomar in den Zielbestand wechseln.
+- **FR-DWN-007 (P2):** Die App MUST unzureichenden Speicher vor Start blockieren, temporären Mehrbedarf sichtbar machen und Cancel/Fehler ohne Beschädigung bestehender Modelle bereinigen können.
+- **FR-DWN-008 (P2):** Heruntergeladene Inhalte bleiben nicht vertrauenswürdig und werden niemals automatisch gestartet. Ausführbarer Remote Code, `trust_remote_code`, unreviewte Skripte und unsichere serialisierte Pythonobjekte sind im Standardpfad ausgeschlossen.
 
-### 9.13 Settings und Erweiterbarkeit
+### 9.14 Settings und Erweiterbarkeit
 
 - **FR-EXT-001 (P0):** Settings MUST eine kleine stabile Top-Level-Struktur `General`, `Sources`, `Integrations`, `Security` und `Advanced` verwenden. Storage Providers, Runtimes, Clients, Tools und Model-Card-Resolver werden innerhalb `Integrations` nach Rolle gefiltert, nicht als eigene Top-Level-Panes dargestellt.
 - **FR-EXT-002 (P0):** Listenaktionen richten sich nach Capabilities. Built-in-Adapter können aktiviert, konfiguriert und zurückgesetzt, aber nicht dupliziert oder in ihrer Implementierung editiert werden; nutzerdefinierte Datenobjekte dürfen dupliziert und bearbeitet werden.
@@ -901,9 +918,10 @@ Die erste nutzbare Beta ist bewusst klein und scan-only. Sie ist fertig, wenn al
 | 1 — Read-only Beta | Permission UX, Scan, Inventar, Alter, Suche, Größen, Configs, Finder, grundlegende Settings | Nutzbarer Speicherüberblick ohne Mutationen oder Prozessstarts |
 | 2 — Safe Actions | Löschpläne, Papierkorb, Audit, Verifikation | Kontrolliertes Aufräumen |
 | 3 — Runtimes | Readiness, Ollama, llama.cpp, Tooldefinitionsschema | Kontrollierter Start/Stop |
-| 4 — Integrationen | OpenClaw, Unsloth, MLX-Runtimes, Menüleiste | Erweiterter lokaler Workflow |
+| 4 — Integrationen | OpenClaw, Unsloth, Menüleiste und Launch at Login | Erweiterter lokaler Workflow ohne Python-/MLX-Trust-Grenze |
 | 5 — Stable Public Release | vollständige DMG-Pipeline, GitHub Release, Pages, Community, Security-Aktivierung | Verifizierte stabile Veröffentlichung |
-| 6 — Optional | Downloads, Lizenzen, Resume, Checksums | Separat freizugebender Scope |
+| 6 — MLX Support | Kompilierter MLX-Storage-Adapter; Runtime nur nach separatem Python-/Package-Security-Gate | MLX-Inventar zuerst, kontrollierte lokale Ausführung optional danach |
+| 7 — Optional Downloads | Providerdownload, Lizenz-UX, Resume, Atomicity, Checksums und Keychain | Separat freizugebender Supply-Chain-Scope |
 
 ### 18.1 Implementierungsreihenfolge und Phase Gates
 
@@ -926,7 +944,12 @@ Spätere Research-Spikes MAY parallel auf separaten Branches oder hinter nicht a
 | 3 | Executable-/Argumentvalidierung, Process-Lifecycle, Portkonflikte, Timeout/Cancel/Stop, Loopback-Healthcheck, minimaler Inference-Request, RAM-Warnung und Log-Redaction |
 | 4 | Client-Handoff, OpenClaw-/Unsloth-Contracts, Menüleisten-Lifecycle, Login-Item-Verhalten, Settings-Capabilities und Links zum Adapterguide |
 | 5 | komplette OS-/Xcode-Matrix, UI-/Accessibility-Regressionssuite, Performance-Benchmarks, Security-/License-/History-Audit, DMG/Code Sign/Notarization/Stapling/Gatekeeper, SBOM/Attestation und Pages-Deployment |
-| 6 | Eigenes ADR, Threat Model, Lizenz-UX, Download-Resume/Atomicity/Checksum und separate Freigabeentscheidung |
+| 6 | Lizenzierte MLX-Fixtures, Partial-/False-Positive-/Pfadtests; für Runtime zusätzlich Interpreter-/Package-Revalidation, Modulpfad-Injection, Local-only-Plan, Loopback, Lifecycle und echte Minimal-Inference-Evidenz |
+| 7 | Eigenes Download-ADR und Threat Model, Lizenz-/Auth-UX, HTTPS-/Redirect-Policy, Speicherreserve, Resume/Cancel, Atomicity, Checksum, Remote-Code-Ausschluss und separate Freigabeentscheidung |
+
+Nach Phase 7 ist keine weitere Shipping-Phase beschlossen. Ideen verbleiben im Backlog oder
+als nicht ausgelieferter Research-Spike, bis Scope, ADR, Requirements, Security-Grenze und
+Release-Gate ausdrücklich akzeptiert wurden.
 
 **Senior-Empfehlung:** Phase 1 kann privat getestet und anschließend als read-only Beta veröffentlicht werden. Löschung und Prozessstart werden erst nach realen Cachefixtures, Threat Model und telemetriefreien Fehlerrückmeldungen in separaten Releases freigeschaltet. Es gibt keinen phasenübergreifenden „MVP“-Sammelbegriff.
 

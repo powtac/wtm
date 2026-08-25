@@ -1,8 +1,8 @@
 # Architecture
 
 WTM is a native Swift 6 macOS application with a thin SwiftUI composition root and one
-local Swift package. Phase 3 adds an isolated runtime graph to the inventory and safe-action
-graphs. Client handoff and downloads remain absent.
+local Swift package. Inventory, safe actions, runtime ownership, and client handoff remain
+separate graphs. Model downloads and MLX capabilities are absent from the current target.
 
 ```text
 WTM app (composition and presentation only)
@@ -12,6 +12,7 @@ WTM app (composition and presentation only)
   -> ActionOllama, ActionHuggingFace, ActionManual
   -> WTMRuntime -> WTMAdapterContracts, WTMDomain
   -> RuntimeOllama, RuntimeLlamaCpp
+  -> ClientOpenClaw, ClientUnsloth
   -> WTMPersistence
 ```
 
@@ -60,6 +61,24 @@ The Phase 2 action boundary remains intact: actions use short-lived immutable pl
 no-follow identities, provider revalidation, centralized macOS Trash, explicit irreversible
 confirmation, and bounded privacy-preserving audit entries.
 
+## Phase 4 client and menu boundary
+
+- The native `NSStatusItem` is a passive projection of the same ephemeral inventory model;
+  it owns no scanner, persistence, runtime registry, or refresh loop.
+- `ClientHandoffBroker` applies the same identity-bound, shell-free process boundary as the
+  runtime broker, but it cannot claim model-runtime ownership or rewrite client defaults.
+- OpenClaw receives one provider-qualified Ollama reference backed by fresh local inference
+  evidence. Unsloth uses a reviewed API-only loopback plan with tools and public tunnels
+  disabled. Neither integration installs packages or orchestrates training.
+
+## Deferred capability boundaries
+
+Phase 6 MLX support begins with a compiled read-only storage adapter. A Python-based runtime
+is a second gate because executable identity alone does not bind the imported package graph.
+It must satisfy [ADR-028](decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md) or remain
+storage-only. Phase 7 is the sole planned model-download capability and requires a separate
+download threat model and release decision. No Phase 8 capability is committed.
+
 ## Persisted and ephemeral state
 
 Versioned JSON under Application Support persists only operational source settings, user
@@ -93,6 +112,8 @@ Phase 4 menu projections and client trust boundaries are governed by
 [ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
 Phase 5 release publication and private-to-public gates are governed by
 [ADR-027](decisions/ADR-027-fail-closed-public-release-chain.md).
+The MLX deferral, Phase 6 execution gate, and Phase 7 download separation are governed by
+[ADR-028](decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;
 neither document may silently contradict the other.

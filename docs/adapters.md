@@ -53,6 +53,13 @@ Runtime adapters never receive shell strings and never launch processes directly
 return typed plans to the central broker. Compatibility, health, inference, and ownership
 remain separate facts.
 
+MLX is intentionally not part of the current runtime list. Phase 6 first adds a compiled
+read-only storage adapter. A later runtime sub-gate must bind the Python interpreter and
+package graph, reject inherited module paths and implicit Hub downloads, and satisfy the
+same loopback/evidence/ownership rules. If that identity cannot be revalidated fail-closed,
+MLX remains storage-only. See
+[ADR-028](decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md).
+
 ### Client adapter
 
 Handoff to a consuming application or endpoint. Phase 4 ships two compiled client

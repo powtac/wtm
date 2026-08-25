@@ -86,3 +86,50 @@ Client handoff, OpenClaw, Unsloth, downloads, remote inference endpoints, dynami
 plugins, Terminal automation, privileged helpers, and unattended execution remain out of
 scope. Provider-managed processes are not treated as WTM-owned merely because their port or
 model name is known.
+
+## Phase 4 threats and controls
+
+| Threat | Control |
+|---|---|
+| Menu-bar state diverges or starts a second scanner | Native status item is a passive projection of the single ephemeral inventory model and owns no scanner, persistence, or refresh loop |
+| Menu lifecycle consumes unbounded CPU or memory in hosted execution | Use `NSStatusItem`/`NSMenu`; omit it from hosted unit-test processes after the rejected SwiftUI `MenuBarExtra` lifecycle showed a symbol-update loop |
+| Client handoff mutates persistent defaults or claims runtime ownership | Short-lived reviewed handoff plans only; no client-config rewrite and no adoption of client/provider processes |
+| A client executable, interpreter, or script changes after preview | Bind protected canonical identities and revalidate immediately before direct process launch |
+| OpenClaw receives an ambiguous model name or stale endpoint | Require provider-qualified Ollama identity and fresh WTM inference evidence on numeric loopback |
+| Unsloth enables unrelated tools, training, or public access | Reviewed API-only arguments disable tools and Cloudflare; training, installation, and public binds remain absent |
+| Closing the app leaves a WTM-owned client process behind | Track the exact process handle and perform bounded owned-process shutdown during app termination |
+
+## Explicitly absent in Phase 4
+
+Generic MLX storage/runtime support, model downloads, package installation, training
+orchestration, remote inference endpoints, public tunnels, client-config mutation, and
+unattended handoff remain out of scope.
+
+## Phase 5 threats and controls
+
+| Threat | Control |
+|---|---|
+| A partial workflow publishes `latest` | Keep the GitHub Release draft until every build, trust, backup, and attestation gate succeeds; publish only in the final step |
+| Signing credentials persist on a runner | Store credentials only in the protected release Environment, import into an ephemeral keychain, and delete it unconditionally |
+| Signed app and distributed DMG differ | Notarize/staple both layers, mount the final DMG, copy its app, then repeat code-signing, Gatekeeper, and process-start checks |
+| Release artifacts contain credentials | Reject credential file types and high-confidence secret patterns before upload; publish checksums, SPDX SBOM, and build metadata |
+| Private preparation accidentally becomes public | Require the exact repository, public visibility, exact SemVer tag, matching app version, and explicit Pages/release jobs |
+| Mutable third-party Actions alter the release | Pin Actions to full commit hashes and grant each job only explicit token permissions |
+
+## Deferred Phase 6 and 7 boundaries
+
+Phase 6 MLX storage is read-only and requires licensed fixtures, structural evidence,
+false-positive handling, and the existing path/symlink controls. MLX runtime execution is a
+separate sub-gate: interpreter identity alone is insufficient because Python package and
+module resolution can change executed code. It must bind and revalidate interpreter, entry
+point, package/distribution identity, protected model resources, working directory,
+arguments, and allowlisted environment; it rejects module-path injection and inputs that
+can trigger implicit Hub downloads. If this cannot be guaranteed, Phase 6 remains
+storage-only.
+
+Phase 7 is the sole planned model-download boundary. Before implementation it requires a
+separate threat model covering license acceptance, Keychain authentication, canonical HTTPS
+sources and redirect validation, immutable revisions, staging/resume/atomic finalization,
+checksums, temporary disk pressure, cancellation cleanup, unsafe serialization, remote code,
+and the rule that downloaded content is never automatically executed. No Phase 8 capability
+is currently authorized.

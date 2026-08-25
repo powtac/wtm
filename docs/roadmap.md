@@ -9,15 +9,17 @@ automated tests, manual gates, and distribution evidence are complete.
 | 1 — Read-only Beta | Completed | Requirements 0.2.0 code gates and fresh Developer ID distribution evidence are verified |
 | 2 — Safe Actions | Completed | Revalidated plans, provider actions, Trash, audit, targeted verification, recovery tests, and fresh notarized distribution are verified |
 | 3 — Runtimes | Completed | Evidence-gated runtime checks, owned process lifecycle, tool definitions, automated gates, and fresh notarized distribution are verified |
-| 4 — Integrations | Partially implemented | Native menu bar, separate login item, and reviewed OpenClaw/Unsloth handoffs are implemented; the normative MLX storage/runtime adapter and manual release evidence remain open |
+| 4 — Integrations | Implemented | Native menu bar, separate login item, and reviewed OpenClaw/Unsloth handoffs are implemented; manual integration/release evidence remains open |
 | 5 — Stable Public Release | Implemented | DMG and Pages automation implemented; protected-environment release evidence and public community activation pending |
-| 6 — Optional Downloads | Not started | Separate architecture and security decision required |
+| 6 — MLX Support | Not started | Read-only compiled storage adapter first; runtime requires the separate interpreter/package trust gate in ADR-028 |
+| 7 — Optional Downloads | Not started | Separate download ADR, threat model, license/authentication UX, integrity and supply-chain release decision required |
 
 The normative scope and acceptance criteria are in
 [Requirements (German, normative)](../REQUIREMENTS.md). Translations are convenience
 copies only and are not maintained by the project.
 
-Phase 4 is intentionally not marked complete: recognizing an `.mlx` suffix is not an MLX
-storage/runtime adapter. A safe implementation must bind the Python interpreter and package
-identity, prevent module-path injection and remote fallback downloads, and verify a local-only
-health/inference path before execution.
+Phase 4 is implementation-complete but does not become `Completed` until its manual evidence
+is recorded. ADR-028 moves MLX into Phase 6 because recognizing an `.mlx` suffix is not an
+inventory adapter and Python execution introduces a separate interpreter/package boundary.
+Phase 6 may ship storage-only. Phase 7 is the only phase allowed to introduce model
+acquisition. No Phase 8 is committed; later ideas remain backlog until separately accepted.
