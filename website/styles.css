@@ -38,10 +38,11 @@ h3 { margin:.1rem 0 .5rem; }
 .cards p,.privacy li { color:var(--muted); }
 .split { display:grid; grid-template-columns:1.4fr .8fr; gap:3rem; }
 table { width:100%; border-collapse:collapse; }th,td{text-align:left;padding:.8rem;border-bottom:1px solid var(--line)}td{color:var(--muted)}
-.callout { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
+.callout,.release-panel { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
+.release-panel { background:linear-gradient(145deg,#18241f,#11161e); padding-left:1.5rem; padding-right:1.5rem; }
 .article { max-width:900px; padding-top:6rem; }.article h1{max-width:13ch}.article section{padding:3.5rem 0;border-top:1px solid var(--line)}.article h3{margin-top:2rem}.article p{color:var(--muted)}
 .steps { list-style:none; counter-reset:steps; padding:0; }.steps li{counter-increment:steps;display:grid;grid-template-columns:2rem 11rem 1fr;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line)}.steps li:before{content:counter(steps);color:var(--accent);font-weight:700}.steps span{color:var(--muted)}
 footer { border-top:1px solid var(--line); color:var(--muted); font-size:.86rem; }
-@media (max-width:820px){.hero,.split,.callout{grid-template-columns:1fr}.hero{padding-top:2rem}.product-preview{transform:none}.cards,.cards.compact{grid-template-columns:1fr 1fr}.site-header{align-items:flex-start}.preview-grid{grid-template-columns:95px 1fr}.preview-grid aside:last-child{display:none}}
+@media (max-width:820px){.hero,.split,.callout,.release-panel{grid-template-columns:1fr}.hero{padding-top:2rem}.product-preview{transform:none}.cards,.cards.compact{grid-template-columns:1fr 1fr}.site-header{align-items:flex-start}.preview-grid{grid-template-columns:95px 1fr}.preview-grid aside:last-child{display:none}}
 @media (max-width:560px){main{padding:1.25rem}.site-header,footer{padding:1rem 1.25rem;align-items:flex-start;flex-direction:column}.cards,.cards.compact{grid-template-columns:1fr}.preview-grid{grid-template-columns:78px 1fr}.steps li{grid-template-columns:2rem 1fr}.steps span{grid-column:2}.hero{gap:2rem}h1{font-size:2.8rem}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.button:hover,.button:focus{transform:none}}

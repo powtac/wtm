@@ -4,6 +4,19 @@ set -euo pipefail
 repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 website_root="$repository_root/website"
 
+if command -v rg >/dev/null 2>&1; then
+  search() { rg "$@"; }
+else
+  search() {
+    local flags=()
+    while [[ "${1:-}" == -* ]]; do
+      flags+=("$1")
+      shift
+    done
+    grep -RE "${flags[@]}" "$@"
+  }
+fi
+
 for required_file in index.html extend.html styles.css; do
   [[ -f "$website_root/$required_file" ]] || {
     echo "Missing website asset: $required_file" >&2
@@ -12,10 +25,21 @@ for required_file in index.html extend.html styles.css; do
 done
 
 for html_file in "$website_root"/*.html; do
-  rg -q '<html lang="en">' "$html_file" || { echo "Missing English lang: $html_file" >&2; exit 1; }
-  rg -q '<meta name="description"' "$html_file" || { echo "Missing description: $html_file" >&2; exit 1; }
-  [[ "$(rg -c '<h1[ >]' "$html_file")" == 1 ]] || { echo "Expected one h1: $html_file" >&2; exit 1; }
-  if rg -n '<img(?![^>]*alt=)' "$html_file" --pcre2; then
+  search -q '<html lang="en">' "$html_file" || { echo "Missing English lang: $html_file" >&2; exit 1; }
+  search -q '<meta name="description"' "$html_file" || { echo "Missing description: $html_file" >&2; exit 1; }
+  [[ "$(search -c '<h1[ >]' "$html_file")" == 1 ]] || { echo "Expected one h1: $html_file" >&2; exit 1; }
+  if python3 - "$html_file" <<'PY'
+import re
+import sys
+
+html = open(sys.argv[1], encoding="utf-8").read()
+for tag in re.findall(r"<img\b[^>]*>", html, flags=re.IGNORECASE | re.DOTALL):
+    if not re.search(r"\balt\s*=", tag, flags=re.IGNORECASE):
+        print(tag)
+        raise SystemExit(0)
+raise SystemExit(1)
+PY
+  then
     echo "Image without alt text: $html_file" >&2
     exit 1
   fi
@@ -33,6 +57,6 @@ while IFS= read -r reference; do
       exit 1
     }
   fi
-done < <(rg -o 'href="[a-zA-Z0-9._-]+\.html(#[a-zA-Z0-9._-]+)?"' "$website_root"/*.html | sed -E 's/.*href="([^"]+)"/\1/' | sort -u)
+done < <(search -o 'href="[a-zA-Z0-9._-]+\.html(#[a-zA-Z0-9._-]+)?"' "$website_root"/*.html | sed -E 's/.*href="([^"]+)"/\1/' | sort -u)
 
 echo "Website structure, local links, and baseline accessibility are valid."

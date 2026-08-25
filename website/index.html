@@ -25,14 +25,14 @@
     <main id="main">
       <section class="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Local LLM Inventory for macOS</p>
+          <p class="eyebrow">Public beta · Local LLM Inventory for macOS</p>
           <h1>Know which models are taking your disk space.</h1>
           <p class="lead">WTM scans only the model sources you enable, reconciles provider metadata with physical files, and makes storage, age, completeness, and runtime evidence understandable.</p>
           <div class="actions">
             <a class="button primary" href="https://github.com/powtac/wtm/releases/latest">Download latest release</a>
             <a class="button" href="https://github.com/powtac/wtm">View source</a>
           </div>
-          <p class="fine-print">Requires Apple Silicon and macOS 15 or later. Direct distribution; not a Mac App Store product.</p>
+          <p class="fine-print">Requires Apple Silicon and macOS 15 or later. Direct distribution; not a Mac App Store product. Installation remains manual.</p>
         </div>
         <div class="product-preview" role="img" aria-label="Illustrated preview of the WTM model inventory showing providers, model sizes, and details">
           <div class="window-bar"><span></span><span></span><span></span><b>What The Model</b></div>
@@ -41,6 +41,17 @@
             <div class="preview-list"><strong>9 Artifacts · 46 GB total</strong><span><b>gpt-oss-20b</b><em>Ollama · 13 GB</em></span><span><b>Qwen3-8B</b><em>Hugging Face · 17 GB</em></span><span><b>local-model-q4</b><em>GGUF · 6 GB</em></span></div>
             <aside><strong>Details</strong><small>Stored</small><small>Age: 34 days</small><small>Provider: Ollama</small></aside>
           </div>
+        </div>
+      </section>
+
+      <section class="section release-panel">
+        <div>
+          <p class="eyebrow">Release channel</p>
+          <h2>Stable builds are signed and notarized.</h2>
+        </div>
+        <div>
+          <p>Download the current macOS release from GitHub. WTM checks the official stable release channel weekly, never installs updates automatically, and sends no inventory or telemetry data.</p>
+          <div class="actions"><a class="button primary" href="https://github.com/powtac/wtm/releases/latest">Open releases</a><a class="button" href="https://github.com/powtac/wtm/blob/main/SECURITY.md">Security policy</a></div>
         </div>
       </section>
 

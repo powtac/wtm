@@ -4,44 +4,59 @@ set -euo pipefail
 repository_root="${0:A:h:h}"
 cd "$repository_root"
 
-if rg -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp)' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMRuntime 2>/dev/null; then
+if command -v rg >/dev/null 2>&1; then
+  search() { rg "$@"; }
+else
+  search() {
+    local flags=()
+    while [[ "${1:-}" == -* ]]; do
+      flags+=("$1")
+      shift
+    done
+    grep -RE "${flags[@]}" "$@"
+  }
+fi
+
+process_pattern='Process[[:space:]]*\('
+
+if search -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp)' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMRuntime 2>/dev/null; then
   echo "Core targets must not import concrete adapters." >&2
   exit 1
 fi
 
-if rg -n 'DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
+if search -n 'DownloadAdapter' App/WTMApp Packages/WTMKit/Sources Packages/WTMKit/Package.swift; then
   echo "Phase 5 must not contain download capabilities." >&2
   exit 1
 fi
 
-if rg -n '/bin/(zsh|bash|sh)|/usr/bin/env[[:space:]]+(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
+if search -n '/bin/(zsh|bash|sh)|/usr/bin/env[[:space:]]+(zsh|bash|sh)' App/WTMApp Packages/WTMKit/Sources; then
   echo "Shell capabilities remain forbidden in the shipped Phase 5 app." >&2
   exit 1
 fi
 
-process_files="$(rg -l 'Process\s*\(' App/WTMApp Packages/WTMKit/Sources || true)"
+process_files="$(search -l "$process_pattern" App/WTMApp Packages/WTMKit/Sources || true)"
 if [[ -n "$process_files" && "$process_files" != "Packages/WTMKit/Sources/WTMRuntime/FoundationProcessLauncher.swift" ]]; then
   echo "Foundation Process is allowed only in WTMRuntime/FoundationProcessLauncher.swift." >&2
   exit 1
 fi
 
-if rg -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
+if search -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
   echo "A source-mutation API entered the read-only inventory graph." >&2
   exit 1
 fi
 
-if rg -n 'FileManager\.default\.(removeItem|moveItem|replaceItem)' Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/ActionOllama Packages/WTMKit/Sources/ActionHuggingFace Packages/WTMKit/Sources/ActionManual; then
+if search -n 'FileManager\.default\.(removeItem|moveItem|replaceItem)' Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/ActionOllama Packages/WTMKit/Sources/ActionHuggingFace Packages/WTMKit/Sources/ActionManual; then
   echo "Raw filesystem deletion or movement is forbidden in the action graph." >&2
   exit 1
 fi
 
-trash_calls="$(rg -l 'FileManager\.default\.trashItem' Packages/WTMKit/Sources App/WTMApp || true)"
+trash_calls="$(search -l 'FileManager\.default\.trashItem' Packages/WTMKit/Sources App/WTMApp || true)"
 if [[ "$trash_calls" != "Packages/WTMKit/Sources/WTMActions/TrashMover.swift" ]]; then
   echo "macOS Trash must be reachable only through WTMActions/TrashMover.swift." >&2
   exit 1
 fi
 
-network_files="$(rg -l 'URLSession' Packages/WTMKit/Sources App/WTMApp || true)"
+network_files="$(search -l 'URLSession' Packages/WTMKit/Sources App/WTMApp || true)"
 if [[ -n "$network_files" ]]; then
   while IFS= read -r network_file; do
     case "$network_file" in
@@ -55,12 +70,12 @@ if [[ -n "$network_files" ]]; then
   done <<< "$network_files"
 fi
 
-if rg -n 'Process\s*\(' App/WTMApp Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/WTMAdapterContracts; then
+if search -n "$process_pattern" App/WTMApp Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMActions Packages/WTMKit/Sources/WTMAdapterContracts; then
   echo "UI, inventory, actions, and adapter contracts cannot execute processes or runtime HTTP." >&2
   exit 1
 fi
 
-if rg -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechRecognitionUsageDescription|com\.apple\.security\.device\.audio-input|com\.apple\.developer\.(musickit|music-user-token)|import[[:space:]]+(AudioToolbox|AVFAudio|AVFoundation|AVKit|CoreAudio|MediaPlayer|MusicKit|Speech)' App/WTMApp Packages/WTMKit/Sources Config WTM.xcodeproj/project.pbxproj; then
+if search -n 'NSMicrophoneUsageDescription|NSAppleMusicUsageDescription|NSSpeechRecognitionUsageDescription|com\.apple\.security\.device\.audio-input|com\.apple\.developer\.(musickit|music-user-token)|import[[:space:]]+(AudioToolbox|AVFAudio|AVFoundation|AVKit|CoreAudio|MediaPlayer|MusicKit|Speech)' App/WTMApp Packages/WTMKit/Sources Config WTM.xcodeproj/project.pbxproj; then
   echo "Microphone, audio, media-library, Apple Music, and speech capabilities are forbidden." >&2
   exit 1
 fi

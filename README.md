@@ -103,8 +103,8 @@ open the GitHub Release page; installation remains manual.
 Read the [public extension guide](https://powtac.github.io/wtm/extend.html) and the
 [technical adapter guide](docs/adapters.md) before proposing a provider or tool. Data-only
 definitions and compiled adapters have intentionally different capability and review
-requirements. The static website is versioned in [`website/`](website/); its deployment
-activates only after the repository becomes public.
+requirements. The static website is versioned in [`website/`](website/) and deployed through
+GitHub Pages after every validated change on `main`.
 
 ## License
 
