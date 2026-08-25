@@ -866,6 +866,7 @@ Das Repository MUST enthalten:
 - **GH-CI-010:** CI verwendet die dokumentierte Xcode-/Swift-Toolchain für `swift-format`; lokal und CI laufen dieselben versionierten Skript-Einstiegspunkte. Formatierungsänderungen werden nicht still im CI-Workspace geschrieben, sondern als Fehler gemeldet.
 - **GH-CI-011:** Ein Architekturcheck validiert erlaubte Target-Abhängigkeiten, verbotene Core-→Adapter-Imports und das Fehlen von Action-/Runtime-Targets im Phase-1-Release-Graph.
 - **GH-CI-012:** Pflichtchecks wachsen phasenweise mit Abschnitt 18.1. Eine neue Capability darf nicht gemergt oder ausgeliefert werden, bevor ihr Phase-Gate als Test beziehungsweise dokumentierter manueller Check existiert.
+- **GH-CI-013:** CI- und Release-Workflows DÜRFEN keine nicht garantierten Tools des gehosteten Runners voraussetzen. Jede externe CLI-Abhängigkeit, einschließlich `rg`, MUST vor dem ersten versionierten Check nichtinteraktiv geprüft und bei Bedarf reproduzierbar installiert werden; ein fehlendes oder nicht installierbares Tool MUST vor Signierung und Notarisierung fail-closed abbrechen.
 
 ### 16.4 DMG- und Release-Pipeline
 
@@ -879,6 +880,7 @@ Das Repository MUST enthalten:
 - **GH-REL-008:** Ein fehlgeschlagenes Release darf weder `latest` noch Update-Feed verändern; Veröffentlichung erfolgt erst nach allen Gates atomar.
 - **GH-REL-009:** Release-Metadaten dokumentieren Commit-SHA, SemVer, macOS-/Xcode-/Swift-Version, Dependency-Lockfile, Workflow-Run, Checksummen und Notarisierungsergebnis. Ein unsigned App-Payload MAY separat auf Reproduzierbarkeit geprüft werden.
 - **GH-REL-010:** Unter GitHub Free MUST der Release-Job im privaten Repository hart deaktiviert bleiben, da Environment-Secrets und Required Reviewers dort nicht verfügbar sind. Nach dem Public-Schalten werden das geschützte Environment und seine Secrets vor dem ersten Release-Tag eingerichtet.
+- **GH-REL-011:** Vor dem Push eines Release-Tags MÜSSEN lokale Release-Gates, öffentliche Repository-Sichtbarkeit, die geschützte `release`-Environment und alle erforderlichen Secrets geprüft sein. Ein fehlgeschlagener Tag-Run darf nur erneut ausgeführt oder korrigiert werden, solange noch kein öffentlicher GitHub Release publiziert wurde; ein bereits publizierter Release-Tag ist unveränderlich.
 
 ### 16.5 GitHub Pages Website
 

@@ -33,6 +33,14 @@ A workflow that uploads before every gate finishes can expose an incomplete or u
   Pages deployment is structurally disabled until repository visibility is public.
 - Workflow actions are pinned to full commit hashes and each job receives only its explicit
   GitHub token permissions.
+- Hosted macOS runner capabilities are not treated as part of the toolchain contract. The
+  release preflight verifies required command-line tools before any signing step and installs
+  missing `ripgrep` noninteractively with Homebrew auto-update disabled; an unavailable
+  dependency fails the run before credentials are imported.
+- A release tag is pushed only after local gates, public visibility, the protected `release`
+  Environment, and all required secrets are verified. A failed pre-release tag run may be
+  rerun while no GitHub Release is published; after publication, the tag and release bytes
+  are immutable and must never be force-moved.
 
 ## Consequences
 
@@ -59,3 +67,7 @@ CI parses the workflows, compiles the AppleScript, renders the DMG artwork, vali
 SPDX JSON, runs website link/accessibility checks, and executes the normal code gates.
 A release run additionally provides the authoritative Developer ID, notarization, stapling,
 Gatekeeper, DMG mount/copy/start, secret-pattern, checksum, SBOM, and publication evidence.
+The 2026-08-25 first release attempt demonstrated that `macos-15` did not provide `rg` by
+default: the run stopped in the verification step before signing. The release workflow now
+performs the explicit preflight required above; this operational fix is separate from and
+does not constitute notarization evidence.
