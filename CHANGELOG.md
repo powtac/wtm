@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.4] - 2026-08-25
+
+### Fixed
+
+- Wait for Finder to expose the mounted DMG before applying the release layout.
+- Wait for the DMG contents before positioning release icons.
+
 ## [0.3.3] - 2026-08-25
 
 ### Fixed
