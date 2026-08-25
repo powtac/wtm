@@ -42,7 +42,8 @@ the assumed Finder object on a fresh hosted runner.
   GitHub token permissions.
 - Hosted macOS runner capabilities are not treated as part of the toolchain contract. The
   release verifies the selected Xcode and Swift toolchain before signing; release-specific
-  scripts must still preflight every non-system command they require.
+  scripts preflight both PATH-resolved tools and absolute macOS system-tool paths before
+  signing credentials are imported.
 - The exact hosted runner image from the workflow's `Set up job` log is diagnostic evidence.
   A generic runner label and a successful local run do not prove equivalent installed tools,
   GUI state, or Finder object resolution.
@@ -104,3 +105,7 @@ failed until its own gates pass. The subsequent `v0.3.5` attempt reached that fo
 the nested background-image object specifier with error `-10006`. Resolving the same image
 to a concrete POSIX file alias before entering the Finder command succeeds against a real
 writable APFS DMG and removes that runner-dependent object-specifier resolution.
+The `v0.3.6` run confirmed that the background alias and `.DS_Store` layout step execute on
+the hosted runner, then failed at the incorrectly hardcoded `/usr/bin/sync`; macOS exposes
+that utility as `/bin/sync`. The release now validates all distribution executables before
+credential import, so a path mismatch fails before archive and notarization work.

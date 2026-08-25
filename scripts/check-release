@@ -8,6 +8,7 @@ trap 'rm -rf "$temporary_root"' EXIT INT TERM
 for script in build-distribution generate-sbom audit-release-artifacts verify-release-ci check-release; do
   /bin/zsh -n "$repository_root/scripts/$script"
 done
+"$repository_root/scripts/build-distribution" --preflight >/dev/null
 /usr/bin/osacompile -o "$temporary_root/layout.scpt" "$repository_root/scripts/layout-dmg.applescript"
 
 version="$(sed -n 's/^MARKETING_VERSION = //p' "$repository_root/Config/Base.xcconfig")"
@@ -35,6 +36,7 @@ for gate in \
   'actions: read' \
   "github.event.repository.visibility == 'public'" \
   'verify-release-ci "$GITHUB_REPOSITORY" "$GITHUB_SHA"' \
+  'build-distribution --preflight' \
   'build-distribution' \
   'audit-release-artifacts' \
   'actions/attest@' \

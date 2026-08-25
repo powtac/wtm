@@ -2,11 +2,49 @@
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
-  echo "Usage: build-distribution OUTPUT_DIRECTORY" >&2
+  echo "Usage: build-distribution OUTPUT_DIRECTORY | --preflight" >&2
   exit 64
 fi
 
 repository_root="${0:A:h:h}"
+
+preflight_release_tools() {
+  local tool
+  local required_tools=(
+    git
+    xcodebuild
+    xcrun
+    swift
+    /bin/sync
+    /usr/bin/awk
+    /usr/bin/codesign
+    /usr/bin/ditto
+    /usr/bin/grep
+    /usr/bin/hdiutil
+    /usr/bin/head
+    /usr/bin/osascript
+    /usr/bin/ruby
+    /usr/bin/shasum
+    /usr/bin/tr
+    /usr/libexec/PlistBuddy
+    /usr/sbin/spctl
+  )
+  for tool in $required_tools; do
+    if [[ "$tool" == /* ]]; then
+      [[ -x "$tool" ]] || { echo "Missing release executable: $tool" >&2; return 69; }
+    else
+      command -v "$tool" >/dev/null 2>&1 || { echo "Missing release command: $tool" >&2; return 69; }
+    fi
+  done
+}
+
+if [[ "$1" == "--preflight" ]]; then
+  preflight_release_tools
+  echo "Release runner tools are available."
+  exit 0
+fi
+
+preflight_release_tools
 output_directory="${1:A}"
 base_configuration="$repository_root/Config/Base.xcconfig"
 source "$repository_root/scripts/load-local-environment"
@@ -127,7 +165,7 @@ mounted_path="$temporary_root/mounted-layout"
 mkdir -p "$mounted_path"
 /usr/bin/hdiutil attach "$read_write_dmg" -readwrite -noverify -noautoopen -mountpoint "$mounted_path" -quiet
 /usr/bin/osascript "$repository_root/scripts/layout-dmg.applescript" "$mounted_path"
-/usr/bin/sync
+/bin/sync
 [[ -f "$mounted_path/.DS_Store" ]] || { echo "Finder layout did not create .DS_Store." >&2; exit 1; }
 /usr/bin/hdiutil detach "$mounted_path" -quiet
 mounted_path=""

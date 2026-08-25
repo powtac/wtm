@@ -51,6 +51,7 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
+          ./scripts/build-distribution --preflight
 
       - name: Import ephemeral Developer ID certificate
         env:

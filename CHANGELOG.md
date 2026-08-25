@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.7] - 2026-08-25
+
+### Fixed
+
+- Use the canonical macOS `/bin/sync` path and validate every release executable before
+  importing signing credentials.
+
 ## [0.3.6] - 2026-08-25
 
 ### Fixed
