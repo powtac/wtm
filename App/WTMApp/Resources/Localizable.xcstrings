@@ -228,6 +228,126 @@
         }
       }
     },
+    "client.error.launch-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The client could not be started. Review its installation and try again."
+          }
+        }
+      }
+    },
+    "client.error.plan-failed" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A safe client handoff could not be prepared."
+          }
+        }
+      }
+    },
+    "client.error.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client Handoff Failed"
+          }
+        }
+      }
+    },
+    "client.error.unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This client integration is unavailable."
+          }
+        }
+      }
+    },
+    "client.execute.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Handoff"
+          }
+        }
+      }
+    },
+    "client.prepare.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Handoff…"
+          }
+        }
+      }
+    },
+    "client.preview.client" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client"
+          }
+        }
+      }
+    },
+    "client.preview.detail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM will execute this exact argument vector without a shell. The client may load the model into memory."
+          }
+        }
+      }
+    },
+    "client.preview.model" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model reference"
+          }
+        }
+      }
+    },
+    "client.preview.warning" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Review Client Handoff"
+          }
+        }
+      }
+    },
+    "client.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clients"
+          }
+        }
+      }
+    },
     "deletion.batch-selection.title" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1231,6 +1351,7 @@
       }
     },
     "inventory.copy.absolute-path" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1241,6 +1362,7 @@
       }
     },
     "inventory.copy.menu" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1251,6 +1373,7 @@
       }
     },
     "inventory.copy.model-name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1261,6 +1384,7 @@
       }
     },
     "inventory.copy.provider-model-name" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1437,6 +1561,116 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No Issues"
+          }
+        }
+      }
+    },
+    "menu.incomplete" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Incomplete"
+          }
+        }
+      }
+    },
+    "menu.issues" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Issues"
+          }
+        }
+      }
+    },
+    "menu.last-scan" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last scan"
+          }
+        }
+      }
+    },
+    "menu.models" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Models"
+          }
+        }
+      }
+    },
+    "menu.not-scanned" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not scanned yet"
+          }
+        }
+      }
+    },
+    "menu.offline-sources" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Offline sources"
+          }
+        }
+      }
+    },
+    "menu.old" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Old"
+          }
+        }
+      }
+    },
+    "menu.open" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open WTM"
+          }
+        }
+      }
+    },
+    "menu.running" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
+          }
+        }
+      }
+    },
+    "menu.storage" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Storage"
           }
         }
       }
@@ -1965,216 +2199,6 @@
         }
       }
     },
-    "client.error.launch-failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The client could not be started. Review its installation and try again."
-          }
-        }
-      }
-    },
-    "client.error.plan-failed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A safe client handoff could not be prepared."
-          }
-        }
-      }
-    },
-    "client.error.title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client Handoff Failed"
-          }
-        }
-      }
-    },
-    "client.error.unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This client integration is unavailable."
-          }
-        }
-      }
-    },
-    "client.execute.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start Handoff"
-          }
-        }
-      }
-    },
-    "client.prepare.action" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Handoff…"
-          }
-        }
-      }
-    },
-    "client.preview.client" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client"
-          }
-        }
-      }
-    },
-    "client.preview.detail" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WTM will execute this exact argument vector without a shell. The client may load the model into memory."
-          }
-        }
-      }
-    },
-    "client.preview.model" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Model reference"
-          }
-        }
-      }
-    },
-    "client.preview.warning" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Review Client Handoff"
-          }
-        }
-      }
-    },
-    "client.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clients"
-          }
-        }
-      }
-    },
-    "menu.incomplete" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Incomplete"
-          }
-        }
-      }
-    },
-    "menu.issues" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Issues"
-          }
-        }
-      }
-    },
-    "menu.last-scan" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last scan"
-          }
-        }
-      }
-    },
-    "menu.models" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Models"
-          }
-        }
-      }
-    },
-    "menu.not-scanned" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not scanned yet"
-          }
-        }
-      }
-    },
-    "menu.offline-sources" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offline sources"
-          }
-        }
-      }
-    },
-    "menu.old" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Old"
-          }
-        }
-      }
-    },
-    "menu.open" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open WTM"
-          }
-        }
-      }
-    },
-    "menu.running" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Running"
-          }
-        }
-      }
-    },
-    "menu.storage" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Storage"
-          }
-        }
-      }
-    },
     "scan.action" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2396,6 +2420,37 @@
         }
       }
     },
+    "settings.client.reviewed" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built-in · Reviewed handoff"
+          }
+        }
+      }
+    },
+    "settings.clients.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Client launches require an explicit preview. WTM never opens Terminal or changes a client's persistent model configuration."
+          }
+        }
+      }
+    },
+    "settings.clients.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clients"
+          }
+        }
+      }
+    },
     "settings.days" : {
       "localizations" : {
         "en" : {
@@ -2434,106 +2489,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Extending WTM"
-          }
-        }
-      }
-    },
-    "settings.login-item.description" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start WTM after login. This is independent of the menu bar item."
-          }
-        }
-      }
-    },
-    "settings.login-item.enabled" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launch at Login"
-          }
-        }
-      }
-    },
-    "settings.login-item.error" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "macOS did not accept the login item change. Check System Settings > General > Login Items."
-          }
-        }
-      }
-    },
-    "settings.login-item.error-title" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Launch at Login"
-          }
-        }
-      }
-    },
-    "settings.menu-bar.description" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show a compact, passive inventory summary in the menu bar."
-          }
-        }
-      }
-    },
-    "settings.menu-bar.enabled" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show WTM in Menu Bar"
-          }
-        }
-      }
-    },
-    "settings.menu-bar.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Menu Bar"
-          }
-        }
-      }
-    },
-    "settings.client.reviewed" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Built-in · Reviewed handoff"
-          }
-        }
-      }
-    },
-    "settings.clients.description" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Client launches require an explicit preview. WTM never opens Terminal or changes a client's persistent model configuration."
-          }
-        }
-      }
-    },
-    "settings.clients.section" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Clients"
           }
         }
       }
@@ -2587,6 +2542,81 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inventory Data"
+          }
+        }
+      }
+    },
+    "settings.login-item.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start WTM after login. This is independent of the menu bar item."
+          }
+        }
+      }
+    },
+    "settings.login-item.enabled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Login"
+          }
+        }
+      }
+    },
+    "settings.login-item.error" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "macOS did not accept the login item change. Check System Settings > General > Login Items."
+          }
+        }
+      }
+    },
+    "settings.login-item.error-title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Launch at Login"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show a compact, passive inventory summary in the menu bar."
+          }
+        }
+      }
+    },
+    "settings.menu-bar.enabled" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show WTM in Menu Bar"
+          }
+        }
+      }
+    },
+    "settings.menu-bar.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu Bar"
           }
         }
       }
