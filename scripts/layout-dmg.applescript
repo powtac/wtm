@@ -3,8 +3,17 @@ on run arguments
   set volumeName to item 1 of arguments
 
   tell application "Finder"
+    repeat with attemptNumber from 1 to 30
+      if exists disk volumeName then exit repeat
+      delay 1
+    end repeat
+    if not (exists disk volumeName) then error "Mounted volume did not become visible in Finder: " & volumeName
     tell disk volumeName
       open
+      repeat with attemptNumber from 1 to 15
+        if (exists item "WTM.app" of container window) and (exists item "Applications" of container window) then exit repeat
+        delay 1
+      end repeat
       set current view of container window to icon view
       set toolbar visible of container window to false
       set statusbar visible of container window to false
