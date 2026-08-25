@@ -126,7 +126,7 @@ xcrun swift "$repository_root/scripts/render-dmg-background.swift" \
 mounted_path="$temporary_root/mounted-layout"
 mkdir -p "$mounted_path"
 /usr/bin/hdiutil attach "$read_write_dmg" -readwrite -noverify -noautoopen -mountpoint "$mounted_path" -quiet
-/usr/bin/osascript "$repository_root/scripts/layout-dmg.applescript" "$volume_name"
+/usr/bin/osascript "$repository_root/scripts/layout-dmg.applescript" "$mounted_path"
 /usr/bin/sync
 /usr/bin/hdiutil detach "$mounted_path" -quiet
 mounted_path=""

@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.5] - 2026-08-25
+
+### Fixed
+
+- Apply the DMG Finder layout through its actual mount path so custom temporary mount
+  points work reliably on hosted macOS runners.
+
 ## [0.3.4] - 2026-08-25
 
 ### Fixed
