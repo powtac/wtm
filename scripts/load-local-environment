@@ -1,0 +1,11 @@
+#!/bin/zsh
+
+load_local_environment() {
+  local repository_root="$1"
+  local environment_file="${WTM_LOCAL_ENV_FILE:-$repository_root/.env.local}"
+
+  [[ -f "$environment_file" ]] || return 0
+  set -a
+  source "$environment_file"
+  set +a
+}

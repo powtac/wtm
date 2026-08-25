@@ -52,6 +52,8 @@ Requirements:
 - Xcode 26.3 or later with Swift 6
 
 ```sh
+cp .env.example .env.local
+source .env.local
 cp Config/Local.xcconfig.example Config/Local.xcconfig
 # Set your Apple Developer Team ID in Config/Local.xcconfig.
 open WTM.xcodeproj
@@ -81,7 +83,8 @@ sudo DevToolsSecurity -enable
 ./scripts/test-ui
 ```
 
-The local configuration is ignored by Git. Signing certificates, Team IDs, and
+The local configuration and `.env.local` are ignored by Git. The repository scripts read
+the local signing identity and Team ID from `.env.local`; signing certificates and
 notarization credentials must never be committed.
 
 ## Release

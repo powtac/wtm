@@ -3,6 +3,8 @@ set -euo pipefail
 
 repository_root="${0:A:h:h}"
 cd "$repository_root"
+source "$repository_root/scripts/load-local-environment"
+load_local_environment "$repository_root"
 
 derived_data="$(mktemp -d /tmp/wtm-ui-tests.XXXXXX)"
 trap '/bin/rm -rf -- "$derived_data"' EXIT

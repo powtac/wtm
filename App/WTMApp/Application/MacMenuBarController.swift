@@ -42,13 +42,14 @@ final class MacMenuBarController: NSObject, NSMenuDelegate {
   private let model: InventoryViewModel
   private let openInventory: @MainActor () -> Void
   private var statusItem: NSStatusItem?
+  private var isApplyingEnabledSetting = false
 
   init(model: InventoryViewModel, openInventory: @escaping @MainActor () -> Void) {
     self.model = model
     self.openInventory = openInventory
     super.init()
 
-    guard ProcessInfo.processInfo.environment["XCTestBundlePath"] == nil else { return }
+    guard !Self.isRunningUnderXCTest else { return }
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(defaultsDidChange(_:)),
@@ -63,6 +64,10 @@ final class MacMenuBarController: NSObject, NSMenuDelegate {
   }
 
   private func applyEnabledSetting() {
+    guard !isApplyingEnabledSetting else { return }
+    isApplyingEnabledSetting = true
+    defer { isApplyingEnabledSetting = false }
+
     let storedValue = UserDefaults.standard.object(forKey: "menu-bar.enabled") as? Bool
     let isEnabled = storedValue ?? true
 
@@ -183,6 +188,15 @@ final class MacMenuBarController: NSObject, NSMenuDelegate {
 
   private func contextItem(title: String, count: Int, action: Selector) -> NSMenuItem {
     count > 0 ? actionItem(title: title, action: action) : informationalItem(title: title)
+  }
+
+  private static var isRunningUnderXCTest: Bool {
+    let environment = ProcessInfo.processInfo.environment
+    return environment["WTM_UI_TEST_MODE"] == "1"
+      || environment["XCTestBundlePath"] != nil
+      || environment["XCTestConfigurationFilePath"] != nil
+      || environment["XCInjectBundle"] != nil
+      || environment["XCInjectBundleInto"] != nil
   }
 
   @objc private func showInventory() {

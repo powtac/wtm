@@ -44,10 +44,10 @@ The UI suite verifies the non-executing launch preview and does not start a user
 
 - Build source commit: `d1780c8`
 - Archive: `WTM Phase 3 2026-08-24 220600.xcarchive`
-- Export: `/path/to/local/home/Desktop/WTM-0.3.0-Phase3-Notarized/WTM.app`
+- Export: local path intentionally omitted
 - Version: `0.3.0 (3)`; bundle identifier: `de.powtac.whatthemodel`
 - Architecture: Apple Silicon (`arm64`)
-- Signing: `Developer ID signed (signer omitted)` with hardened runtime
+- Signing: Developer ID signed with signer identity omitted; hardened runtime
 - Entitlements: empty; App Sandbox remains disabled by accepted architecture decision
 - Apple notarization: accepted on 2026-08-24 with no issues; submission
   `54EEA91E-D05D-4C9E-A499-0434235A8EA4`

@@ -42,10 +42,10 @@ directories only; they never target the user's model stores.
 
 - Build source commit: `93a298c`
 - Archive: `WTM Phase 2 2026-08-24 191300.xcarchive`
-- Export: `/path/to/local/home/Desktop/WTM-0.2.0-Phase2.app`
+- Export: local path intentionally omitted
 - Version: `0.2.0 (2)`; bundle identifier: `de.powtac.whatthemodel`
 - Architecture: Apple Silicon (`arm64`)
-- Signing: `Developer ID signed (signer omitted)` with hardened runtime
+- Signing: Developer ID signed with signer identity omitted; hardened runtime
 - Entitlements: empty; App Sandbox remains disabled by accepted architecture decision
 - Apple notarization: accepted on 2026-08-24; submission
   `AAE0C8AD-32A3-4FF4-B2D9-1777E1807C61`

@@ -8,6 +8,13 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DERIVED_DATA="$ROOT_DIR/DerivedData/Run"
 APP_BUNDLE="$DERIVED_DATA/Build/Products/Debug/$APP_NAME.app"
 APP_BINARY="$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+source "$ROOT_DIR/scripts/load-local-environment"
+load_local_environment "$ROOT_DIR"
+
+build_settings=()
+if [[ -n "${APPLE_TEAM_ID:-}" ]]; then
+  build_settings+=(DEVELOPMENT_TEAM="$APPLE_TEAM_ID")
+fi
 
 case "$MODE" in
   run|--debug|debug|--logs|logs|--telemetry|telemetry|--verify|verify)
@@ -27,6 +34,7 @@ esac
   -configuration Debug \
   -destination 'platform=macOS,arch=arm64' \
   -derivedDataPath "$DERIVED_DATA" \
+  "${build_settings[@]}" \
   build
 
 if [[ ! -x "$APP_BINARY" ]]; then

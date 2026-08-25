@@ -36,10 +36,10 @@ bookmarks, volume identity, and UI preferences persist.
 
 - Source commit: `956290d`
 - Archive: `WTM Phase 1 Revalidated 2026-08-24 175531.xcarchive`
-- Export: `/path/to/local/home/Desktop/WTM-0.1.0-Phase1-Revalidated.app`
+- Export: local path intentionally omitted
 - Version: `0.1.0 (1)`; bundle identifier: `de.powtac.whatthemodel`
 - Architecture: Apple Silicon (`arm64`)
-- Signing: `Developer ID signed (signer omitted)` with hardened runtime
+- Signing: Developer ID signed with signer identity omitted; hardened runtime
 - Entitlements: empty; App Sandbox remains disabled by accepted architecture decision
 - Apple notarization: accepted on 2026-08-24; submission `767FBFE3-6FFF-4590-877B-AC32CB4D311E`
 - Stapler: ticket validation succeeded

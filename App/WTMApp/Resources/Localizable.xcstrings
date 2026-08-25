@@ -1448,6 +1448,7 @@
       }
     },
     "inventory.search.prompt" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

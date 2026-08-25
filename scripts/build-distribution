@@ -9,6 +9,8 @@ fi
 repository_root="${0:A:h:h}"
 output_directory="${1:A}"
 base_configuration="$repository_root/Config/Base.xcconfig"
+source "$repository_root/scripts/load-local-environment"
+load_local_environment "$repository_root"
 
 required_environment=(
   WTM_SIGNING_IDENTITY

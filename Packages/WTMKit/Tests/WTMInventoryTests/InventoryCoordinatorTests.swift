@@ -6,6 +6,13 @@ import WTMSecurity
 @testable import WTMDomain
 @testable import WTMInventory
 
+private var testHomeURL: URL {
+  URL(
+    filePath: ProcessInfo.processInfo.environment["WTM_TEST_HOME_PATH"] ?? "/tmp/wtm-test-home",
+    directoryHint: .isDirectory
+  )
+}
+
 @Test("Disabled sources are never passed to an adapter")
 func disabledSourceIsRejected() async throws {
   let registry = try AdapterRegistry(adapters: [FixtureAdapter()])
@@ -290,7 +297,7 @@ private struct StreamingFixtureAdapter: StorageProviderAdapter {
 
 @Test("Default sources are narrow, deterministic, and disabled")
 func defaultSourcesAreSafeAndDeterministic() {
-  let home = URL(filePath: "/tmp/wtm-test-home", directoryHint: .isDirectory)
+  let home = testHomeURL
   let sources = DefaultSourceCatalog().suggestions(homeDirectory: home)
 
   #expect(DefaultSourceCatalog.version == 2)
@@ -298,7 +305,7 @@ func defaultSourcesAreSafeAndDeterministic() {
     sources.map(\.id)
       == ["default:ollama", "default:hugging-face", "default:unsloth", "default:models"]
   )
-  #expect(sources[2].rootURL.path == "/tmp/wtm-test-home/.unsloth")
+  #expect(sources[2].rootURL.path == home.appending(path: ".unsloth").path)
   #expect(sources.allSatisfy { !$0.isEnabled })
   #expect(!sources.map(\.rootURL.path).contains(home.path))
   #expect(!sources.map(\.rootURL.path).contains(home.appending(path: ".cache").path))

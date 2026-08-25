@@ -5,6 +5,13 @@ import WTMRuntime
 
 @testable import WTMPersistence
 
+private var testHomeURL: URL {
+  URL(
+    filePath: ProcessInfo.processInfo.environment["WTM_TEST_HOME_PATH"] ?? "/tmp/wtm-test-home",
+    directoryHint: .isDirectory
+  )
+}
+
 @Test("Tool settings persist definitions and approvals but no runtime state or logs")
 func toolSettingsRoundTrip() async throws {
   let directory = FileManager.default.temporaryDirectory.appending(
@@ -51,7 +58,7 @@ func toolSettingsRoundTrip() async throws {
 func toolManifestPolicy() throws {
   let originalID = UUID()
   let importedID = UUID()
-  let homeURL = URL(filePath: "/tmp/wtm-test-home", directoryHint: .isDirectory)
+  let homeURL = testHomeURL
   let definition = ToolDefinition(
     id: originalID,
     displayName: "llama.cpp",
@@ -62,14 +69,14 @@ func toolManifestPolicy() throws {
     executableURL: homeURL.appending(path: "bin/llama-server"),
     arguments: [
       .literal("--model"),
-      .literal("/tmp/wtm-test-home/Models/model.gguf"),
+      .literal(homeURL.appending(path: "Models/model.gguf").path),
       .placeholder(.port),
     ],
     supportedFormats: [.gguf],
     currentDirectoryURL: homeURL.appending(path: "Models", directoryHint: .isDirectory),
     environment: [
       "SAFE": "1",
-      "PRIVATE_PATH": "/tmp/wtm-test-home/.cache",
+      "PRIVATE_PATH": homeURL.appending(path: ".cache").path,
     ]
   )
 
@@ -89,7 +96,7 @@ func toolManifestPolicy() throws {
   #expect(exported.currentDirectoryURL == nil)
   #expect(exported.environment == ["SAFE": "1"])
   #expect(exported.executableURL.path == "/path/to/llama-server")
-  #expect(!json.contains("/tmp/wtm-test-home"))
+  #expect(!json.contains(homeURL.path))
 
   let manifest = try JSONDecoder().decode(ToolDefinitionManifest.self, from: data)
   #expect(manifest.schemaVersion == ToolDefinitionManifest.currentSchemaVersion)

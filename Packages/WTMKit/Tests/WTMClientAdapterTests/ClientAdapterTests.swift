@@ -6,6 +6,10 @@ import WTMAdapterContracts
 import WTMDomain
 import WTMRuntime
 
+private var testHomePath: String {
+  ProcessInfo.processInfo.environment["WTM_TEST_HOME_PATH"] ?? "/tmp/wtm-test-home"
+}
+
 private func installation(
   providerID: ProviderID = .ollama,
   format: ModelFormat = .ollama
@@ -77,7 +81,7 @@ func openClawBuildsReviewedPlan() throws {
   let adapter = OpenClawClientAdapter(
     nodeURL: URL(filePath: "/usr/bin/true"),
     scriptURL: URL(filePath: "/usr/bin/true"),
-    environment: ["HOME": "/tmp/wtm-test-home"]
+    environment: ["HOME": testHomePath]
   )
   let plan = try adapter.makeHandoffPlan(
     for: installation(),

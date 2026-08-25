@@ -3,11 +3,23 @@ import XCTest
 
 final class WTMAppUITests: XCTestCase {
   @MainActor
+  private func launch(_ application: XCUIApplication) {
+    application.launchEnvironment["WTM_UI_TEST_MODE"] = "1"
+    application.launch()
+
+    // A previous crashed local run can leave macOS' recovery alert in front of the app.
+    let recoveryButton = application.dialogs.buttons["Don’t Reopen"].firstMatch
+    if recoveryButton.waitForExistence(timeout: 1) {
+      recoveryButton.click()
+    }
+  }
+
+  @MainActor
   func testSourceSetupAppearsOnFirstLaunch() throws {
     let application = XCUIApplication()
     application.launchEnvironment["WTM_SETTINGS_NAMESPACE"] =
       "de.powtac.whatthemodel.ui-tests.\(UUID().uuidString)"
-    application.launch()
+    launch(application)
 
     XCTAssertTrue(application.staticTexts["Choose Model Sources"].waitForExistence(timeout: 5))
     XCTAssertTrue(
@@ -35,7 +47,7 @@ final class WTMAppUITests: XCTestCase {
     application.launchEnvironment["WTM_SETTINGS_NAMESPACE"] =
       "de.powtac.whatthemodel.ui-tests.cleanup.\(UUID().uuidString)"
     application.launchEnvironment["WTM_UI_TEST_HOME_DIRECTORY"] = homeURL.path
-    application.launch()
+    launch(application)
     defer { application.terminate() }
 
     let sourceToggle =
@@ -131,7 +143,7 @@ final class WTMAppUITests: XCTestCase {
       "de.powtac.whatthemodel.ui-tests.runtime.\(UUID().uuidString)"
     application.launchEnvironment["WTM_UI_TEST_HOME_DIRECTORY"] = homeURL.path
     application.launchEnvironment["WTM_UI_TEST_RUNTIME_EXECUTABLE"] = "/usr/bin/true"
-    application.launch()
+    launch(application)
     defer { application.terminate() }
 
     let sourceToggle = application.descendants(matching: .any)["source-toggle-default:models"]
