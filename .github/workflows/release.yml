@@ -45,7 +45,9 @@ jobs:
         run: |
           xcodebuild -version
           swift --version
-          brew install ripgrep
+          if ! command -v rg >/dev/null 2>&1; then
+            HOMEBREW_NO_AUTO_UPDATE=1 brew install ripgrep
+          fi
           sudo /usr/sbin/DevToolsSecurity -enable
           ./scripts/test
           ./scripts/test-ui
