@@ -50,7 +50,12 @@
           <h2>Stable builds are signed and notarized.</h2>
         </div>
         <div>
-          <p>Download the current macOS release from GitHub. WTM checks the official stable release channel weekly, never installs updates automatically, and sends no inventory or telemetry data.</p>
+          <p>Download and install the latest Apple Silicon build directly from Terminal. The command verifies SHA-256 before replacing the app.</p>
+          <div class="terminal-command">
+            <code id="install-command">set -euo pipefail; d="$(mktemp -d)"; trap 'hdiutil detach "$d/mnt" >/dev/null 2>&1 || true; rm -rf "$d"' EXIT; a="$(curl -fsSL https://api.github.com/repos/powtac/wtm/releases/latest)"; u="$(printf '%s' "$a" | sed -n 's|.*"browser_download_url": "\(https://[^\"]*/WTM-[^\"]*-arm64\.dmg\)".*|\1|p' | head -1)"; s="$(printf '%s' "$a" | sed -n 's|.*"browser_download_url": "\(https://[^\"]*/WTM-[^\"]*\.sha256\)".*|\1|p' | head -1)"; n="${u##*/}"; curl -fL "$u" -o "$d/$n"; curl -fL "$s" -o "$d/checksums.sha256"; (cd "$d" &amp;&amp; shasum -a 256 -c checksums.sha256); mkdir "$d/mnt"; hdiutil attach "$d/$n" -nobrowse -readonly -mountpoint "$d/mnt" &gt;/dev/null; sudo ditto "$d/mnt/WTM.app" /Applications/WTM.app; open /Applications/WTM.app</code>
+            <button class="copy-command" type="button" data-copy-target="install-command">Copy command</button>
+          </div>
+          <p class="fine-print">Requires macOS 15+, Apple Silicon, and an administrator password for <code>/Applications</code>.</p>
           <div class="actions"><a class="button primary" href="https://github.com/powtac/wtm/releases/latest">Open releases</a><a class="button" href="https://github.com/powtac/wtm/blob/main/SECURITY.md">Security policy</a></div>
         </div>
       </section>
@@ -104,5 +109,15 @@
       <span>What The Model · Apache-2.0</span>
       <nav aria-label="Footer navigation"><a href="https://github.com/powtac/wtm/blob/main/README.md">Documentation</a><a href="https://github.com/powtac/wtm/issues">Issues</a><a href="https://github.com/powtac/wtm/discussions">Discussions</a><a href="https://github.com/powtac/wtm/blob/main/REQUIREMENTS.md">Requirements (German, normative)</a></nav>
     </footer>
+    <script>
+      document.querySelectorAll('[data-copy-target]').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const command = document.getElementById(button.dataset.copyTarget).textContent;
+          await navigator.clipboard.writeText(command);
+          button.textContent = 'Copied';
+          setTimeout(() => { button.textContent = 'Copy command'; }, 1600);
+        });
+      });
+    </script>
   </body>
 </html>

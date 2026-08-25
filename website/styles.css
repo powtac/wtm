@@ -40,6 +40,10 @@ h3 { margin:.1rem 0 .5rem; }
 table { width:100%; border-collapse:collapse; }th,td{text-align:left;padding:.8rem;border-bottom:1px solid var(--line)}td{color:var(--muted)}
 .callout,.release-panel { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
 .release-panel { background:linear-gradient(145deg,#18241f,#11161e); padding-left:1.5rem; padding-right:1.5rem; }
+.terminal-command { position:relative; margin:1.5rem 0 .5rem; padding:1rem 6.8rem 1rem 1rem; overflow:auto; border:1px solid #3c665a; border-radius:.7rem; background:#09100f; color:#b9f5df; font: .78rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; }
+.terminal-command code { white-space:pre-wrap; overflow-wrap:anywhere; }
+.copy-command { position:absolute; top:.7rem; right:.7rem; border:1px solid #4a7568; border-radius:.45rem; padding:.45rem .6rem; color:var(--text); background:#172c27; cursor:pointer; font:600 .75rem/-apple-system,BlinkMacSystemFont,"SF Pro Text",sans-serif; }
+.copy-command:hover,.copy-command:focus { border-color:var(--accent); color:var(--accent); }
 .article { max-width:900px; padding-top:6rem; }.article h1{max-width:13ch}.article section{padding:3.5rem 0;border-top:1px solid var(--line)}.article h3{margin-top:2rem}.article p{color:var(--muted)}
 .steps { list-style:none; counter-reset:steps; padding:0; }.steps li{counter-increment:steps;display:grid;grid-template-columns:2rem 11rem 1fr;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line)}.steps li:before{content:counter(steps);color:var(--accent);font-weight:700}.steps span{color:var(--muted)}
 footer { border-top:1px solid var(--line); color:var(--muted); font-size:.86rem; }
