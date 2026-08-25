@@ -21,13 +21,13 @@ for number in {001..028}; do
     "## Requirements impact" \
     "## Validation"
   do
-    if ! rg -Fq -- "$marker" "$record"; then
+    if ! grep -Fq -- "$marker" "$record"; then
       echo "${record:t} is missing required marker: $marker" >&2
       exit 1
     fi
   done
 
-  if ! rg -Fq "[ADR-$number](docs/decisions/${record:t})" "$requirements_file"; then
+  if ! grep -Fq "[ADR-$number](docs/decisions/${record:t})" "$requirements_file"; then
     echo "REQUIREMENTS.md does not link ADR-$number to ${record:t}." >&2
     exit 1
   fi

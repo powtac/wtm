@@ -27,7 +27,15 @@ done
 for html_file in "$website_root"/*.html; do
   search -q '<html lang="en">' "$html_file" || { echo "Missing English lang: $html_file" >&2; exit 1; }
   search -q '<meta name="description"' "$html_file" || { echo "Missing description: $html_file" >&2; exit 1; }
-  [[ "$(search -c '<h1[ >]' "$html_file")" == 1 ]] || { echo "Expected one h1: $html_file" >&2; exit 1; }
+  h1_count="$(python3 - "$html_file" <<'PY'
+import re
+import sys
+
+html = open(sys.argv[1], encoding="utf-8").read()
+print(len(re.findall(r"<h1(?:\s|>)", html, flags=re.IGNORECASE)))
+PY
+)"
+  [[ "$h1_count" == 1 ]] || { echo "Expected one h1: $html_file" >&2; exit 1; }
   if python3 - "$html_file" <<'PY'
 import re
 import sys
@@ -52,7 +60,7 @@ while IFS= read -r reference; do
   [[ -z "$target" ]] && target="index.html"
   [[ -f "$website_root/$target" ]] || { echo "Broken local link: $reference" >&2; exit 1; }
   if [[ -n "$anchor" ]]; then
-    rg -q "id=\"$anchor\"" "$website_root/$target" || {
+    search -q "id=\"$anchor\"" "$website_root/$target" || {
       echo "Broken local anchor: $reference" >&2
       exit 1
     }
