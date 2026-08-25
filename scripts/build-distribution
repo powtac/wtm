@@ -69,9 +69,9 @@ notarize() {
     --password "$APPLE_APP_PASSWORD" \
     --wait \
     --output-format json > "$report_path"
-  local status
-  status="$(/usr/bin/ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("status")' "$report_path")"
-  [[ "$status" == "Accepted" ]] || { echo "Notarization failed: $status" >&2; exit 1; }
+  local notarization_status
+  notarization_status="$(/usr/bin/ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("status")' "$report_path")"
+  [[ "$notarization_status" == "Accepted" ]] || { echo "Notarization failed: $notarization_status" >&2; exit 1; }
 }
 
 cd "$repository_root"

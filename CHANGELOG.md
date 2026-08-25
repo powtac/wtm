@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.3] - 2026-08-25
+
+### Fixed
+
+- Fixed zsh release-script failure caused by using the read-only `status` shell variable
+  while processing notarization reports.
+
 ## [0.3.2] - 2026-08-25
 
 ### Fixed
