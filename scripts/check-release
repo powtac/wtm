@@ -42,7 +42,7 @@ for gate in \
 do
   /usr/bin/grep -Fq "$gate" "$workflow" || { echo "Missing release gate: $gate" >&2; exit 1; }
 done
-if /usr/bin/grep -Eq '^[[:space:]]+\./scripts/test(-ui)?[[:space:]]*$' "$workflow"; then
+if /usr/bin/grep -Eq '\./scripts/test(-ui)?([[:space:]]|$)' "$workflow"; then
   echo "Release workflow must reuse exact-SHA CI evidence instead of rerunning full tests." >&2
   exit 1
 fi

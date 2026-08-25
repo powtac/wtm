@@ -93,14 +93,14 @@ A release run first verifies the successful CI workflow and required jobs for it
 then provides the authoritative Developer ID, notarization, stapling, Gatekeeper, DMG
 mount/copy/start, secret-pattern, checksum, SBOM, and publication evidence.
 The 2026-08-25 first release attempt demonstrated that `macos-15` did not provide `rg` by
-default: the run stopped in the verification step before signing. The release workflow now
-performs the explicit preflight required above; this operational fix is separate from and
-does not constitute notarization evidence. A later `v0.3.4` attempt successfully notarized,
-stapled, and Gatekeeper-validated the app, then failed while resolving a custom temporary
-mountpoint as Finder `disk "WTM 0.3.4"`. Waiting did not change the object model. Passing the
-actual mount path as a Finder folder succeeded in a runtime fixture and preserves the phase
-boundary: app notarization evidence remains valid, while DMG packaging remains failed until
-its own gates pass. The subsequent `v0.3.5` attempt reached that folder but Finder rejected
+default: the duplicated full CI suite stopped in the verification step before signing. Exact-
+SHA CI reuse removes that unnecessary release dependency; this operational change is separate
+from and does not constitute notarization evidence. A later `v0.3.4` attempt successfully
+notarized, stapled, and Gatekeeper-validated the app, then failed while resolving a custom
+temporary mountpoint as Finder `disk "WTM 0.3.4"`. Waiting did not change the object model.
+Passing the actual mount path as a Finder folder succeeded in a runtime fixture and preserves
+the phase boundary: app notarization evidence remains valid, while DMG packaging remains
+failed until its own gates pass. The subsequent `v0.3.5` attempt reached that folder but Finder rejected
 the nested background-image object specifier with error `-10006`. Resolving the same image
 to a concrete POSIX file alias before entering the Finder command succeeds against a real
 writable APFS DMG and removes that runner-dependent object-specifier resolution.
