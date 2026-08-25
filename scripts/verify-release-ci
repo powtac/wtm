@@ -1,0 +1,94 @@
+#!/bin/zsh
+set -euo pipefail
+
+if (( $# != 2 )); then
+  echo "Usage: $0 OWNER/REPOSITORY COMMIT_SHA" >&2
+  exit 64
+fi
+
+repository="$1"
+commit="${2:l}"
+
+if [[ ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+  echo "Invalid GitHub repository: $repository" >&2
+  exit 64
+fi
+if [[ ! "$commit" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "Invalid full commit SHA: $commit" >&2
+  exit 64
+fi
+if ! command -v gh >/dev/null 2>&1; then
+  echo "GitHub CLI is required to verify CI evidence." >&2
+  exit 69
+fi
+
+runs_json="$(
+  gh api --method GET \
+    -H 'Accept: application/vnd.github+json' \
+    -H 'X-GitHub-Api-Version: 2026-03-10' \
+    "repos/$repository/actions/workflows/ci.yml/runs" \
+    -f head_sha="$commit" \
+    -f branch=main \
+    -f event=push \
+    -f status=success \
+    -F exclude_pull_requests=true \
+    -F per_page=100
+)"
+
+run_record="$(
+  print -r -- "$runs_json" | /usr/bin/ruby -rjson -e '
+    runs = JSON.parse(STDIN.read).fetch("workflow_runs")
+    run = runs.max_by { |candidate| [candidate.fetch("run_attempt"), candidate.fetch("id")] }
+    exit if run.nil?
+    puts [
+      run.fetch("id"),
+      run.fetch("head_sha"),
+      run.fetch("head_branch"),
+      run.fetch("event"),
+      run.fetch("status"),
+      run.fetch("conclusion"),
+      run.fetch("html_url")
+    ].join("\t")
+  '
+)"
+
+if [[ -z "$run_record" ]]; then
+  echo "No successful main-branch CI push run exists for commit $commit." >&2
+  exit 1
+fi
+
+IFS=$'\t' read -r run_id run_sha run_branch run_event run_status run_conclusion run_url <<< "$run_record"
+if [[ "$run_sha" != "$commit" || "$run_branch" != main || "$run_event" != push || \
+      "$run_status" != completed || "$run_conclusion" != success ]]; then
+  echo "CI run $run_id does not match the required commit, branch, event, and result." >&2
+  exit 1
+fi
+
+jobs_json="$(
+  gh api --method GET \
+    -H 'Accept: application/vnd.github+json' \
+    -H 'X-GitHub-Api-Version: 2026-03-10' \
+    "repos/$repository/actions/runs/$run_id/jobs" \
+    -f filter=latest \
+    -F per_page=100
+)"
+
+print -r -- "$jobs_json" | /usr/bin/ruby -rjson -e '
+  commit = ARGV.fetch(0)
+  run_url = ARGV.fetch(1)
+  required = ["Build and test", "Secret scan"]
+  jobs = JSON.parse(STDIN.read).fetch("jobs")
+
+  required.each do |name|
+    job = jobs.find { |candidate| candidate["name"] == name }
+    abort "Missing required CI job #{name.inspect} in #{run_url}." if job.nil?
+
+    unless job["status"] == "completed" && job["conclusion"] == "success" && job["head_sha"] == commit
+      abort "Required CI job #{name.inspect} is not successful for #{commit}: " \
+        "status=#{job["status"].inspect}, conclusion=#{job["conclusion"].inspect}."
+    end
+  end
+' "$commit" "$run_url"
+
+echo "Verified CI run $run_id for $commit: Build and test, Secret scan."
+echo "$run_url"

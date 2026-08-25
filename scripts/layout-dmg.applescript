@@ -2,6 +2,7 @@ on run arguments
   if (count of arguments) is not 1 then error "Expected the mounted volume path."
   set mountedPath to item 1 of arguments
   set mountedFolderAlias to POSIX file mountedPath as alias
+  set backgroundPictureAlias to POSIX file (mountedPath & "/.background/background.png") as alias
 
   tell application "Finder"
     set mountedFolder to folder mountedFolderAlias
@@ -22,7 +23,7 @@ on run arguments
     set arrangement of theViewOptions to not arranged
     set icon size of theViewOptions to 96
     set text size of theViewOptions to 13
-    set background picture of theViewOptions to file "background.png" of folder ".background" of mountedFolder
+    set background picture of theViewOptions to backgroundPictureAlias
     set position of item "WTM.app" of mountedFolder to {190, 218}
     set position of item "Applications" of mountedFolder to {470, 218}
     close layoutWindow

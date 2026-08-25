@@ -2,6 +2,13 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## [0.3.6] - 2026-08-25
+
+### Fixed
+
+- Resolve the DMG background image to a concrete file alias before asking Finder to apply
+  it, avoiding hosted-runner failures from nested Finder object specifiers.
+
 ## [0.3.5] - 2026-08-25
 
 ### Fixed

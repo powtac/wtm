@@ -31,10 +31,12 @@ and store only these Environment secrets:
 - `APPLE_APP_PASSWORD`
 
 The release job is hard-disabled unless repository visibility is `public`. `release.yml`
-accepts only a stable SemVer tag matching the Xcode project version. It uses
-an ephemeral keychain and publishes a draft only after signing, notarization, DMG, SBOM,
-checksum, secret-pattern, and start-smoke gates pass. Artifact attestation is enabled only
-after the repository is public.
+accepts only a stable SemVer tag matching the Xcode project version. Before importing any
+credential, it requires successful `Build and test` and `Secret scan` jobs from the `main`
+CI push run for the exact tag commit; it does not rerun the full suite. It uses an ephemeral
+keychain and publishes a draft only after signing, notarization, DMG, SBOM, checksum,
+secret-pattern, and start-smoke gates pass. Artifact attestation is enabled only after the
+repository is public.
 
 ## Public launch
 

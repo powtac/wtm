@@ -15,7 +15,7 @@ deployment evidence below are recorded.
 | About | Native About window shows product name, version, build, repository, license, update status, release notes, and download links |
 | Entry points | App menu, About, and `Settings > General` call the same `UpdateChecker`; Settings keeps the stable five-pane structure |
 | Automated verification | SemVer, stable/prerelease, equal version, empty releases, invalid metadata, offline, rate-limit, and seven-day cache tests are included |
-| Release pipeline | Fail-closed Developer ID, notarization, stapling, Gatekeeper, DMG mount/copy/start, SBOM, checksum, secret audit, attestation, draft release, and atomic publish gates are versioned |
+| Release pipeline | Exact-SHA CI reuse plus fail-closed Developer ID, notarization, stapling, Gatekeeper, DMG mount/copy/start, SBOM, checksum, secret audit, attestation, draft release, and atomic publish gates are versioned |
 | Website | Versioned English Pages site, accessibility/link validation, extension guide, and official latest-release link are present |
 
 ## Verification commands
@@ -28,8 +28,9 @@ deployment evidence below are recorded.
 ```
 
 The public release workflow additionally requires repository visibility `public`, exact
-tag `vMAJOR.MINOR.PATCH`, protected Environment `release`, five Environment secrets, a
-successful Apple notarization, and manual public-launch checks. No release tag or public
+tag `vMAJOR.MINOR.PATCH`, successful `Build and test` and `Secret scan` jobs from the `main`
+CI push run for the exact commit, protected Environment `release`, five Environment secrets,
+a successful Apple notarization, and manual public-launch checks. No release tag or public
 repository mutation is performed by local tests.
 
 ## Open manual gates
