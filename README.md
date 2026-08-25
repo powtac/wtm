@@ -7,6 +7,8 @@
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 
+**Website:** [powtac.github.io/wtm](https://powtac.github.io/wtm/)
+
 What The Model is a native macOS inventory for locally stored LLMs. It explains which
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.

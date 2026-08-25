@@ -2,6 +2,11 @@
 
 The repository starts private and is designed to become public without rewriting history.
 
+## Current public settings
+
+As of 2026-08-25, `powtac/wtm` is public, GitHub Pages is deployed from GitHub Actions at
+`https://powtac.github.io/wtm/`, and Discussions and Projects are intentionally disabled.
+
 ## Initial private settings
 
 - Default branch: `main`
@@ -34,9 +39,9 @@ after the repository is public.
 ## Public launch
 
 Before changing visibility, run a history, secret, personal-data, fixture-license,
-trademark, and security audit. Then enable Discussions, Pages, public issue forms,
-Dependabot, code scanning, secret scanning, push protection, and artifact attestations
-where the GitHub plan supports them.
+trademark, and security audit. Then enable Pages, public issue forms, Dependabot, code
+scanning, secret scanning, push protection, and artifact attestations where the GitHub plan
+supports them. Discussions and Projects remain disabled unless separately approved.
 
 After visibility changes to public, set Pages source to **GitHub Actions**, approve the
 `github-pages` Environment, run the Pages workflow, and verify all Settings extension links
