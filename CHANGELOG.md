@@ -1,7 +1,13 @@
 # Changelog
 
-All notable changes follow Keep a Changelog. The project uses Semantic Versioning once the
-first public release is tagged.
+All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
+
+## [0.3.1] - 2026-08-25
+
+### Fixed
+
+- Made the reviewed client-broker process test cancellation-safe and increased its exit
+  observation deadline for hosted macOS runners.
 
 ## Unreleased
 

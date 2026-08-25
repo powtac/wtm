@@ -153,8 +153,13 @@ func clientBrokerStartsReviewedPlan() async throws {
   let started = try await broker.start(plan: plan, installation: model)
   #expect(started.processIdentifier > 0)
   var finished = try await broker.snapshot(sessionID: started.id)
-  for _ in 0..<100 where finished.exitStatus == nil {
-    try await Task.sleep(for: .milliseconds(10))
+  let deadline = ContinuousClock.now.advanced(by: .seconds(5))
+  while finished.exitStatus == nil && ContinuousClock.now < deadline {
+    do {
+      try await Task.sleep(for: .milliseconds(10))
+    } catch is CancellationError {
+      return
+    }
     finished = try await broker.snapshot(sessionID: started.id)
   }
   #expect(finished.exitStatus == 0)
