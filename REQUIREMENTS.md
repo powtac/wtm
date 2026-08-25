@@ -867,6 +867,7 @@ Das Repository MUST enthalten:
 - **GH-CI-011:** Ein Architekturcheck validiert erlaubte Target-Abhängigkeiten, verbotene Core-→Adapter-Imports und das Fehlen von Action-/Runtime-Targets im Phase-1-Release-Graph.
 - **GH-CI-012:** Pflichtchecks wachsen phasenweise mit Abschnitt 18.1. Eine neue Capability darf nicht gemergt oder ausgeliefert werden, bevor ihr Phase-Gate als Test beziehungsweise dokumentierter manueller Check existiert.
 - **GH-CI-013:** CI- und Release-Workflows DÜRFEN keine nicht garantierten Tools des gehosteten Runners voraussetzen. Jede externe CLI-Abhängigkeit, einschließlich `rg`, MUST vor dem ersten versionierten Check nichtinteraktiv geprüft und bei Bedarf reproduzierbar installiert werden; ein fehlendes oder nicht installierbares Tool MUST vor Signierung und Notarisierung fail-closed abbrechen.
+- **GH-CI-014:** Bei einem Fehler auf einem GitHub-gehosteten Runner MUST die konkrete Runner-Image-Version aus `Set up job > Runner Image` als Diagnoseevidenz herangezogen werden. Ein lokal erfolgreicher Test oder ein generisches `macos-*`-Label gilt nicht als Nachweis identischer Runtime-, Tool- oder Finder-Semantik.
 
 ### 16.4 DMG- und Release-Pipeline
 
@@ -881,6 +882,8 @@ Das Repository MUST enthalten:
 - **GH-REL-009:** Release-Metadaten dokumentieren Commit-SHA, SemVer, macOS-/Xcode-/Swift-Version, Dependency-Lockfile, Workflow-Run, Checksummen und Notarisierungsergebnis. Ein unsigned App-Payload MAY separat auf Reproduzierbarkeit geprüft werden.
 - **GH-REL-010:** Unter GitHub Free MUST der Release-Job im privaten Repository hart deaktiviert bleiben, da Environment-Secrets und Required Reviewers dort nicht verfügbar sind. Nach dem Public-Schalten werden das geschützte Environment und seine Secrets vor dem ersten Release-Tag eingerichtet.
 - **GH-REL-011:** Vor dem Push eines Release-Tags MÜSSEN lokale Release-Gates, öffentliche Repository-Sichtbarkeit, die geschützte `release`-Environment und alle erforderlichen Secrets geprüft sein. Ein fehlgeschlagener Tag-Run darf nur erneut ausgeführt oder korrigiert werden, solange noch kein öffentlicher GitHub Release publiziert wurde; ein bereits publizierter Release-Tag ist unveränderlich.
+- **GH-REL-012:** Die Finder-Automation für ein beschreibbar gemountetes DMG MUST den tatsächlich verwendeten Mountpfad als Finder-Ordner adressieren. Der sichtbare Volumename dient nur der Darstellung und darf insbesondere bei einem expliziten Mountpoint nicht als Beweis für ein gleichnamiges Finder-`disk`-Objekt gelten.
+- **GH-REL-013:** Das Kompilieren des DMG-AppleScripts ist ausschließlich ein Syntax-Gate. Vor Konvertierung, DMG-Signierung und DMG-Notarisierung MUST der Release-Run das Layout am real gemounteten Pfad ausführen, `WTM.app`, die `Applications`-Verknüpfung und eine erzeugte `.DS_Store` nachweisen; fehlende Finder-Runtime-Evidenz bricht fail-closed ab.
 
 ### 16.5 GitHub Pages Website
 
@@ -1012,6 +1015,8 @@ Eine spätere Mac-App-Store-Ausgabe wäre ein separates, funktional reduziertes 
 - [Managing files and folders in your Xcode project](https://developer.apple.com/documentation/xcode/managing-files-and-folders-in-your-xcode-project)
 - [Swift Testing](https://developer.apple.com/documentation/testing)
 - [Logger](https://developer.apple.com/documentation/os/logger)
+- [AppleScript Language Guide: Object Specifiers](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/conceptual/ASLR_fundamentals.html)
+- [AppleScript Language Guide: Folder Actions Reference](https://developer.apple.com/library/archive/documentation/AppleScript/Conceptual/AppleScriptLangGuide/reference/ASLR_folder_actions.html)
 
 ### Provider und Runtimes
 
@@ -1033,7 +1038,9 @@ Eine spätere Mac-App-Store-Ausgabe wäre ein separates, funktional reduziertes 
 
 ### GitHub
 
-- [GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+- [GitHub-hosted runners and runner images](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners)
+- [GitHub Actions runner images](https://github.com/actions/runner-images)
+- [Choosing the runner for a job](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job)
 - [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages)
 - [Custom workflows with GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 - [GitHub security features](https://docs.github.com/en/code-security/getting-started/github-security-features)

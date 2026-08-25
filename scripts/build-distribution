@@ -128,6 +128,7 @@ mkdir -p "$mounted_path"
 /usr/bin/hdiutil attach "$read_write_dmg" -readwrite -noverify -noautoopen -mountpoint "$mounted_path" -quiet
 /usr/bin/osascript "$repository_root/scripts/layout-dmg.applescript" "$mounted_path"
 /usr/bin/sync
+[[ -f "$mounted_path/.DS_Store" ]] || { echo "Finder layout did not create .DS_Store." >&2; exit 1; }
 /usr/bin/hdiutil detach "$mounted_path" -quiet
 mounted_path=""
 

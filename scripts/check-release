@@ -40,7 +40,7 @@ for gate in \
 do
   /usr/bin/grep -Fq "$gate" "$workflow" || { echo "Missing release gate: $gate" >&2; exit 1; }
 done
-for gate in 'notarytool' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts'; do
+for gate in 'notarytool' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts' '.DS_Store'; do
   /usr/bin/grep -Fq "$gate" "$repository_root/scripts/build-distribution" || {
     echo "Missing distribution gate: $gate" >&2
     exit 1

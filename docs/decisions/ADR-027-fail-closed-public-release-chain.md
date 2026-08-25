@@ -9,6 +9,9 @@ Phase 5 turns a locally notarized application into a repeatable public release. 
 notarization, DMG presentation, GitHub publication, and Pages have different failure modes.
 A workflow that uploads before every gate finishes can expose an incomplete or untrusted
 `latest` release. The repository also remains private on GitHub Free until the public launch.
+Finder automation adds a runtime-only boundary: AppleScript object specifiers are resolved
+when executed, so successful compilation does not prove that a mounted path is exposed as
+the assumed Finder object on a fresh hosted runner.
 
 ## Decision
 
@@ -37,6 +40,15 @@ A workflow that uploads before every gate finishes can expose an incomplete or u
   release preflight verifies required command-line tools before any signing step and installs
   missing `ripgrep` noninteractively with Homebrew auto-update disabled; an unavailable
   dependency fails the run before credentials are imported.
+- The exact hosted runner image from the workflow's `Set up job` log is diagnostic evidence.
+  A generic runner label and a successful local run do not prove equivalent installed tools,
+  GUI state, or Finder object resolution.
+- DMG layout automation receives the actual `hdiutil` mount path and addresses it as a Finder
+  folder. The display volume name is not used to discover a Finder `disk` object when an
+  explicit temporary mountpoint is used.
+- AppleScript compilation remains a syntax gate. The release run must execute the layout,
+  confirm the app and Applications link, and require the resulting `.DS_Store` before the
+  writable image is detached or converted.
 - A release tag is pushed only after local gates, public visibility, the protected `release`
   Environment, and all required secrets are verified. A failed pre-release tag run may be
   rerun while no GitHub Release is published; after publication, the tag and release bytes
@@ -51,12 +63,16 @@ A workflow that uploads before every gate finishes can expose an incomplete or u
   cannot enter the release job. GitHub Free does not expose protected Environment secrets
   to this repository while it is private.
 - The pipeline consumes macOS Actions minutes and performs two notarization submissions.
+- A Finder-layout failure can occur after the app has already been notarized. Logs and release
+  evidence must identify the failing phase instead of reporting the entire trust chain as a
+  notarization failure.
 - Public Pages, attestations, Discussions, and security features still require a deliberate
   repository-visibility launch step; committed workflows do not imply remote activation.
 
 ## Requirements impact
 
-This decision implements the architecture for `GH-REL-001` through `GH-REL-009`,
+This decision implements the architecture for `GH-CI-013` through `GH-CI-014`,
+`GH-REL-001` through `GH-REL-013`,
 `GH-WEB-001` through `GH-WEB-008`, and the private-to-public controls in `GH-PUB-003`
 through `GH-PUB-005`. Phase 5 remains `Implemented`, not `Completed`, until a real tagged
 release passes the protected environment and the public-launch audit is recorded.
@@ -70,4 +86,9 @@ Gatekeeper, DMG mount/copy/start, secret-pattern, checksum, SBOM, and publicatio
 The 2026-08-25 first release attempt demonstrated that `macos-15` did not provide `rg` by
 default: the run stopped in the verification step before signing. The release workflow now
 performs the explicit preflight required above; this operational fix is separate from and
-does not constitute notarization evidence.
+does not constitute notarization evidence. A later `v0.3.4` attempt successfully notarized,
+stapled, and Gatekeeper-validated the app, then failed while resolving a custom temporary
+mountpoint as Finder `disk "WTM 0.3.4"`. Waiting did not change the object model. Passing the
+actual mount path as a Finder folder succeeded in a runtime fixture and preserves the phase
+boundary: app notarization evidence remains valid, while DMG packaging remains failed until
+its own gates pass.
