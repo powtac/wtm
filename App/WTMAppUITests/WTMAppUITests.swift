@@ -65,7 +65,10 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(
       application.descendants(matching: .any)["inventory-filter-menu"].exists
     )
+    let searchField = application.descendants(matching: .any)["inventory-search-field"]
+    XCTAssertTrue(searchField.exists)
     let scanControlY = application.descendants(matching: .any)["inventory-scan-button"].frame.minY
+    XCTAssertEqual(searchField.frame.minY, scanControlY, accuracy: 3)
 
     let oldSection = application.staticTexts["sidebar-section-old"]
     XCTAssertTrue(oldSection.waitForExistence(timeout: 15))

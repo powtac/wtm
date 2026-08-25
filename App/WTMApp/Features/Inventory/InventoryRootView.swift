@@ -49,7 +49,6 @@ struct InventoryRootView: View {
         } content: {
           inventoryContent
             .navigationTitle(Text("inventory.title"))
-            .searchable(text: $model.searchText, prompt: Text("inventory.search.prompt"))
         } detail: {
           if model.selectedInstallationIDs.count > 1 {
             VStack(spacing: 14) {
@@ -424,6 +423,11 @@ struct InventoryRootView: View {
       }
 
       Spacer()
+
+      InventorySearchField(text: $model.searchText)
+        .frame(minWidth: 180, idealWidth: 240, maxWidth: 280)
+        .layoutPriority(1)
+        .accessibilityIdentifier("inventory-search-field")
 
       Menu {
         Picker("filter.provider", selection: $model.selectedProviderID) {
