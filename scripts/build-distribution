@@ -189,13 +189,18 @@ xcrun stapler validate "$mounted_app"
 copied_app="$temporary_root/copied/WTM.app"
 mkdir -p "${copied_app:h}"
 /usr/bin/ditto "$mounted_app" "$copied_app"
+echo "Running DMG copy-and-launch smoke test..."
 "$copied_app/Contents/MacOS/WTM" > "$temporary_root/smoke.stdout" 2> "$temporary_root/smoke.stderr" &
 smoke_pid=$!
 sleep 5
-kill -0 "$smoke_pid" 2>/dev/null || { echo "Copied app exited during start smoke test." >&2; exit 1; }
+kill -0 "$smoke_pid" 2>/dev/null || {
+  echo "DMG copy-and-launch smoke test failed: copied app exited during startup." >&2
+  exit 1
+}
 kill "$smoke_pid"
 wait "$smoke_pid" 2>/dev/null || true
 smoke_pid=""
+echo "DMG copy-and-launch smoke test passed."
 
 /usr/bin/hdiutil detach "$mounted_path" -quiet
 mounted_path=""
