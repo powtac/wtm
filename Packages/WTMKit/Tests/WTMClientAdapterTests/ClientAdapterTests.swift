@@ -30,7 +30,10 @@ private func installation(
   )
 }
 
-private func verifiedOllamaRuntime(at now: Date) -> RuntimeInstance {
+private func verifiedOllamaRuntime(
+  at now: Date,
+  ownership: RuntimeOwnership = .startedByWTM
+) -> RuntimeInstance {
   guard let endpoint = URL(string: "http://127.0.0.1:11434") else {
     preconditionFailure("Static loopback URL must be valid")
   }
@@ -48,7 +51,7 @@ private func verifiedOllamaRuntime(at now: Date) -> RuntimeInstance {
     installationID: "installation",
     endpoint: endpoint,
     state: .running,
-    ownership: .providerManaged,
+    ownership: ownership,
     lastInferenceCheck: verified
   )
 }
@@ -93,6 +96,25 @@ func openClawRequiresVerifiedRuntime() throws {
   let model = installation()
   #expect(throws: ClientAdapterError.verifiedRuntimeRequired) {
     try adapter.makeHandoffPlan(for: model, context: ClientHandoffContext())
+  }
+}
+
+@Test("OpenClaw rejects provider-managed Ollama evidence as unauthenticated")
+func openClawRejectsProviderManagedEvidence() throws {
+  let now = Date(timeIntervalSince1970: 100)
+  let adapter = OpenClawClientAdapter(
+    nodeURL: URL(filePath: "/usr/bin/true"),
+    scriptURL: URL(filePath: "/usr/bin/true"),
+    environment: [:]
+  )
+  #expect(throws: ClientAdapterError.verifiedRuntimeRequired) {
+    try adapter.makeHandoffPlan(
+      for: installation(),
+      context: ClientHandoffContext(
+        now: now,
+        runtimeInstances: [verifiedOllamaRuntime(at: now, ownership: .providerManaged)]
+      )
+    )
   }
 }
 

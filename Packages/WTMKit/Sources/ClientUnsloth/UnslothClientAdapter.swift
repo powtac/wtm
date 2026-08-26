@@ -95,7 +95,8 @@ public struct UnslothClientAdapter: ClientAdapter {
         "--no-cloudflare", "--disable-tools",
       ],
       environment: environment,
-      approvedIdentity: python.identity
+      approvedIdentity: python.identity,
+      protectedResourceIdentities: [script.identity]
     )
     return ClientHandoffPlan(
       adapterID: id,

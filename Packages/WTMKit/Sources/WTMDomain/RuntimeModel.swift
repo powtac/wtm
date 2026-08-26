@@ -40,6 +40,7 @@ public enum ModelValidation: String, Codable, CaseIterable, Sendable {
   case blocked
   case staticCompatible
   case runtimeReachable
+  case runtimeReachableUnauthenticated
   case inferenceVerified
   case inferenceFailed
 }

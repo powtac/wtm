@@ -8,6 +8,7 @@ public enum RuntimeBrokerError: Error, Equatable, Sendable {
   case installationMismatch
   case invalidEndpoint
   case executableIdentityChanged
+  case endpointOwnershipMismatch
   case processExited(Int32)
   case healthCheckTimedOut
   case healthCheckFailed(String)
@@ -50,18 +51,21 @@ public actor RuntimeBroker {
   private let launcher: any RuntimeProcessLaunching
   private let endpointPolicy: LoopbackEndpointPolicy
   private let inspector: ExecutableInspector
+  private let endpointCorrelator: any RuntimeEndpointCorrelating
   private var sessions: [RuntimeInstance.ID: Session] = [:]
 
   public init(
     registry: RuntimeAdapterRegistry,
     launcher: any RuntimeProcessLaunching = FoundationProcessLauncher(),
     endpointPolicy: LoopbackEndpointPolicy = LoopbackEndpointPolicy(),
-    inspector: ExecutableInspector = ExecutableInspector()
+    inspector: ExecutableInspector = ExecutableInspector(),
+    endpointCorrelator: any RuntimeEndpointCorrelating = DarwinProcessEndpointCorrelator()
   ) {
     self.registry = registry
     self.launcher = launcher
     self.endpointPolicy = endpointPolicy
     self.inspector = inspector
+    self.endpointCorrelator = endpointCorrelator
   }
 
   public func start(
@@ -140,6 +144,7 @@ public actor RuntimeBroker {
         timeout: timeout,
         pollInterval: pollInterval
       )
+      try await validateOwnedRuntimeEndpoint(sessionID: id)
       var inference: RuntimeProbeResult?
       if verifyInference {
         inference = await adapter.inferenceCheck(
@@ -147,12 +152,18 @@ public actor RuntimeBroker {
           installation: installation,
           prompt: prompt
         )
+        try await validateOwnedRuntimeEndpoint(sessionID: id)
       }
       let validationValue: ModelValidation
       if let inference {
-        validationValue = inference.succeeded ? .inferenceVerified : .inferenceFailed
+        validationValue =
+          inference.succeeded
+          ? (ownership == .startedByWTM ? .inferenceVerified : .runtimeReachableUnauthenticated)
+          : .inferenceFailed
       } else {
-        validationValue = .runtimeReachable
+        validationValue =
+          ownership == .startedByWTM
+          ? .runtimeReachable : .runtimeReachableUnauthenticated
       }
       let checkedAt = inference?.checkedAt ?? health.checkedAt
       let runningInstance = RuntimeInstance(
@@ -165,7 +176,8 @@ public actor RuntimeBroker {
         startedAt: startingInstance.startedAt,
         ownership: ownership,
         lastHealthCheck: RuntimeObservation(
-          value: .runtimeReachable,
+          value: ownership == .startedByWTM
+            ? .runtimeReachable : .runtimeReachableUnauthenticated,
           adapterID: adapter.id,
           adapterVersion: adapter.version,
           checkedAt: health.checkedAt,
@@ -290,6 +302,23 @@ public actor RuntimeBroker {
       let process = session.process
     else { return }
     await process.terminate()
+  }
+
+  private func validateOwnedRuntimeEndpoint(sessionID: RuntimeInstance.ID) async throws {
+    guard let session = sessions[sessionID], let process = session.process else { return }
+    guard await process.isRunning() else {
+      throw RuntimeBrokerError.processExited(await process.waitForExit())
+    }
+    let processIdentifier = await process.processIdentifier()
+    guard
+      await endpointCorrelator.ownsListener(
+        processIdentifier: processIdentifier,
+        endpoint: session.instance.endpoint
+      )
+    else { throw RuntimeBrokerError.endpointOwnershipMismatch }
+    guard await process.isRunning() else {
+      throw RuntimeBrokerError.processExited(await process.waitForExit())
+    }
   }
 
   private func replacingState(of instance: RuntimeInstance, with state: RuntimeState)

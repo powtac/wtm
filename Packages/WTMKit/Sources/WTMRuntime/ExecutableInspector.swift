@@ -11,6 +11,7 @@ public enum ExecutableInspectionError: Error, Equatable, Sendable {
   case notExecutable
   case unsafeOwner
   case unsafePermissions
+  case unsafeAncestor
 }
 
 public struct ExecutableInspection: Hashable, Sendable {
@@ -69,6 +70,7 @@ public struct ExecutableInspector: Sendable {
     guard (targetInformation.st_mode & (S_IWGRP | S_IWOTH)) == 0 else {
       throw ExecutableInspectionError.unsafePermissions
     }
+    try validateAncestors(of: canonicalURL)
 
     let identity = ExecutableIdentity(
       requestedURL: requestedURL.standardizedFileURL,
@@ -95,6 +97,22 @@ public struct ExecutableInspector: Sendable {
       signingIdentifier: signing.identifier,
       version: bundleVersion(for: canonicalURL)
     )
+  }
+
+  private func validateAncestors(of url: URL) throws {
+    var directory = url.deletingLastPathComponent().standardizedFileURL
+    while true {
+      var information = stat()
+      guard lstat(directory.path, &information) == 0,
+        (information.st_mode & S_IFMT) == S_IFDIR
+      else { throw ExecutableInspectionError.unsafeAncestor }
+      guard information.st_uid == getuid() || information.st_uid == 0,
+        (information.st_mode & (S_IWGRP | S_IWOTH)) == 0
+      else { throw ExecutableInspectionError.unsafeAncestor }
+      let parent = directory.deletingLastPathComponent().standardizedFileURL
+      if parent == directory { return }
+      directory = parent
+    }
   }
 
   private func signingEvidence(for executableURL: URL) -> (

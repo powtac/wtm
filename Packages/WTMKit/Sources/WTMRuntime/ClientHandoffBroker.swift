@@ -98,7 +98,15 @@ public actor ClientHandoffBroker {
         sensitiveValues: [installation.rootURL.path]
       )
     )
-    let process = try launcher.launch(handoff.invocation) { stream, text in
+    let securedInvocation = RuntimeExecutableInvocation(
+      executableURL: handoff.invocation.executableURL,
+      arguments: handoff.invocation.arguments,
+      currentDirectoryURL: handoff.invocation.currentDirectoryURL,
+      environment: handoff.invocation.environment,
+      approvedIdentity: handoff.invocation.approvedIdentity,
+      protectedResourceIdentities: handoff.protectedResourceIdentities
+    )
+    let process = try launcher.launch(securedInvocation) { stream, text in
       logs.append(text, stream: stream)
     }
     let sessionID = UUID()

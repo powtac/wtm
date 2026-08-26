@@ -48,7 +48,7 @@ public struct OllamaRuntimeAdapter: RuntimeAdapter {
         let runningNames = try await transport.runningModelNames()
         if let modelName = modelName(for: installation), contains(modelName, in: runningNames) {
           runtimeValue = .running
-          validationValue = .runtimeReachable
+          validationValue = .runtimeReachableUnauthenticated
         }
       } catch {
         compatibilityValue = .runtimeUnavailable
@@ -69,7 +69,7 @@ public struct OllamaRuntimeAdapter: RuntimeAdapter {
       validation: observation(
         validationValue,
         at: checkedAt,
-        evidence: "Static format plus Ollama API status"
+        evidence: "Unauthenticated Ollama loopback API status"
       ),
       runtime: observation(
         runtimeValue,

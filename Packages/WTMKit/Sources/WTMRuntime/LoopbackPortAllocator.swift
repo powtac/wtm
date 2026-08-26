@@ -11,6 +11,8 @@ public enum LoopbackPortAllocatorError: Error, Equatable, Sendable {
 public struct LoopbackPortAllocator: Sendable {
   public init() {}
 
+  /// Returns a port that was free at probe time. It is not a reservation.
+  /// RuntimeBroker separately proves that the launched PID owns the listener.
   public func availablePort(preferred: UInt16? = nil) throws -> UInt16 {
     let descriptor = socket(AF_INET, SOCK_STREAM, 0)
     guard descriptor >= 0 else {

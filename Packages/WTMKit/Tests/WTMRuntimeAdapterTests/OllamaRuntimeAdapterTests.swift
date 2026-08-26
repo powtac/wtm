@@ -72,7 +72,7 @@ func ollamaReadinessUsesSeparateAxes() async {
   )
 
   #expect(readiness.compatibility.value == .compatible)
-  #expect(readiness.validation.value == .runtimeReachable)
+  #expect(readiness.validation.value == .runtimeReachableUnauthenticated)
   #expect(readiness.runtime.value == .running)
   #expect(readiness.validation.value != .inferenceVerified)
 }

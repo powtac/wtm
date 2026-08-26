@@ -3,13 +3,35 @@ import WTMAdapterContracts
 import WTMDomain
 import WTMSecurity
 
+public struct ManualScanBudget: Sendable {
+  public let maximumEntryCount: Int
+  public let maximumSafetensorDirectoryCount: Int
+  public let maximumEntriesPerSafetensorDirectory: Int
+  public let maximumDuration: Duration
+
+  public init(
+    maximumEntryCount: Int = 250_000,
+    maximumSafetensorDirectoryCount: Int = 10_000,
+    maximumEntriesPerSafetensorDirectory: Int = 10_000,
+    maximumDuration: Duration = .seconds(300)
+  ) {
+    self.maximumEntryCount = max(maximumEntryCount, 1)
+    self.maximumSafetensorDirectoryCount = max(maximumSafetensorDirectoryCount, 1)
+    self.maximumEntriesPerSafetensorDirectory = max(maximumEntriesPerSafetensorDirectory, 1)
+    self.maximumDuration = maximumDuration
+  }
+}
+
 public struct ManualFolderAdapter: StorageProviderAdapter {
   private static let streamBatchSize = 25
 
   public let id = ProviderID.manual
   public let displayName = "Manual Folder"
+  private let budget: ManualScanBudget
 
-  public init() {}
+  public init(budget: ManualScanBudget = ManualScanBudget()) {
+    self.budget = budget
+  }
 
   public func scan(source: ScanSource) async -> AdapterScanResult {
     var installations: [ModelInstallation] = []
@@ -25,8 +47,11 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
     AsyncStream { continuation in
       let task = Task {
         var pendingInstallations: [ModelInstallation] = []
-        var regularFilesByDirectory: [URL: [FileSystemEntry]] = [:]
-        var safetensorFilesByDirectory: [URL: [FileSystemEntry]] = [:]
+        var safetensorDirectories: Set<URL> = []
+        var scannedEntryCount = 0
+        let clock = ContinuousClock()
+        let deadline = clock.now.advanced(by: budget.maximumDuration)
+        var scanWasTruncated = false
 
         func yieldPendingIfNeeded(force: Bool = false) {
           guard !pendingInstallations.isEmpty else { return }
@@ -36,18 +61,21 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
         }
 
         do {
-          for try await entry in ReadOnlyDirectoryWalker().entryStream(
+          try ReadOnlyDirectoryWalker().visitEntries(
             under: source.rootURL,
             approvedBy: source
-          ) {
+          ) { entry in
             guard !Task.isCancelled else {
-              continuation.finish()
-              return
+              return false
             }
-            guard entry.isRegularFile || entry.isSymbolicLink else { continue }
+            scannedEntryCount += 1
+            if scannedEntryCount > budget.maximumEntryCount || clock.now >= deadline {
+              scanWasTruncated = true
+              return false
+            }
+            guard entry.isRegularFile || entry.isSymbolicLink else { return true }
 
             let directory = entry.url.deletingLastPathComponent()
-            regularFilesByDirectory[directory, default: []].append(entry)
             switch entry.url.pathExtension.lowercased() {
             case "gguf":
               if let installation = installation(forGGUF: entry, source: source) {
@@ -60,21 +88,58 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
                 yieldPendingIfNeeded()
               }
             case "safetensors":
-              safetensorFilesByDirectory[directory, default: []].append(entry)
+              if safetensorDirectories.count >= budget.maximumSafetensorDirectoryCount,
+                !safetensorDirectories.contains(directory)
+              {
+                scanWasTruncated = true
+                return false
+              }
+              safetensorDirectories.insert(directory)
             default:
               break
             }
+            return true
+          }
+
+          guard !Task.isCancelled else {
+            continuation.finish()
+            return
           }
 
           yieldPendingIfNeeded(force: true)
-          for directory in safetensorFilesByDirectory.keys.sorted(by: { $0.path < $1.path }) {
+          if scanWasTruncated {
+            continuation.yield(
+              AdapterScanBatch(installations: [], issues: [scanBudgetIssue(source: source)])
+            )
+            continuation.finish()
+            return
+          }
+          for directory in safetensorDirectories.sorted(by: { $0.path < $1.path }) {
             guard !Task.isCancelled else {
               continuation.finish()
               return
             }
-            guard
-              let safetensorFiles = safetensorFilesByDirectory[directory],
-              let allFiles = regularFilesByDirectory[directory],
+            var allFiles: [FileSystemEntry] = []
+            try ReadOnlyDirectoryWalker().visitEntries(
+              under: directory,
+              approvedBy: source,
+              descendIntoSubdirectories: false
+            ) { entry in
+              guard entry.isRegularFile || entry.isSymbolicLink else { return true }
+              if allFiles.count >= budget.maximumEntriesPerSafetensorDirectory
+                || clock.now >= deadline
+              {
+                scanWasTruncated = true
+                return false
+              }
+              allFiles.append(entry)
+              return true
+            }
+            if scanWasTruncated { break }
+            let safetensorFiles = allFiles.filter {
+              $0.url.pathExtension.lowercased() == "safetensors"
+            }
+            guard !safetensorFiles.isEmpty,
               let installation = installation(
                 forSafetensors: safetensorFiles,
                 directory: directory,
@@ -86,6 +151,11 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
             yieldPendingIfNeeded()
           }
           yieldPendingIfNeeded(force: true)
+          if scanWasTruncated {
+            continuation.yield(
+              AdapterScanBatch(installations: [], issues: [scanBudgetIssue(source: source)])
+            )
+          }
         } catch {
           yieldPendingIfNeeded(force: true)
           continuation.yield(
@@ -264,6 +334,18 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       sourceID: source.id,
       summary: "The selected folder could not be inventoried.",
       affectedURL: url
+    )
+  }
+
+  private func scanBudgetIssue(source: ScanSource) -> InventoryIssue {
+    InventoryIssue(
+      id: "\(source.id):MANUAL_SCAN_TRUNCATED",
+      code: "MANUAL_SCAN_TRUNCATED",
+      severity: .warning,
+      sourceID: source.id,
+      summary:
+        "The scan reached its safety budget. Results are incomplete; narrow the source folder.",
+      affectedURL: source.rootURL
     )
   }
 }

@@ -99,7 +99,8 @@ public struct OpenClawClientAdapter: ClientAdapter {
         "--prompt", "Reply with exactly: pong", "--json",
       ],
       environment: environment,
-      approvedIdentity: node.identity
+      approvedIdentity: node.identity,
+      protectedResourceIdentities: [script.identity]
     )
     return ClientHandoffPlan(
       adapterID: id,
@@ -124,6 +125,7 @@ public struct OpenClawClientAdapter: ClientAdapter {
     context.runtimeInstances.first { runtime in
       runtime.installationID == installation.id
         && runtime.adapterID == .ollama
+        && runtime.ownership == .startedByWTM
         && runtime.state == .running
         && runtime.lastInferenceCheck?.value == .inferenceVerified
         && runtime.lastInferenceCheck?.isExpired(at: context.now) == false

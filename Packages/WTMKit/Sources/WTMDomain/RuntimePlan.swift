@@ -28,19 +28,22 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
   public let currentDirectoryURL: URL?
   public let environment: [String: String]
   public let approvedIdentity: ExecutableIdentity
+  public let protectedResourceIdentities: [ExecutableIdentity]
 
   public init(
     executableURL: URL,
     arguments: [String],
     currentDirectoryURL: URL? = nil,
     environment: [String: String] = [:],
-    approvedIdentity: ExecutableIdentity
+    approvedIdentity: ExecutableIdentity,
+    protectedResourceIdentities: [ExecutableIdentity] = []
   ) {
     self.executableURL = executableURL
     self.arguments = arguments
     self.currentDirectoryURL = currentDirectoryURL
     self.environment = environment
     self.approvedIdentity = approvedIdentity
+    self.protectedResourceIdentities = protectedResourceIdentities
   }
 }
 

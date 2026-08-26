@@ -131,6 +131,27 @@ func manualFixtureIsInventoried() async throws {
   #expect(result.installations.first?.variant.quantization == "Q4_K_M")
 }
 
+@Test("Manual scan stops visibly at its retained-entry budget")
+func manualScanBudgetIsVisible() async throws {
+  let root = FileManager.default.temporaryDirectory.appending(
+    path: "wtm-manual-budget-\(UUID().uuidString)", directoryHint: .isDirectory
+  )
+  defer { try? FileManager.default.removeItem(at: root) }
+  try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
+  for index in 0..<4 {
+    try Data("gguf".utf8).write(to: root.appending(path: "model-\(index).gguf"))
+  }
+  let source = allowedSource(id: "manual-budget", provider: .manual, root: root)
+  let adapter = ManualFolderAdapter(
+    budget: ManualScanBudget(maximumEntryCount: 2, maximumDuration: .seconds(10))
+  )
+
+  let result = await adapter.scan(source: source)
+
+  #expect(result.installations.count <= 2)
+  #expect(result.issues.contains { $0.code == "MANUAL_SCAN_TRUNCATED" })
+}
+
 @Test("MLX-LM structures require config, weights, tokenizer, and explicit MLX quantization")
 func mlxFixtureIsInventoried() async throws {
   let root = try #require(fixtureRoot("mlx"))

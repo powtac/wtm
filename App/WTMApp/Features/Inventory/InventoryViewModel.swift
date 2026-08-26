@@ -1234,9 +1234,17 @@ final class InventoryViewModel {
     let checkedAt = snapshot.inference?.checkedAt ?? snapshot.health?.checkedAt ?? .now
     let validation: ModelValidation
     if let inference = snapshot.inference {
-      validation = inference.succeeded ? .inferenceVerified : .inferenceFailed
+      validation =
+        inference.succeeded
+        ? (snapshot.instance.ownership == .startedByWTM
+          ? .inferenceVerified : .runtimeReachableUnauthenticated)
+        : .inferenceFailed
     } else {
-      validation = snapshot.health?.succeeded == true ? .runtimeReachable : .blocked
+      validation =
+        snapshot.health?.succeeded == true
+        ? (snapshot.instance.ownership == .startedByWTM
+          ? .runtimeReachable : .runtimeReachableUnauthenticated)
+        : .blocked
     }
     func observation<Value: Hashable & Codable & Sendable>(
       _ value: Value,

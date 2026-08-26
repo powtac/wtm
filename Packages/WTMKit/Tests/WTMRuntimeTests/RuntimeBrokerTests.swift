@@ -41,6 +41,12 @@ private final class FakeProcessLauncher: RuntimeProcessLaunching, @unchecked Sen
   }
 }
 
+private struct FakeEndpointCorrelator: RuntimeEndpointCorrelating {
+  let result: Bool
+
+  func ownsListener(processIdentifier: Int32, endpoint: URL) async -> Bool { result }
+}
+
 private struct FakeRuntimeAdapter: RuntimeAdapter {
   let id: RuntimeAdapterID
   let displayName = "Fake Runtime"
@@ -130,7 +136,11 @@ func ownedProcessLifecycle() async throws {
   )
   let launcher = FakeProcessLauncher()
   let registry = try RuntimeAdapterRegistry(adapters: [adapter])
-  let broker = RuntimeBroker(registry: registry, launcher: launcher)
+  let broker = RuntimeBroker(
+    registry: registry,
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
+  )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
 
@@ -154,6 +164,34 @@ func ownedProcessLifecycle() async throws {
   #expect(await launcher.handle.wasTerminated())
 }
 
+@Test("Healthy spoof listener cannot verify a WTM-owned runtime")
+func listenerMustBelongToOwnedProcess() async throws {
+  let adapter = FakeRuntimeAdapter(
+    id: .llamaCpp,
+    healthSucceeds: true,
+    inferenceSucceeds: true
+  )
+  let launcher = FakeProcessLauncher()
+  let broker = RuntimeBroker(
+    registry: try RuntimeAdapterRegistry(adapters: [adapter]),
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: false)
+  )
+  let installation = runtimeInstallation()
+  let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
+
+  await #expect(throws: RuntimeBrokerError.endpointOwnershipMismatch) {
+    _ = try await broker.start(
+      plan: executablePlan(installation: installation, identity: identity),
+      installation: installation,
+      verifyInference: true,
+      timeout: .seconds(1),
+      pollInterval: .milliseconds(1)
+    )
+  }
+  #expect(await launcher.handle.wasTerminated())
+}
+
 @Test("Termination cleanup stops every WTM-owned process")
 func terminationCleanupStopsOwnedProcesses() async throws {
   let adapter = FakeRuntimeAdapter(
@@ -164,7 +202,8 @@ func terminationCleanupStopsOwnedProcesses() async throws {
   let launcher = FakeProcessLauncher()
   let broker = RuntimeBroker(
     registry: try RuntimeAdapterRegistry(adapters: [adapter]),
-    launcher: launcher
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
   )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
@@ -193,7 +232,8 @@ func inferenceFailureDoesNotEraseHealthEvidence() async throws {
   let launcher = FakeProcessLauncher()
   let broker = RuntimeBroker(
     registry: try RuntimeAdapterRegistry(adapters: [adapter]),
-    launcher: launcher
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
   )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
@@ -205,7 +245,6 @@ func inferenceFailureDoesNotEraseHealthEvidence() async throws {
     timeout: .seconds(1),
     pollInterval: .milliseconds(1)
   )
-
   #expect(started.instance.state == .running)
   #expect(started.instance.lastHealthCheck?.value == .runtimeReachable)
   #expect(started.instance.lastInferenceCheck?.value == .inferenceFailed)
@@ -243,6 +282,7 @@ func providerManagedStopIsBlocked() async throws {
     timeout: .seconds(1),
     pollInterval: .milliseconds(1)
   )
+  #expect(started.instance.lastHealthCheck?.value == .runtimeReachableUnauthenticated)
   await #expect(throws: RuntimeBrokerError.stopNotAllowed) {
     _ = try await broker.stop(started.instance.id)
   }
@@ -267,7 +307,8 @@ func failedHealthCheckCleansUpOwnedProcess() async throws {
   let launcher = FakeProcessLauncher()
   let broker = RuntimeBroker(
     registry: try RuntimeAdapterRegistry(adapters: [adapter]),
-    launcher: launcher
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
   )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
@@ -295,7 +336,8 @@ func cancellationCleansUpOwnedProcess() async throws {
   let launcher = FakeProcessLauncher()
   let broker = RuntimeBroker(
     registry: try RuntimeAdapterRegistry(adapters: [adapter]),
-    launcher: launcher
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
   )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity
@@ -326,7 +368,8 @@ func stopTimeoutLeavesFailedOwnedSessionVisible() async throws {
   let launcher = FakeProcessLauncher(ignoresTermination: true)
   let broker = RuntimeBroker(
     registry: try RuntimeAdapterRegistry(adapters: [adapter]),
-    launcher: launcher
+    launcher: launcher,
+    endpointCorrelator: FakeEndpointCorrelator(result: true)
   )
   let installation = runtimeInstallation()
   let identity = try ExecutableInspector().inspect(URL(filePath: "/usr/bin/true")).identity

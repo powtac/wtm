@@ -32,24 +32,57 @@ public enum DirectoryWalkerError: Error, Equatable, Sendable {
 public struct ReadOnlyDirectoryWalker: Sendable {
   public init() {}
 
-  public func entries(under rootURL: URL, approvedBy source: ScanSource) throws
+  public func entries(
+    under rootURL: URL,
+    approvedBy source: ScanSource,
+    descendIntoSubdirectories: Bool = true
+  ) throws
     -> [FileSystemEntry]
   {
     var entries: [FileSystemEntry] = []
-    try enumerate(under: rootURL, approvedBy: source) { entries.append($0) }
+    try visitEntries(
+      under: rootURL,
+      approvedBy: source,
+      descendIntoSubdirectories: descendIntoSubdirectories
+    ) {
+      entries.append($0)
+      return true
+    }
     return entries
+  }
+
+  /// Visits entries synchronously and stops when the visitor returns false.
+  /// Use this for security budgets: unlike AsyncStream it cannot buffer ahead.
+  public func visitEntries(
+    under rootURL: URL,
+    approvedBy source: ScanSource,
+    descendIntoSubdirectories: Bool = true,
+    visitor: (FileSystemEntry) throws -> Bool
+  ) throws {
+    try enumerate(
+      under: rootURL,
+      approvedBy: source,
+      descendIntoSubdirectories: descendIntoSubdirectories,
+      visitor: visitor
+    )
   }
 
   /// Produces validated entries as traversal advances so adapters can publish bounded results.
   public func entryStream(
     under rootURL: URL,
-    approvedBy source: ScanSource
+    approvedBy source: ScanSource,
+    descendIntoSubdirectories: Bool = true
   ) -> AsyncThrowingStream<FileSystemEntry, Error> {
     AsyncThrowingStream { continuation in
       let task = Task {
         do {
-          try enumerate(under: rootURL, approvedBy: source) { entry in
+          try visitEntries(
+            under: rootURL,
+            approvedBy: source,
+            descendIntoSubdirectories: descendIntoSubdirectories
+          ) { entry in
             continuation.yield(entry)
+            return true
           }
           continuation.finish()
         } catch {
@@ -63,7 +96,8 @@ public struct ReadOnlyDirectoryWalker: Sendable {
   private func enumerate(
     under rootURL: URL,
     approvedBy source: ScanSource,
-    yield: (FileSystemEntry) -> Void
+    descendIntoSubdirectories: Bool,
+    visitor: (FileSystemEntry) throws -> Bool
   ) throws {
     guard let rootIdentity = source.rootIdentity else {
       throw ScopedPathError.sourceIdentityUnavailable
@@ -84,11 +118,13 @@ public struct ReadOnlyDirectoryWalker: Sendable {
       .isRegularFileKey,
       .isSymbolicLinkKey,
     ]
+    var options: FileManager.DirectoryEnumerationOptions = [.skipsPackageDescendants]
+    if !descendIntoSubdirectories { options.insert(.skipsSubdirectoryDescendants) }
     guard
       let enumerator = FileManager.default.enumerator(
         at: rootURL,
         includingPropertiesForKeys: keys,
-        options: [.skipsPackageDescendants],
+        options: options,
         errorHandler: { _, _ in true }
       )
     else {
@@ -118,7 +154,7 @@ public struct ReadOnlyDirectoryWalker: Sendable {
       }
       try policy.revalidateRoot()
 
-      yield(
+      let shouldContinue = try visitor(
         FileSystemEntry(
           url: url,
           resolvedURL: resolvedURL,
@@ -127,6 +163,7 @@ public struct ReadOnlyDirectoryWalker: Sendable {
           isSymbolicLink: isSymbolicLink
         )
       )
+      if !shouldContinue { break }
     }
     try policy.revalidateRoot()
   }
