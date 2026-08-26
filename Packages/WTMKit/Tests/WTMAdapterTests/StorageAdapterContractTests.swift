@@ -312,7 +312,7 @@ private func fixtureRoot(_ name: String) -> URL? {
 }
 
 private func allowedSource(id: String, provider: ProviderID, root: URL) -> ScanSource {
-  ScanSource(
+  let source = ScanSource(
     id: id,
     displayName: id,
     providerID: provider,
@@ -320,6 +320,10 @@ private func allowedSource(id: String, provider: ProviderID, root: URL) -> ScanS
     accessState: .allowed,
     isEnabled: true
   )
+  guard let approved = try? SourceApprovalPolicy().approve(source) else {
+    preconditionFailure("Fixture source must be approvable")
+  }
+  return approved
 }
 
 private struct TemporaryMLXFixture {

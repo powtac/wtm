@@ -600,11 +600,15 @@ private struct OllamaActionFixture {
 }
 
 private func actionSource(id: String, providerID: ProviderID, rootURL: URL) -> ScanSource {
-  ScanSource(
+  guard let identity = try? SourceRootPolicy().capture(rootURL: rootURL) else {
+    preconditionFailure("Fixture source must be approvable")
+  }
+  return ScanSource(
     id: id,
     displayName: id,
     providerID: providerID,
     rootURL: rootURL,
+    rootIdentity: identity,
     accessState: .allowed,
     isEnabled: true
   )

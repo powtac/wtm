@@ -187,19 +187,18 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
   private func symbolicLinkGraph(sources: [ScanSource]) throws -> [String: [URL]] {
     var graph: [String: [URL]] = [:]
     for source in sources where source.providerID == id && source.isEnabled {
-      guard
-        let enumerator = FileManager.default.enumerator(
-          at: source.rootURL,
-          includingPropertiesForKeys: [.isSymbolicLinkKey],
-          options: [.skipsPackageDescendants],
-          errorHandler: { _, _ in true }
-        )
-      else { continue }
-      for case let url as URL in enumerator {
-        guard url.path.contains("/snapshots/"),
-          let destination = try resolvedSymbolicLinkDestination(for: url)
+      guard source.accessState == .allowed, source.rootIdentity != nil else {
+        throw StorageActionAdapterError.sourceUnavailable(source.id)
+      }
+      let entries = try ReadOnlyDirectoryWalker().entries(
+        under: source.rootURL,
+        approvedBy: source
+      )
+      for entry in entries where entry.isSymbolicLink {
+        guard entry.url.path.contains("/snapshots/"),
+          let destination = try resolvedSymbolicLinkDestination(for: entry.url)
         else { continue }
-        graph[destination.resolvingSymlinksInPath().path, default: []].append(url)
+        graph[destination.resolvingSymlinksInPath().path, default: []].append(entry.url)
       }
     }
     return graph
@@ -256,8 +255,16 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
   ) throws {
     let path = url.standardizedFileURL.path
     let identity: DeletionFileIdentity
+    guard let rootIdentity = source.rootIdentity else {
+      throw StorageActionAdapterError.fileIdentityUnavailable
+    }
     do {
-      identity = try targetPolicy.captureIdentity(for: url, under: source.rootURL)
+      identity = try targetPolicy.captureIdentity(
+        for: url,
+        under: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        expectedRootIdentity: rootIdentity
+      )
     } catch {
       throw StorageActionAdapterError.fileIdentityUnavailable
     }
@@ -271,6 +278,7 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
       url: url,
       sourceID: source.id,
       sourceRootURL: source.rootURL,
+      sourceRootIdentity: rootIdentity,
       identity: identity,
       allocatedByteCount: combinedByteCount,
       displayName: url.lastPathComponent

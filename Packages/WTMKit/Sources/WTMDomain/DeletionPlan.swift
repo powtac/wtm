@@ -64,6 +64,7 @@ public struct DeletionFileTarget: Hashable, Codable, Sendable {
   public let url: URL
   public let sourceID: ScanSource.ID
   public let sourceRootURL: URL
+  public let sourceRootIdentity: SourceRootIdentity
   public let identity: DeletionFileIdentity
   public let allocatedByteCount: Int64
   public let displayName: String
@@ -72,6 +73,7 @@ public struct DeletionFileTarget: Hashable, Codable, Sendable {
     url: URL,
     sourceID: ScanSource.ID,
     sourceRootURL: URL,
+    sourceRootIdentity: SourceRootIdentity,
     identity: DeletionFileIdentity,
     allocatedByteCount: Int64,
     displayName: String
@@ -79,6 +81,7 @@ public struct DeletionFileTarget: Hashable, Codable, Sendable {
     self.url = url
     self.sourceID = sourceID
     self.sourceRootURL = sourceRootURL
+    self.sourceRootIdentity = sourceRootIdentity
     self.identity = identity
     self.allocatedByteCount = allocatedByteCount
     self.displayName = displayName
@@ -215,6 +218,7 @@ public struct DeletionPlan: Identifiable, Hashable, Codable, Sendable {
   public let expiresAt: Date
   public let providerPlans: [ProviderDeletionPlan]
   public let conflicts: [DeletionConflict]
+  public let sourceApprovals: [DeletionSourceApproval]
 
   public init(
     id: UUID,
@@ -222,7 +226,8 @@ public struct DeletionPlan: Identifiable, Hashable, Codable, Sendable {
     createdAt: Date,
     expiresAt: Date,
     providerPlans: [ProviderDeletionPlan],
-    conflicts: [DeletionConflict]
+    conflicts: [DeletionConflict],
+    sourceApprovals: [DeletionSourceApproval] = []
   ) {
     self.id = id
     self.generationID = generationID
@@ -230,6 +235,7 @@ public struct DeletionPlan: Identifiable, Hashable, Codable, Sendable {
     self.expiresAt = expiresAt
     self.providerPlans = providerPlans.sorted { $0.providerID.rawValue < $1.providerID.rawValue }
     self.conflicts = conflicts.sorted { $0.id < $1.id }
+    self.sourceApprovals = sourceApprovals.sorted { $0.sourceID < $1.sourceID }
   }
 
   public var models: [DeletionModelSummary] { providerPlans.flatMap(\.models) }
@@ -245,6 +251,25 @@ public struct DeletionPlan: Identifiable, Hashable, Codable, Sendable {
   }
   public var requiresIrreversibleConfirmation: Bool {
     operations.contains { $0.reversibility == .irreversible }
+  }
+}
+
+public struct DeletionSourceApproval: Hashable, Codable, Sendable {
+  public let sourceID: ScanSource.ID
+  public let rootURL: URL
+  public let volumeIdentity: VolumeIdentity?
+  public let rootIdentity: SourceRootIdentity
+
+  public init(
+    sourceID: ScanSource.ID,
+    rootURL: URL,
+    volumeIdentity: VolumeIdentity?,
+    rootIdentity: SourceRootIdentity
+  ) {
+    self.sourceID = sourceID
+    self.rootURL = rootURL
+    self.volumeIdentity = volumeIdentity
+    self.rootIdentity = rootIdentity
   }
 }
 

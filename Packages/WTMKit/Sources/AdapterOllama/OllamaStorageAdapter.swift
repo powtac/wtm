@@ -12,7 +12,7 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
   public func scan(source: ScanSource) async -> AdapterScanResult {
     let entries: [FileSystemEntry]
     do {
-      entries = try ReadOnlyDirectoryWalker().entries(under: source.rootURL)
+      entries = try ReadOnlyDirectoryWalker().entries(under: source.rootURL, approvedBy: source)
     } catch {
       return AdapterScanResult(
         source: source,
@@ -60,7 +60,7 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
 
       var isIncomplete = false
       for descriptor in parsed.manifest.descriptors {
-        guard let blobURL = blobURL(for: descriptor.digest, root: source.rootURL) else {
+        guard let blobURL = blobURL(for: descriptor.digest, source: source) else {
           isIncomplete = true
           issues.append(
             issue(source: source, code: "OLLAMA_BLOB_REFERENCE_INVALID", url: parsed.url)
@@ -102,14 +102,19 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     return AdapterScanResult(source: source, installations: installations, issues: issues)
   }
 
-  private func blobURL(for digest: String, root: URL) -> URL? {
+  private func blobURL(for digest: String, source: ScanSource) -> URL? {
     let sha256Pattern = #"^sha256:[0-9a-fA-F]{64}$"#
     guard digest.range(of: sha256Pattern, options: .regularExpression) != nil else { return nil }
     let candidate =
-      root
+      source.rootURL
       .appending(path: "blobs", directoryHint: .isDirectory)
       .appending(path: digest.replacingOccurrences(of: ":", with: "-"))
-    return try? ScopedPathPolicy(rootURL: root).validate(candidate)
+    guard let rootIdentity = source.rootIdentity else { return nil }
+    return try? ScopedPathPolicy(
+      rootURL: source.rootURL,
+      volumeIdentity: source.volumeIdentity,
+      expectedRootIdentity: rootIdentity
+    ).validate(candidate)
   }
 
   private func location(for manifestURL: URL, root: URL) -> ManifestLocation? {

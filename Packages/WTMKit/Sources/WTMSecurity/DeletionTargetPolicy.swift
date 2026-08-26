@@ -28,16 +28,54 @@ public struct DeletionTargetPolicy: Sendable {
     }
   }
 
-  public func captureIdentity(for targetURL: URL, under sourceRootURL: URL) throws
-    -> DeletionFileIdentity
-  {
+  public func captureIdentity(
+    for targetURL: URL,
+    under sourceRootURL: URL,
+    volumeIdentity: VolumeIdentity?,
+    expectedRootIdentity: SourceRootIdentity
+  ) throws -> DeletionFileIdentity {
+    let rootPolicy = SourceRootPolicy()
+    try rootPolicy.revalidate(
+      rootURL: sourceRootURL,
+      volumeIdentity: volumeIdentity,
+      expected: expectedRootIdentity
+    )
+    try validateResolvedContainment(
+      of: targetURL,
+      under: sourceRootURL,
+      volumeIdentity: volumeIdentity,
+      expectedRootIdentity: expectedRootIdentity
+    )
     try validateContainment(of: targetURL, under: sourceRootURL)
-    return try readIdentity(for: targetURL)
+    let identity = try readIdentity(for: targetURL)
+    try rootPolicy.revalidate(
+      rootURL: sourceRootURL,
+      volumeIdentity: volumeIdentity,
+      expected: expectedRootIdentity
+    )
+    return identity
   }
 
   public func revalidate(_ target: DeletionFileTarget) throws {
+    let rootPolicy = SourceRootPolicy()
+    try rootPolicy.revalidate(
+      rootURL: target.sourceRootURL,
+      volumeIdentity: nil,
+      expected: target.sourceRootIdentity
+    )
+    try validateResolvedContainment(
+      of: target.url,
+      under: target.sourceRootURL,
+      volumeIdentity: nil,
+      expectedRootIdentity: target.sourceRootIdentity
+    )
     try validateContainment(of: target.url, under: target.sourceRootURL)
     let currentIdentity = try readIdentity(for: target.url)
+    try rootPolicy.revalidate(
+      rootURL: target.sourceRootURL,
+      volumeIdentity: nil,
+      expected: target.sourceRootIdentity
+    )
     guard currentIdentity == target.identity else {
       throw DeletionTargetPolicyError.identityChanged
     }
@@ -53,6 +91,19 @@ public struct DeletionTargetPolicy: Sendable {
     guard targetPath.hasPrefix(rootPrefix) else {
       throw DeletionTargetPolicyError.targetOutsideSource
     }
+  }
+
+  private func validateResolvedContainment(
+    of targetURL: URL,
+    under sourceRootURL: URL,
+    volumeIdentity: VolumeIdentity?,
+    expectedRootIdentity: SourceRootIdentity
+  ) throws {
+    _ = try ScopedPathPolicy(
+      rootURL: sourceRootURL,
+      volumeIdentity: volumeIdentity,
+      expectedRootIdentity: expectedRootIdentity
+    ).validate(targetURL)
   }
 
   private func readIdentity(for url: URL) throws -> DeletionFileIdentity {

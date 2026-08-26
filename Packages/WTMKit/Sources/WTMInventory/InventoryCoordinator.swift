@@ -1,6 +1,7 @@
 import Foundation
 import WTMAdapterContracts
 import WTMDomain
+import WTMSecurity
 
 public struct InventorySnapshot: Sendable {
   public let installations: [ModelInstallation]
@@ -115,6 +116,14 @@ public actor InventoryCoordinator: InventoryScanning {
       )
     }
 
+    guard sourceIdentityIsValid(source) else {
+      return rejectedSource(
+        source,
+        code: "SOURCE_IDENTITY_CHANGED",
+        summary: "The approved source location changed and must be granted again."
+      )
+    }
+
     guard FileManager.default.fileExists(atPath: source.rootURL.path) else {
       return AdapterScanResult(
         source: source,
@@ -187,6 +196,16 @@ public actor InventoryCoordinator: InventoryScanning {
         )
       ]
     )
+  }
+
+  private nonisolated func sourceIdentityIsValid(_ source: ScanSource) -> Bool {
+    guard let identity = source.rootIdentity else { return false }
+    return
+      (try? SourceRootPolicy().revalidate(
+        rootURL: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        expected: identity
+      )) != nil
   }
 
   public func scan(sources: [ScanSource]) async -> InventorySnapshot {
@@ -284,6 +303,7 @@ public actor InventoryCoordinator: InventoryScanning {
   private func adapterBatchStream(for source: ScanSource) -> AsyncStream<AdapterScanBatch> {
     if source.isEnabled,
       source.accessState == .allowed || source.accessState == .limited,
+      sourceIdentityIsValid(source),
       FileManager.default.fileExists(atPath: source.rootURL.path),
       FileManager.default.isReadableFile(atPath: source.rootURL.path),
       let adapter = registry.adapter(for: source.providerID)

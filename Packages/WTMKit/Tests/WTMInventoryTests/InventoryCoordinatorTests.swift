@@ -169,13 +169,9 @@ func scanEventsAreOrderedAndBounded() async throws {
   let registry = try AdapterRegistry(adapters: [FixtureAdapter(installationCount: 3)])
   let coordinator = InventoryCoordinator(registry: registry, installationBatchSize: 2)
   let sources = ["first", "second"].map { id in
-    ScanSource(
+    allowedSource(
       id: id,
-      displayName: id,
-      providerID: FixtureAdapter.providerID,
-      rootURL: URL(filePath: "/tmp"),
-      accessState: .allowed,
-      isEnabled: true
+      providerID: FixtureAdapter.providerID
     )
   }
 
@@ -384,11 +380,16 @@ private func duplicateFixtureInstallation(
 }
 
 private func allowedSource(id: String, providerID: ProviderID) -> ScanSource {
-  ScanSource(
+  let rootURL = FileManager.default.temporaryDirectory
+  guard let identity = try? SourceRootPolicy().capture(rootURL: rootURL) else {
+    preconditionFailure("Fixture source must be approvable")
+  }
+  return ScanSource(
     id: id,
     displayName: id,
     providerID: providerID,
-    rootURL: URL(filePath: "/tmp"),
+    rootURL: rootURL,
+    rootIdentity: identity,
     accessState: .allowed,
     isEnabled: true
   )

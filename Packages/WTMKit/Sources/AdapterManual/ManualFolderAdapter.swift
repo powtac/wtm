@@ -36,7 +36,10 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
         }
 
         do {
-          for try await entry in ReadOnlyDirectoryWalker().entryStream(under: source.rootURL) {
+          for try await entry in ReadOnlyDirectoryWalker().entryStream(
+            under: source.rootURL,
+            approvedBy: source
+          ) {
             guard !Task.isCancelled else {
               continuation.finish()
               return

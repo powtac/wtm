@@ -153,6 +153,43 @@ func irreversibleOperationsRequireConfirmation() async throws {
   #expect(entries[0].includedIrreversibleOperation)
 }
 
+@Test("A replaced approved root blocks an irreversible provider mutation")
+func replacedRootBlocksProviderMutation() async throws {
+  let fixture = try ActionFixture(providerID: .ollama)
+  let backupURL = fixture.rootURL.appendingPathExtension("approved-backup")
+  let redirectedURL = fixture.rootURL.appendingPathExtension("redirected")
+  defer {
+    try? FileManager.default.removeItem(at: fixture.rootURL)
+    try? FileManager.default.moveItem(at: backupURL, to: fixture.rootURL)
+    try? FileManager.default.removeItem(at: redirectedURL)
+    fixture.cleanup()
+  }
+  let actionExecutor = try makeExecutor(
+    adapter: IrreversibleFixtureActionAdapter(),
+    trashMover: RecordingTrashMover()
+  )
+  let plan = try await actionExecutor.prepareDeletion(
+    installationIDs: [fixture.installation.id],
+    currentInventory: [fixture.installation],
+    sources: [fixture.source]
+  )
+  try FileManager.default.moveItem(at: fixture.rootURL, to: backupURL)
+  try FileManager.default.createDirectory(at: redirectedURL, withIntermediateDirectories: true)
+  try FileManager.default.createSymbolicLink(
+    at: fixture.rootURL,
+    withDestinationURL: redirectedURL
+  )
+
+  await #expect(throws: ActionExecutorError.targetRevalidationFailed) {
+    try await actionExecutor.execute(
+      plan,
+      currentInventory: [fixture.installation],
+      sources: [fixture.source],
+      confirmedIrreversible: true
+    )
+  }
+}
+
 @Test("A failed mutation stops later operations and reports a partial result")
 func partialFailureStopsLaterOperations() async throws {
   let directoryURL = temporaryDirectory()
@@ -328,9 +365,12 @@ func systemUsageCheckerIdentifiesOpenFile() async throws {
     url: fixture.fileURL,
     sourceID: fixture.source.id,
     sourceRootURL: fixture.source.rootURL,
+    sourceRootIdentity: try #require(fixture.source.rootIdentity),
     identity: try DeletionTargetPolicy().captureIdentity(
       for: fixture.fileURL,
-      under: fixture.source.rootURL
+      under: fixture.source.rootURL,
+      volumeIdentity: fixture.source.volumeIdentity,
+      expectedRootIdentity: try #require(fixture.source.rootIdentity)
     ),
     allocatedByteCount: 1,
     displayName: fixture.fileURL.lastPathComponent
@@ -392,9 +432,15 @@ private struct FixtureActionAdapter: StorageActionAdapter {
     let policy = DeletionTargetPolicy()
     let operations = try context.selectedInstallations.map { installation in
       guard let artifact = installation.artifacts.first,
-        let source = context.source(for: installation.sourceID)
+        let source = context.source(for: installation.sourceID),
+        let rootIdentity = source.rootIdentity
       else { throw StorageActionAdapterError.invalidSelection }
-      let identity = try policy.captureIdentity(for: artifact.url, under: source.rootURL)
+      let identity = try policy.captureIdentity(
+        for: artifact.url,
+        under: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        expectedRootIdentity: rootIdentity
+      )
       return DeletionOperation(
         id: "fixture:\(artifact.url.path)",
         providerID: id,
@@ -406,6 +452,7 @@ private struct FixtureActionAdapter: StorageActionAdapter {
             url: artifact.url,
             sourceID: source.id,
             sourceRootURL: source.rootURL,
+            sourceRootIdentity: rootIdentity,
             identity: identity,
             allocatedByteCount: artifact.allocatedByteCount,
             displayName: artifact.url.lastPathComponent
@@ -453,14 +500,20 @@ private struct OverlappingFixtureActionAdapter: StorageActionAdapter {
 
   func makeDeletionPlan(context: DeletionPlanningContext) throws -> ProviderDeletionPlan {
     guard let installation = context.selectedInstallations.first,
-      let source = context.source(for: installation.sourceID)
+      let source = context.source(for: installation.sourceID),
+      let rootIdentity = source.rootIdentity
     else { throw StorageActionAdapterError.invalidSelection }
     let policy = DeletionTargetPolicy()
     let parentURL = installation.rootURL
     let childURL = installation.artifacts[0].url
     let urls = [parentURL, childURL]
     let operations = try urls.map { url in
-      let identity = try policy.captureIdentity(for: url, under: source.rootURL)
+      let identity = try policy.captureIdentity(
+        for: url,
+        under: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        expectedRootIdentity: rootIdentity
+      )
       return DeletionOperation(
         id: "overlap:\(url.path)",
         providerID: id,
@@ -472,6 +525,7 @@ private struct OverlappingFixtureActionAdapter: StorageActionAdapter {
             url: url,
             sourceID: source.id,
             sourceRootURL: source.rootURL,
+            sourceRootIdentity: rootIdentity,
             identity: identity,
             allocatedByteCount: 1,
             displayName: url.lastPathComponent
@@ -569,11 +623,13 @@ private struct ActionFixture {
   ) throws {
     self.rootURL = rootURL
     self.fileURL = fileURL
+    let rootIdentity = try SourceRootPolicy().capture(rootURL: rootURL)
     source = ScanSource(
       id: "fixture-source",
       displayName: "Fixture",
       providerID: providerID,
       rootURL: rootURL,
+      rootIdentity: rootIdentity,
       accessState: .allowed,
       isEnabled: true
     )

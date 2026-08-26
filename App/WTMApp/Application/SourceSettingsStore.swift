@@ -1,5 +1,6 @@
 import Foundation
 import WTMDomain
+import WTMInventory
 
 struct SourceSettingsSnapshot: Sendable {
   let revision: UInt64
@@ -103,7 +104,7 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
 
   private func makeSource(for url: URL, providerID: ProviderID) -> ScanSource {
     let standardizedURL = url.standardizedFileURL
-    return ScanSource(
+    let source = ScanSource(
       id: "\(providerID.rawValue):\(UUID().uuidString.lowercased())",
       displayName: standardizedURL.lastPathComponent,
       providerID: providerID,
@@ -112,11 +113,21 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
       accessState: .allowed,
       isEnabled: true
     )
+    return (try? SourceApprovalPolicy().approve(source))
+      ?? ScanSource(
+        id: source.id,
+        displayName: source.displayName,
+        providerID: source.providerID,
+        rootURL: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        accessState: .stale,
+        isEnabled: true
+      )
   }
 
   func replace(_ source: ScanSource, with url: URL) -> ScanSource {
     let standardizedURL = url.standardizedFileURL
-    return ScanSource(
+    let replacement = ScanSource(
       id: source.id,
       displayName: source.displayName,
       providerID: source.providerID,
@@ -125,6 +136,16 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
       accessState: .allowed,
       isEnabled: true
     )
+    return (try? SourceApprovalPolicy().approve(replacement))
+      ?? ScanSource(
+        id: replacement.id,
+        displayName: replacement.displayName,
+        providerID: replacement.providerID,
+        rootURL: replacement.rootURL,
+        volumeIdentity: replacement.volumeIdentity,
+        accessState: .stale,
+        isEnabled: true
+      )
   }
 
   private func resolve(_ record: StoredSource) -> ScanSource {
@@ -148,6 +169,7 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
       providerID: source.providerID,
       rootURL: resolvedURL.standardizedFileURL,
       volumeIdentity: source.volumeIdentity,
+      rootIdentity: source.rootIdentity,
       accessState: isStale ? .stale : source.accessState,
       isEnabled: source.isEnabled
     )

@@ -716,15 +716,29 @@ final class InventoryViewModel {
   func setSourceEnabled(_ sourceID: ScanSource.ID, enabled: Bool) {
     guard let index = sources.firstIndex(where: { $0.id == sourceID }) else { return }
     let source = sources[index]
-    let updated = ScanSource(
+    var updated = ScanSource(
       id: source.id,
       displayName: source.displayName,
       providerID: source.providerID,
       rootURL: source.rootURL,
       volumeIdentity: source.volumeIdentity,
+      rootIdentity: enabled ? source.rootIdentity : nil,
       accessState: enabled ? .allowed : .notSetUp,
       isEnabled: enabled
     )
+    if enabled {
+      updated =
+        (try? SourceApprovalPolicy().approve(updated))
+        ?? ScanSource(
+          id: updated.id,
+          displayName: updated.displayName,
+          providerID: updated.providerID,
+          rootURL: updated.rootURL,
+          volumeIdentity: updated.volumeIdentity,
+          accessState: .stale,
+          isEnabled: true
+        )
+    }
     sources[index] = refreshedSource(updated)
     persistSourceSettings()
   }
@@ -1114,6 +1128,9 @@ final class InventoryViewModel {
       return source.replacing(accessState: .notSetUp)
     }
     guard source.accessState != .stale else { return source }
+    guard source.rootIdentity != nil else {
+      return source.replacing(accessState: .stale)
+    }
 
     var rootURL = source.rootURL.standardizedFileURL
     if let volumeIdentity = source.volumeIdentity {
@@ -1133,7 +1150,11 @@ final class InventoryViewModel {
     guard FileManager.default.isReadableFile(atPath: rootURL.path) else {
       return source.replacing(rootURL: rootURL, accessState: .denied)
     }
-    return source.replacing(rootURL: rootURL, accessState: .allowed)
+    let refreshed = source.replacing(rootURL: rootURL, accessState: .allowed)
+    guard (try? SourceApprovalPolicy().revalidate(refreshed)) != nil else {
+      return refreshed.replacing(accessState: .stale)
+    }
+    return refreshed
   }
 
   private func persistSourceSettings() {
@@ -1443,6 +1464,7 @@ private extension ScanSource {
       providerID: providerID,
       rootURL: rootURL ?? self.rootURL,
       volumeIdentity: volumeIdentity,
+      rootIdentity: rootIdentity,
       accessState: accessState,
       isEnabled: isEnabled
     )

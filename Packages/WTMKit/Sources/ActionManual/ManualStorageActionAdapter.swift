@@ -81,10 +81,15 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
           countedPhysicalIDs.insert(physicalIdentifier).inserted
           ? artifact.allocatedByteCount : 0
         let identity: DeletionFileIdentity
+        guard let rootIdentity = source.rootIdentity else {
+          throw StorageActionAdapterError.fileIdentityUnavailable
+        }
         do {
           identity = try targetPolicy.captureIdentity(
             for: artifact.url,
-            under: source.rootURL
+            under: source.rootURL,
+            volumeIdentity: source.volumeIdentity,
+            expectedRootIdentity: rootIdentity
           )
         } catch {
           throw StorageActionAdapterError.fileIdentityUnavailable
@@ -110,11 +115,15 @@ public struct ManualStorageActionAdapter: StorageActionAdapter {
       }
     }
 
-    let operations = aggregates.values.map { aggregate in
+    let operations = try aggregates.values.map { aggregate in
+      guard let rootIdentity = aggregate.source.rootIdentity else {
+        throw StorageActionAdapterError.fileIdentityUnavailable
+      }
       let target = DeletionFileTarget(
         url: aggregate.url,
         sourceID: aggregate.source.id,
         sourceRootURL: aggregate.source.rootURL,
+        sourceRootIdentity: rootIdentity,
         identity: aggregate.identity,
         allocatedByteCount: aggregate.allocatedByteCount,
         displayName: aggregate.url.lastPathComponent

@@ -62,6 +62,15 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
       let task = Task {
         let repositories: [URL]
         do {
+          guard let rootIdentity = source.rootIdentity else {
+            throw ScopedPathError.sourceIdentityUnavailable
+          }
+          let policy = ScopedPathPolicy(
+            rootURL: source.rootURL,
+            volumeIdentity: source.volumeIdentity,
+            expectedRootIdentity: rootIdentity
+          )
+          try policy.revalidateRoot()
           repositories = try FileManager.default.contentsOfDirectory(
             at: source.rootURL,
             includingPropertiesForKeys: [.isDirectoryKey],
@@ -70,6 +79,7 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
             url.lastPathComponent.hasPrefix("models--")
               && ((try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false)
           }
+          try policy.revalidateRoot()
         } catch {
           continuation.yield(
             AdapterScanBatch(
@@ -124,7 +134,7 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     source: ScanSource,
     issues: inout [InventoryIssue]
   ) throws -> [ModelInstallation] {
-    let entries = try ReadOnlyDirectoryWalker().entries(under: repositoryURL)
+    let entries = try ReadOnlyDirectoryWalker().entries(under: repositoryURL, approvedBy: source)
     let cacheRepositoryName = repositoryURL.lastPathComponent
       .dropFirst("models--".count)
       .replacingOccurrences(of: "--", with: "/")

@@ -60,6 +60,31 @@ public actor ActionExecutor {
     }
 
     let grouped = Dictionary(grouping: selected, by: \.providerID)
+    let selectedSourceIDs = Set(selected.map(\.sourceID))
+    let sourcesByID = Dictionary(uniqueKeysWithValues: sources.map { ($0.id, $0) })
+    let sourceApprovals = try selectedSourceIDs.sorted().map { sourceID in
+      guard let source = sourcesByID[sourceID], source.isEnabled,
+        source.accessState == .allowed,
+        let rootIdentity = source.rootIdentity
+      else {
+        throw ActionExecutorError.sourceUnavailable(sourceID)
+      }
+      do {
+        try SourceRootPolicy().revalidate(
+          rootURL: source.rootURL,
+          volumeIdentity: source.volumeIdentity,
+          expected: rootIdentity
+        )
+      } catch {
+        throw ActionExecutorError.sourceUnavailable(sourceID)
+      }
+      return DeletionSourceApproval(
+        sourceID: source.id,
+        rootURL: source.rootURL,
+        volumeIdentity: source.volumeIdentity,
+        rootIdentity: rootIdentity
+      )
+    }
     var providerPlans: [ProviderDeletionPlan] = []
     for providerID in grouped.keys.sorted(by: { $0.rawValue < $1.rawValue }) {
       guard let adapter = registry.adapter(for: providerID) else {
@@ -88,7 +113,8 @@ public actor ActionExecutor {
         + Self.openFileConflicts(
           in: operations,
           openPaths: openPaths
-        )
+        ),
+      sourceApprovals: sourceApprovals
     )
     activePlan = plan
     return plan
@@ -147,8 +173,10 @@ public actor ActionExecutor {
       do {
         switch operation.payload {
         case .trash(let target):
+          try targetPolicy.revalidate(target)
           try await trashMover.moveToTrash(target.url)
         case .provider(let request):
+          try revalidateSourceApprovals(for: operation, in: plan, sources: sources)
           guard let adapter = registry.adapter(for: operation.providerID) else {
             throw ActionExecutorError.adapterUnavailable(operation.providerID)
           }
@@ -219,6 +247,24 @@ public actor ActionExecutor {
     sources: [ScanSource]
   ) async throws {
     let sourcesByID = Dictionary(uniqueKeysWithValues: sources.map { ($0.id, $0) })
+    for approval in plan.sourceApprovals {
+      guard let source = sourcesByID[approval.sourceID], source.isEnabled,
+        source.accessState == .allowed,
+        source.rootURL.standardizedFileURL == approval.rootURL.standardizedFileURL,
+        source.rootIdentity == approval.rootIdentity
+      else {
+        throw ActionExecutorError.sourceUnavailable(approval.sourceID)
+      }
+      do {
+        try SourceRootPolicy().revalidate(
+          rootURL: source.rootURL,
+          volumeIdentity: source.volumeIdentity,
+          expected: approval.rootIdentity
+        )
+      } catch {
+        throw ActionExecutorError.targetRevalidationFailed
+      }
+    }
     let openPaths = await openFileUsageChecker.openTargetPaths(
       in: plan.operations.compactMap(\.fileTarget)
     )
@@ -260,6 +306,35 @@ public actor ActionExecutor {
         )
       } catch {
         throw ActionExecutorError.providerRevalidationFailed(providerPlan.providerID)
+      }
+    }
+  }
+
+  private func revalidateSourceApprovals(
+    for operation: DeletionOperation,
+    in plan: DeletionPlan,
+    sources: [ScanSource]
+  ) throws {
+    let installationIDs = Set(operation.installationIDs)
+    let sourceIDs = Set(plan.models.filter { installationIDs.contains($0.id) }.map(\.sourceID))
+    let approvals = Dictionary(uniqueKeysWithValues: plan.sourceApprovals.map { ($0.sourceID, $0) })
+    let current = Dictionary(uniqueKeysWithValues: sources.map { ($0.id, $0) })
+    for sourceID in sourceIDs {
+      guard let approval = approvals[sourceID], let source = current[sourceID],
+        source.isEnabled, source.accessState == .allowed,
+        source.rootURL.standardizedFileURL == approval.rootURL.standardizedFileURL,
+        source.rootIdentity == approval.rootIdentity
+      else {
+        throw ActionExecutorError.sourceUnavailable(sourceID)
+      }
+      do {
+        try SourceRootPolicy().revalidate(
+          rootURL: source.rootURL,
+          volumeIdentity: source.volumeIdentity,
+          expected: approval.rootIdentity
+        )
+      } catch {
+        throw ActionExecutorError.targetRevalidationFailed
       }
     }
   }

@@ -1,4 +1,5 @@
 import Foundation
+import WTMDomain
 
 public struct FileSystemEntry: Hashable, Sendable {
   public let url: URL
@@ -31,18 +32,23 @@ public enum DirectoryWalkerError: Error, Equatable, Sendable {
 public struct ReadOnlyDirectoryWalker: Sendable {
   public init() {}
 
-  public func entries(under rootURL: URL) throws -> [FileSystemEntry] {
+  public func entries(under rootURL: URL, approvedBy source: ScanSource) throws
+    -> [FileSystemEntry]
+  {
     var entries: [FileSystemEntry] = []
-    try enumerate(under: rootURL) { entries.append($0) }
+    try enumerate(under: rootURL, approvedBy: source) { entries.append($0) }
     return entries
   }
 
   /// Produces validated entries as traversal advances so adapters can publish bounded results.
-  public func entryStream(under rootURL: URL) -> AsyncThrowingStream<FileSystemEntry, Error> {
+  public func entryStream(
+    under rootURL: URL,
+    approvedBy source: ScanSource
+  ) -> AsyncThrowingStream<FileSystemEntry, Error> {
     AsyncThrowingStream { continuation in
       let task = Task {
         do {
-          try enumerate(under: rootURL) { entry in
+          try enumerate(under: rootURL, approvedBy: source) { entry in
             continuation.yield(entry)
           }
           continuation.finish()
@@ -56,9 +62,19 @@ public struct ReadOnlyDirectoryWalker: Sendable {
 
   private func enumerate(
     under rootURL: URL,
+    approvedBy source: ScanSource,
     yield: (FileSystemEntry) -> Void
   ) throws {
-    let policy = ScopedPathPolicy(rootURL: rootURL)
+    guard let rootIdentity = source.rootIdentity else {
+      throw ScopedPathError.sourceIdentityUnavailable
+    }
+    let policy = ScopedPathPolicy(
+      rootURL: source.rootURL,
+      volumeIdentity: source.volumeIdentity,
+      expectedRootIdentity: rootIdentity
+    )
+    try policy.revalidateRoot()
+    _ = try policy.validate(rootURL)
     guard FileManager.default.isReadableFile(atPath: rootURL.path) else {
       throw DirectoryWalkerError.rootIsNotReadable
     }
@@ -81,6 +97,7 @@ public struct ReadOnlyDirectoryWalker: Sendable {
 
     for case let url as URL in enumerator {
       try Task.checkCancellation()
+      try policy.revalidateRoot()
       let values: URLResourceValues
       do {
         values = try url.resourceValues(forKeys: Set(keys))
@@ -95,10 +112,11 @@ public struct ReadOnlyDirectoryWalker: Sendable {
 
       let resolvedURL: URL
       do {
-        resolvedURL = try policy.validate(url)
+        resolvedURL = try policy.validateAgainstCapturedRoot(url)
       } catch {
         continue
       }
+      try policy.revalidateRoot()
 
       yield(
         FileSystemEntry(
@@ -110,5 +128,6 @@ public struct ReadOnlyDirectoryWalker: Sendable {
         )
       )
     }
+    try policy.revalidateRoot()
   }
 }

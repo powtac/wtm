@@ -494,14 +494,15 @@ func sourceSettingsRoundTrip() async throws {
 
   let settingsURL = directoryURL.appending(path: "source-settings.json")
   let store = JSONSourceSettingsStore(settingsURL: settingsURL)
-  let source = ScanSource(
-    id: "manual:test",
-    displayName: "Test Models",
-    providerID: .manual,
-    rootURL: directoryURL,
-    accessState: .allowed,
-    isEnabled: true
-  )
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "manual:test",
+      displayName: "Test Models",
+      providerID: .manual,
+      rootURL: directoryURL,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   try await store.save(
     SourceSettingsSnapshot(
       revision: 1,
@@ -525,14 +526,15 @@ func sourceSettingsRoundTrip() async throws {
 @MainActor
 @Test("A returning user scans enabled sources on launch")
 func returningUserScansOnLaunch() async throws {
-  let source = ScanSource(
-    id: "launch",
-    displayName: "Launch",
-    providerID: LaunchFixtureAdapter.providerID,
-    rootURL: URL(filePath: "/tmp"),
-    accessState: .allowed,
-    isEnabled: true
-  )
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "launch",
+      displayName: "Launch",
+      providerID: LaunchFixtureAdapter.providerID,
+      rootURL: FileManager.default.temporaryDirectory,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   let registry = try AdapterRegistry(adapters: [LaunchFixtureAdapter()])
   let settingsStore = FixtureSourceSettingsStore(
     snapshot: SourceSettingsSnapshot(
@@ -595,14 +597,15 @@ func returningUserScansOnLaunch() async throws {
 @MainActor
 @Test("Scan on Launch can be disabled")
 func launchScanCanBeDisabled() async throws {
-  let source = ScanSource(
-    id: "launch-disabled",
-    displayName: "Launch Disabled",
-    providerID: LaunchFixtureAdapter.providerID,
-    rootURL: URL(filePath: "/tmp"),
-    accessState: .allowed,
-    isEnabled: true
-  )
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "launch-disabled",
+      displayName: "Launch Disabled",
+      providerID: LaunchFixtureAdapter.providerID,
+      rootURL: FileManager.default.temporaryDirectory,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   let registry = try AdapterRegistry(adapters: [LaunchFixtureAdapter()])
   let model = InventoryViewModel(
     coordinator: InventoryCoordinator(registry: registry),
@@ -640,14 +643,15 @@ func cleanupRequiresPreviewAndTriggersTargetedVerification() async throws {
   defer { try? FileManager.default.removeItem(at: rootURL) }
   let modelURL = rootURL.appending(path: "model.gguf")
   try Data("model".utf8).write(to: modelURL)
-  let source = ScanSource(
-    id: "cleanup-source",
-    displayName: "Cleanup Fixture",
-    providerID: .manual,
-    rootURL: rootURL,
-    accessState: .allowed,
-    isEnabled: true
-  )
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "cleanup-source",
+      displayName: "Cleanup Fixture",
+      providerID: .manual,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   let scanAdapter = FileBackedManualAdapter(modelURL: modelURL)
   let actionExecutor = ActionExecutor(
     registry: try StorageActionAdapterRegistry(adapters: [ManualStorageActionAdapter()]),
@@ -747,12 +751,24 @@ func externalSourceResolvesAfterRemount() async throws {
   let modelRoot = volumeRoot.appending(path: "Models", directoryHint: .isDirectory)
   try FileManager.default.createDirectory(at: modelRoot, withIntermediateDirectories: true)
   defer { try? FileManager.default.removeItem(at: volumeRoot) }
+  let binding = try testVolumeBinding(for: modelRoot)
+  let approved = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "external",
+      displayName: "External Models",
+      providerID: .manual,
+      rootURL: modelRoot,
+      volumeIdentity: binding.identity,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   let source = ScanSource(
-    id: "external",
-    displayName: "External Models",
-    providerID: .manual,
+    id: approved.id,
+    displayName: approved.displayName,
+    providerID: approved.providerID,
     rootURL: URL(filePath: "/Volumes/Disconnected/Models"),
-    volumeIdentity: VolumeIdentity(identifier: "volume-1", relativePath: "Models"),
+    volumeIdentity: approved.volumeIdentity,
+    rootIdentity: approved.rootIdentity,
     accessState: .offline,
     isEnabled: true
   )
@@ -772,9 +788,9 @@ func externalSourceResolvesAfterRemount() async throws {
     volumeCatalog: FixedVolumeCatalog(
       volumes: [
         MountedVolumeInfo(
-          id: "volume-1",
+          id: binding.identity.identifier,
           name: "External",
-          rootURL: volumeRoot,
+          rootURL: binding.volumeRootURL,
           totalByteCount: 1_000,
           availableByteCount: 500,
           fileSystem: "APFS",
@@ -801,19 +817,21 @@ func externalSourceUnmountAndRemountIsTargeted() async throws {
   try FileManager.default.createDirectory(at: modelRoot, withIntermediateDirectories: true)
   defer { try? FileManager.default.removeItem(at: volumeRoot) }
 
-  let source = ScanSource(
-    id: "external-targeted",
-    displayName: "External Models",
-    providerID: LaunchFixtureAdapter.providerID,
-    rootURL: modelRoot,
-    volumeIdentity: VolumeIdentity(identifier: "volume-targeted", relativePath: "Models"),
-    accessState: .allowed,
-    isEnabled: true
-  )
+  let binding = try testVolumeBinding(for: modelRoot)
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "external-targeted",
+      displayName: "External Models",
+      providerID: LaunchFixtureAdapter.providerID,
+      rootURL: modelRoot,
+      volumeIdentity: binding.identity,
+      accessState: .allowed,
+      isEnabled: true
+    ))
   let volume = MountedVolumeInfo(
-    id: "volume-targeted",
+    id: binding.identity.identifier,
     name: "External",
-    rootURL: volumeRoot,
+    rootURL: binding.volumeRootURL,
     totalByteCount: 1_000,
     availableByteCount: 500,
     fileSystem: "APFS",
@@ -907,6 +925,36 @@ func sourceAccessCanRecoverAndBeRevoked() async throws {
   #expect(model.sources.isEmpty)
 }
 
+private struct TestVolumeBinding {
+  let identity: VolumeIdentity
+  let volumeRootURL: URL
+}
+
+private func testVolumeBinding(for rootURL: URL) throws -> TestVolumeBinding {
+  let approved = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "volume-binding",
+      displayName: "Volume Binding",
+      providerID: .manual,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    )
+  )
+  let rootIdentity = try #require(approved.rootIdentity)
+  var volumeRootURL = rootURL.standardizedFileURL
+  for _ in rootIdentity.rootRelativePath.split(separator: "/") {
+    volumeRootURL.deleteLastPathComponent()
+  }
+  return TestVolumeBinding(
+    identity: VolumeIdentity(
+      identifier: rootIdentity.volumeIdentifier,
+      relativePath: rootIdentity.rootRelativePath
+    ),
+    volumeRootURL: volumeRootURL
+  )
+}
+
 private actor FixtureSourceSettingsStore: SourceSettingsStoring {
   private let snapshot: SourceSettingsSnapshot?
 
@@ -921,37 +969,47 @@ private actor FixtureSourceSettingsStore: SourceSettingsStoring {
   func save(_: SourceSettingsSnapshot) {}
 
   func makeManualSource(for url: URL) -> ScanSource {
-    ScanSource(
-      id: "manual:test",
-      displayName: url.lastPathComponent,
-      providerID: .manual,
-      rootURL: url,
-      accessState: .allowed,
-      isEnabled: true
-    )
+    approvedFixtureSource(
+      ScanSource(
+        id: "manual:test",
+        displayName: url.lastPathComponent,
+        providerID: .manual,
+        rootURL: url,
+        accessState: .allowed,
+        isEnabled: true
+      ))
   }
 
   func makeMLXSource(for url: URL) -> ScanSource {
-    ScanSource(
-      id: "mlx:test",
-      displayName: url.lastPathComponent,
-      providerID: .mlx,
-      rootURL: url,
-      accessState: .allowed,
-      isEnabled: true
-    )
+    approvedFixtureSource(
+      ScanSource(
+        id: "mlx:test",
+        displayName: url.lastPathComponent,
+        providerID: .mlx,
+        rootURL: url,
+        accessState: .allowed,
+        isEnabled: true
+      ))
   }
 
   func replace(_ source: ScanSource, with url: URL) -> ScanSource {
-    ScanSource(
-      id: source.id,
-      displayName: source.displayName,
-      providerID: source.providerID,
-      rootURL: url,
-      accessState: .allowed,
-      isEnabled: true
-    )
+    approvedFixtureSource(
+      ScanSource(
+        id: source.id,
+        displayName: source.displayName,
+        providerID: source.providerID,
+        rootURL: url,
+        accessState: .allowed,
+        isEnabled: true
+      ))
   }
+}
+
+private func approvedFixtureSource(_ source: ScanSource) -> ScanSource {
+  guard let approved = try? SourceApprovalPolicy().approve(source) else {
+    preconditionFailure("Fixture source must be approvable")
+  }
+  return approved
 }
 
 private actor FixtureToolSettingsStore: ToolSettingsStoring {

@@ -53,6 +53,20 @@ Primary source anchors:
   `Packages/WTMKit/Sources/RuntimeOllama/OllamaRuntimeTransport.swift:45`.
 - SEC-005: `Packages/WTMKit/Sources/AdapterManual/ManualFolderAdapter.swift:27`.
 
+## Remediation update
+
+SEC-001 is fixed in the working baseline. Source consent now persists a no-follow identity for
+the volume-relative root and every path component. Scan coordination, adapter traversal,
+deletion planning, preview revalidation, and each Trash or provider mutation revalidate that
+identity and fail closed on drift. Existing enabled sources without an identity become stale
+and require access to be granted again; symlink roots are rejected.
+
+Regression coverage replaces an approved root with a symlink before scanning and replaces a
+root ancestor after deletion planning. Both paths are blocked. The complete Swift package
+suite, app unit suite, and external-volume lifecycle test pass. Filesystem mutation still uses
+the macOS Trash API, so descriptor-relative deletion is not available; immediate pre-mutation
+revalidation is the platform-compatible control.
+
 ## Controls verified
 
 - Production process launch does not invoke a shell; executable URL and arguments remain
