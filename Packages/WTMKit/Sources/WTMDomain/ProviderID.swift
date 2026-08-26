@@ -14,5 +14,6 @@ public struct ProviderID: RawRepresentable, Hashable, Codable, Sendable, CustomS
 extension ProviderID {
   public static let ollama = ProviderID(rawValue: "ollama")
   public static let huggingFace = ProviderID(rawValue: "hugging-face")
+  public static let mlx = ProviderID(rawValue: "mlx")
   public static let manual = ProviderID(rawValue: "manual")
 }

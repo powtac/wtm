@@ -13,8 +13,9 @@ What The Model is a native macOS inventory for locally stored LLMs. It explains 
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-The current beta adds explicit runtime verification, a passive menu bar inventory, and
-reviewed OpenClaw and Unsloth handoffs. Stable-release builds include a weekly privacy-
+The current build adds explicit runtime verification, a passive menu bar inventory,
+reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
+Stable-release builds include a weekly privacy-
 preserving check against official GitHub Releases; WTM never auto-installs updates, opens
 a shell, automates Terminal, or downloads models.
 
@@ -23,6 +24,8 @@ a shell, automates Terminal, or downloads models.
 - Ollama manifest and blob inventory
 - Hugging Face model-cache and incomplete-download inventory
 - Conservative GGUF and Safetensors discovery in user-selected folders
+- Structurally verified MLX-LM storage inventory from explicitly selected folders; no MLX
+  runtime or package installation
 - Explicit per-source consent before scanning
 - Search, provider/state filtering, local file details, and Finder reveal
 - A normalized in-memory inventory rebuilt from provider files on every launch

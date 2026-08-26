@@ -8,6 +8,7 @@ extension ProviderID {
     switch self {
     case .ollama: String(localized: "provider.ollama")
     case .huggingFace: String(localized: "provider.hugging-face")
+    case .mlx: String(localized: "provider.mlx")
     case .manual: String(localized: "provider.manual")
     default: rawValue
     }
@@ -71,6 +72,9 @@ extension InventoryIssue {
       String(localized: "issue.ollama")
     case "MANUAL_ENUMERATION_FAILED":
       String(localized: "issue.manual")
+    case "MLX_ENUMERATION_FAILED", "MLX_CONFIGURATION_INVALID", "MLX_STRUCTURE_UNCONFIRMED",
+      "MLX_WEIGHTS_INCOMPLETE", "MLX_TOKENIZER_MISSING":
+      String(localized: "issue.mlx")
     case "SOURCE_OFFLINE":
       String(localized: "issue.source-offline")
     case "SOURCE_NOT_READABLE", "SOURCE_ACCESS_STALE", "SOURCE_NOT_ALLOWED":

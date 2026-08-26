@@ -2,7 +2,8 @@
 
 Phase 4 is Integrations. Its implementation is present against the Phase 4 scope in
 `REQUIREMENTS.md` and [ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
-The phase remains open until the manual UI and release evidence below is recorded.
+The phase is complete. Automated, manual UI, and notarized distribution evidence is recorded
+below.
 
 | Gate | Evidence |
 |---|---|
@@ -14,9 +15,11 @@ The phase remains open until the manual UI and release evidence below is recorde
 | Launch at login | Independent `SMAppService` setting with injected service test; enabling the menu bar does not imply login launch |
 | Settings and links | Integrations and launch-at-login controls are exposed through native Settings; adapter guide links remain data/configuration-only |
 | Capability boundary | Architecture checks reject shell, Terminal automation, remote endpoints, dynamic plugins, package installation, training, public tunnels, and downloads |
-| Automated verification | `./scripts/test` passed 88 Swift package tests, app tests, the Release build, architecture/decision/fixture/language checks, and website checks on 2026-08-25 |
-| UI smoke | `./scripts/test-ui` passed 3 UI tests with 0 failures on 2026-08-25; the test process disables only the menu-bar projection via `WTM_UI_TEST_MODE` |
-| Launch smoke | `./script/build_and_run.sh --verify` successfully launched the debug app and the process was then terminated cleanly |
+| Automated verification | `./scripts/test` passed 93 Swift package tests, app tests, the Release build, architecture/decision/fixture/language checks, and website checks on 2026-08-26 |
+| UI smoke | `./scripts/test-ui` passed 4 UI tests with 0 failures on 2026-08-26; the test process disables only the menu-bar projection via `WTM_UI_TEST_MODE` |
+| Launch smoke | `./script/build_and_run.sh --verify` built, launched, and confirmed the debug process on 2026-08-26 |
+| Manual UI | Native accessibility inspection verified menu-bar enable/disable with restoration, independent disabled Launch at Login, navigation between inventory and Settings, Integrations provider/client presentation, and the non-executing Unsloth handoff preview on 2026-08-26 |
+| Distribution | Public v0.3.7 DMG checksum, strict code signature, notarized Gatekeeper acceptance, app/DMG stapling, DMG copy-and-launch smoke, SBOM, metadata, and artifact attestation were reverified on 2026-08-26 |
 
 ## Resolved UI crash
 
@@ -35,12 +38,11 @@ launches keep the menu bar active. The recovery-alert helper dismisses only a st
 ./script/build_and_run.sh --verify
 ```
 
-## Open gates
+## Acceptance result
 
-1. A manual native UI pass remains required for status-item enable/disable, menu contents,
-   navigation back to the inventory, launch-at-login independence, and client handoff preview.
-2. Fresh Phase 4 integration/release evidence against the notarized distribution remains to
-   be recorded. Phase 5 owns the final public DMG/Release/Pages gates.
+The Phase 4 capability boundary, manual interaction path, and distribution evidence are
+accepted. The handoff preview was inspected but not started; executing an external client is
+not required to prove that WTM presents the exact shell-free plan before launch.
 
 ## Explicit limits
 

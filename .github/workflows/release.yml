@@ -1,5 +1,6 @@
 name: Release
 
+# This workflow intentionally remains tag-only; every release input is immutable.
 on:
   push:
     tags:

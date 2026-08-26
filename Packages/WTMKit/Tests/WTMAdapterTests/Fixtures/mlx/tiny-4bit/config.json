@@ -1,0 +1,1 @@
+{"model_type":"llama","quantization":{"group_size":64,"bits":4,"mode":"affine"},"quantization_config":{"group_size":64,"bits":4,"mode":"affine"}}

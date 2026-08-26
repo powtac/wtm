@@ -15,12 +15,14 @@ func builtInSourcesAreDisabled() {
   let model = AppComposition.makeInventoryViewModel()
 
   #expect(model.sources.allSatisfy { !$0.isEnabled })
+  #expect(model.availableStorageProviderIDs.contains(.mlx))
 }
 
 @MainActor
 @Test("Known inventory values use product strings")
 func inventoryValuesUseProductStrings() {
   #expect(ProviderID.huggingFace.localizedName == "Hugging Face")
+  #expect(ProviderID.mlx.localizedName == "MLX")
   #expect(InstallationState.incomplete.localizedName == "Incomplete")
 }
 
@@ -923,6 +925,17 @@ private actor FixtureSourceSettingsStore: SourceSettingsStoring {
       id: "manual:test",
       displayName: url.lastPathComponent,
       providerID: .manual,
+      rootURL: url,
+      accessState: .allowed,
+      isEnabled: true
+    )
+  }
+
+  func makeMLXSource(for url: URL) -> ScanSource {
+    ScanSource(
+      id: "mlx:test",
+      displayName: url.lastPathComponent,
+      providerID: .mlx,
       rootURL: url,
       accessState: .allowed,
       isEnabled: true

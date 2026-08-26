@@ -2,12 +2,13 @@
 
 WTM is a native Swift 6 macOS application with a thin SwiftUI composition root and one
 local Swift package. Inventory, safe actions, runtime ownership, and client handoff remain
-separate graphs. Model downloads and MLX capabilities are absent from the current target.
+separate graphs. Phase 6 adds MLX storage discovery; model downloads and MLX runtime remain
+absent.
 
 ```text
 WTM app (composition and presentation only)
   -> WTMInventory -> WTMAdapterContracts, WTMDomain, WTMSecurity
-  -> AdapterOllama, AdapterHuggingFace, AdapterManual
+  -> AdapterOllama, AdapterHuggingFace, AdapterManual, AdapterMLX
   -> WTMActions -> WTMAdapterContracts, WTMDomain, WTMSecurity
   -> ActionOllama, ActionHuggingFace, ActionManual
   -> WTMRuntime -> WTMAdapterContracts, WTMDomain
@@ -78,11 +79,11 @@ confirmation, and bounded privacy-preserving audit entries.
 
 ## Deferred capability boundaries
 
-Phase 6 MLX support begins with a compiled read-only storage adapter. A Python-based runtime
+Phase 6 MLX support ships as a compiled read-only storage adapter. A Python-based runtime
 is a second gate because executable identity alone does not bind the imported package graph.
 It must satisfy [ADR-028](decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md) or remain
-storage-only. Phase 7 is the sole planned model-download capability and requires a separate
-download threat model and release decision. No Phase 8 capability is committed.
+storage-only. No model-download phase is currently committed; any future acquisition
+capability requires a separate threat model and release decision.
 
 ## Persisted and ephemeral state
 

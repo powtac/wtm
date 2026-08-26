@@ -27,6 +27,7 @@ protocol SourceSettingsStoring: Sendable {
   func load() async throws -> SourceSettingsSnapshot?
   func save(_ snapshot: SourceSettingsSnapshot) async throws
   func makeManualSource(for url: URL) async -> ScanSource
+  func makeMLXSource(for url: URL) async -> ScanSource
   func replace(_ source: ScanSource, with url: URL) async -> ScanSource
 }
 
@@ -93,11 +94,19 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
   }
 
   func makeManualSource(for url: URL) -> ScanSource {
+    makeSource(for: url, providerID: .manual)
+  }
+
+  func makeMLXSource(for url: URL) -> ScanSource {
+    makeSource(for: url, providerID: .mlx)
+  }
+
+  private func makeSource(for url: URL, providerID: ProviderID) -> ScanSource {
     let standardizedURL = url.standardizedFileURL
     return ScanSource(
-      id: "manual:\(UUID().uuidString.lowercased())",
+      id: "\(providerID.rawValue):\(UUID().uuidString.lowercased())",
       displayName: standardizedURL.lastPathComponent,
-      providerID: .manual,
+      providerID: providerID,
       rootURL: standardizedURL,
       volumeIdentity: volumeIdentity(for: standardizedURL),
       accessState: .allowed,

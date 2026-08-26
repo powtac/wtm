@@ -149,6 +149,9 @@ struct SettingsRootView: View {
         Button("source.add-folder.action") {
           model.addManualFolder()
         }
+        Button("source.add-mlx-folder.action") {
+          model.addMLXFolder()
+        }
       }
 
       Section("settings.volumes.section") {

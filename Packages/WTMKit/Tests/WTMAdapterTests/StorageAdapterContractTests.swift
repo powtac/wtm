@@ -1,4 +1,5 @@
 import AdapterHuggingFace
+import AdapterMLX
 import AdapterManual
 import AdapterOllama
 import Foundation
@@ -130,6 +131,103 @@ func manualFixtureIsInventoried() async throws {
   #expect(result.installations.first?.variant.quantization == "Q4_K_M")
 }
 
+@Test("MLX-LM structures require config, weights, tokenizer, and explicit MLX quantization")
+func mlxFixtureIsInventoried() async throws {
+  let root = try #require(fixtureRoot("mlx"))
+  let source = allowedSource(id: "mlx", provider: .mlx, root: root)
+
+  let result = await MLXStorageAdapter().scan(source: source)
+
+  let installation = try #require(result.installations.first)
+  #expect(result.installations.count == 1)
+  #expect(installation.providerID == .mlx)
+  #expect(installation.variant.format == .mlx)
+  #expect(installation.variant.quantization == "4-bit affine, group 64")
+  #expect(installation.state == .stored)
+  #expect(installation.artifacts.contains { $0.kind == .weights })
+  #expect(installation.artifacts.contains { $0.kind == .configuration })
+  #expect(installation.artifacts.contains { $0.kind == .tokenizer })
+  #expect(installation.artifacts.allSatisfy { $0.physicalIdentifier != nil })
+  #expect(result.issues.isEmpty)
+}
+
+@Test("Safetensors plus a generic Transformers config is not claimed as MLX")
+func mlxRejectsFalsePositive() async throws {
+  let fixture = try TemporaryMLXFixture()
+  defer { fixture.remove() }
+  try fixture.write("config.json", #"{"model_type":"llama"}"#)
+  try fixture.write("model.safetensors", "not model weights")
+  try fixture.write("tokenizer.json", "{}")
+
+  let result = await MLXStorageAdapter().scan(source: fixture.source)
+
+  #expect(result.installations.isEmpty)
+  #expect(result.issues.contains { $0.code == "MLX_STRUCTURE_UNCONFIRMED" })
+}
+
+@Test("MLX partial weights and missing indexed shards remain incomplete")
+func mlxReportsIncompleteArtifacts() async throws {
+  let fixture = try TemporaryMLXFixture()
+  defer { fixture.remove() }
+  try fixture.write(
+    "config.json",
+    #"{"model_type":"llama","quantization":{"group_size":64,"bits":4,"mode":"affine"}}"#
+  )
+  try fixture.write("model-00001-of-00002.safetensors", "first shard")
+  try fixture.write(
+    "model.safetensors.index.json",
+    #"{"weight_map":{"a":"model-00001-of-00002.safetensors","b":"model-00002-of-00002.safetensors"}}"#
+  )
+  try fixture.write("tokenizer.json", "{}")
+
+  let result = await MLXStorageAdapter().scan(source: fixture.source)
+
+  #expect(result.installations.first?.state == .incomplete)
+  #expect(result.issues.contains { $0.code == "MLX_WEIGHTS_INCOMPLETE" })
+}
+
+@Test("MLX scanning never follows a weight symlink outside the approved source")
+func mlxRejectsOutOfScopeSymlink() async throws {
+  let fixture = try TemporaryMLXFixture()
+  defer { fixture.remove() }
+  let outsideURL = fixture.root.deletingLastPathComponent().appending(
+    path: "outside-\(UUID().uuidString).safetensors"
+  )
+  defer { try? FileManager.default.removeItem(at: outsideURL) }
+  try Data("outside".utf8).write(to: outsideURL)
+  try fixture.write(
+    "config.json",
+    #"{"model_type":"llama","quantization":{"group_size":64,"bits":4}}"#
+  )
+  try fixture.write("tokenizer.json", "{}")
+  try FileManager.default.createSymbolicLink(
+    at: fixture.root.appending(path: "model.safetensors"),
+    withDestinationURL: outsideURL
+  )
+
+  let result = await MLXStorageAdapter().scan(source: fixture.source)
+
+  #expect(result.installations.first?.state == .incomplete)
+  #expect(
+    result.installations.first?.artifacts.contains {
+      $0.url.lastPathComponent == "model.safetensors"
+    } == false
+  )
+}
+
+@Test("Opt-in real MLX source exposes only structurally confirmed MLX installations")
+func realMLXSourceIsInventoried() async throws {
+  guard let path = ProcessInfo.processInfo.environment["WTM_REAL_MLX_SOURCE"] else { return }
+  let root = URL(filePath: path, directoryHint: .isDirectory)
+  let result = await MLXStorageAdapter().scan(
+    source: allowedSource(id: "real-mlx", provider: .mlx, root: root)
+  )
+
+  #expect(!result.installations.isEmpty)
+  #expect(result.installations.allSatisfy { $0.providerID == .mlx })
+  #expect(result.installations.allSatisfy { $0.variant.format == .mlx })
+}
+
 @Test("Hugging Face ignores Finder metadata at the snapshots root")
 func huggingFaceIgnoresSnapshotRootMetadata() async throws {
   let root = FileManager.default.temporaryDirectory.appending(
@@ -222,4 +320,28 @@ private func allowedSource(id: String, provider: ProviderID, root: URL) -> ScanS
     accessState: .allowed,
     isEnabled: true
   )
+}
+
+private struct TemporaryMLXFixture {
+  let root: URL
+
+  init() throws {
+    root = FileManager.default.temporaryDirectory.appending(
+      path: "wtm-mlx-\(UUID().uuidString)",
+      directoryHint: .isDirectory
+    )
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+  }
+
+  var source: ScanSource {
+    allowedSource(id: "mlx-temporary", provider: .mlx, root: root)
+  }
+
+  func write(_ name: String, _ contents: String) throws {
+    try Data(contents.utf8).write(to: root.appending(path: name))
+  }
+
+  func remove() {
+    try? FileManager.default.removeItem(at: root)
+  }
 }

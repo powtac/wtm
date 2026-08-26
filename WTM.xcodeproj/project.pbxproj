@@ -23,6 +23,7 @@
 		A0000000000000000000002E /* RuntimeLlamaCpp in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001E /* RuntimeLlamaCpp */; };
 		A0000000000000000000002F /* ClientOpenClaw in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000001F /* ClientOpenClaw */; };
 		A00000000000000000000081 /* ClientUnsloth in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000080 /* ClientUnsloth */; };
+		A00000000000000000000083 /* AdapterMLX in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000082 /* AdapterMLX */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,6 +81,7 @@
 				A00000000000000000000024 /* AdapterOllama in Frameworks */,
 				A00000000000000000000025 /* AdapterHuggingFace in Frameworks */,
 				A00000000000000000000026 /* AdapterManual in Frameworks */,
+				A00000000000000000000083 /* AdapterMLX in Frameworks */,
 				A00000000000000000000027 /* WTMActions in Frameworks */,
 				A00000000000000000000028 /* WTMPersistence in Frameworks */,
 				A00000000000000000000029 /* ActionOllama in Frameworks */,
@@ -167,6 +169,7 @@
 				A00000000000000000000014 /* AdapterOllama */,
 				A00000000000000000000015 /* AdapterHuggingFace */,
 				A00000000000000000000016 /* AdapterManual */,
+				A00000000000000000000082 /* AdapterMLX */,
 				A00000000000000000000017 /* WTMActions */,
 				A00000000000000000000018 /* WTMPersistence */,
 				A00000000000000000000019 /* ActionOllama */,
@@ -546,6 +549,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = ClientUnsloth;
+		};
+		A00000000000000000000082 /* AdapterMLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = AdapterMLX;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

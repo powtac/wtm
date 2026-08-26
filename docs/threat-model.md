@@ -116,9 +116,9 @@ unattended handoff remain out of scope.
 | Private preparation accidentally becomes public | Require the exact repository, public visibility, exact SemVer tag, matching app version, and explicit Pages/release jobs |
 | Mutable third-party Actions alter the release | Pin Actions to full commit hashes and grant each job only explicit token permissions |
 
-## Deferred Phase 6 and 7 boundaries
+## Phase 6 storage and deferred runtime boundary
 
-Phase 6 MLX storage is read-only and requires licensed fixtures, structural evidence,
+Phase 6 MLX storage is implemented read-only and requires licensed fixtures, structural evidence,
 false-positive handling, and the existing path/symlink controls. MLX runtime execution is a
 separate sub-gate: interpreter identity alone is insufficient because Python package and
 module resolution can change executed code. It must bind and revalidate interpreter, entry
@@ -127,9 +127,9 @@ arguments, and allowlisted environment; it rejects module-path injection and inp
 can trigger implicit Hub downloads. If this cannot be guaranteed, Phase 6 remains
 storage-only.
 
-Phase 7 is the sole planned model-download boundary. Before implementation it requires a
+Any future model-download boundary requires a
 separate threat model covering license acceptance, Keychain authentication, canonical HTTPS
 sources and redirect validation, immutable revisions, staging/resume/atomic finalization,
 checksums, temporary disk pressure, cancellation cleanup, unsafe serialization, remote code,
-and the rule that downloaded content is never automatically executed. No Phase 8 capability
-is currently authorized.
+and the rule that downloaded content is never automatically executed. No download phase is
+currently authorized.

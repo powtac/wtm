@@ -2,6 +2,7 @@ import ActionHuggingFace
 import ActionManual
 import ActionOllama
 import AdapterHuggingFace
+import AdapterMLX
 import AdapterManual
 import AdapterOllama
 import ClientOpenClaw
@@ -22,6 +23,7 @@ enum AppComposition {
     let registry = try? AdapterRegistry(adapters: [
       OllamaStorageAdapter(),
       try HuggingFaceStorageAdapter(),
+      MLXStorageAdapter(),
       ManualFolderAdapter(),
     ])
     let coordinator = registry.map { InventoryCoordinator(registry: $0) }
@@ -114,6 +116,7 @@ enum AppComposition {
           directoryHint: .notDirectory
         )
       ),
+      registeredStorageProviderIDs: registry?.providerIDs ?? [],
       folderSelector: MacFolderSelector(),
       fileRevealer: MacFileRevealer(),
       volumeCatalog: MacVolumeCatalog(),

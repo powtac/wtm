@@ -19,6 +19,7 @@ let package = Package(
     .library(name: "WTMPersistence", targets: ["WTMPersistence"]),
     .library(name: "AdapterOllama", targets: ["AdapterOllama"]),
     .library(name: "AdapterHuggingFace", targets: ["AdapterHuggingFace"]),
+    .library(name: "AdapterMLX", targets: ["AdapterMLX"]),
     .library(name: "AdapterManual", targets: ["AdapterManual"]),
     .library(name: "ActionOllama", targets: ["ActionOllama"]),
     .library(name: "ActionHuggingFace", targets: ["ActionHuggingFace"]),
@@ -67,6 +68,10 @@ let package = Package(
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
     ),
     .target(
+      name: "AdapterMLX",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
+    ),
+    .target(
       name: "AdapterManual",
       dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]
     ),
@@ -98,6 +103,7 @@ let package = Package(
         "WTMAdapterContracts",
         "AdapterOllama",
         "AdapterHuggingFace",
+        "AdapterMLX",
         "AdapterManual",
         "WTMInventory",
       ],

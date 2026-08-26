@@ -56,6 +56,7 @@ final class WTMAppUITests: XCTestCase {
       ].exists
     )
     XCTAssertTrue(application.buttons["Start Scan"].exists)
+    XCTAssertTrue(application.buttons["Add MLX Folder…"].exists)
     XCTAssertFalse(application.buttons["Start Scan"].isEnabled)
   }
 

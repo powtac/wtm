@@ -106,7 +106,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-010](docs/decisions/ADR-010-non-sandboxed-least-privilege.md) | App Sandbox ist für die direkte Distribution deaktiviert; Least Privilege wird im Produkt erzwungen | TCC, POSIX/ACL, enger Scope und Zustimmung bleiben verbindlich; Full Disk Access, root und privilegierte Helper sind ausgeschlossen. |
 | [ADR-011](docs/decisions/ADR-011-layered-conventions-and-overrides.md) | `Defaults + Discovery Conventions + User Overrides + Session Overrides` | Explizite, testbare Konventionen bleiben erklärbar und zurücksetzbar. |
 | [ADR-012](docs/decisions/ADR-012-data-only-extension-manifests.md) | Nutzererweiterungen sind schema-validierte Daten, kein nachladbarer Code | Konfigurierbarkeit darf keine neue Capability oder Codeausführung definieren. |
-| [ADR-013](docs/decisions/ADR-013-github-native-delivery.md) | GitHub-native Entwicklung und Distribution | Issues, Discussions, Projects, Pull Requests, Actions, Releases, Security und Pages bilden den öffentlichen Projektworkflow. |
+| [ADR-013](docs/decisions/ADR-013-github-native-delivery.md) | GitHub-native Entwicklung und Distribution | Issues, Pull Requests, Actions, Releases, Security und Pages bilden den öffentlichen Projektworkflow. |
 | [ADR-014](docs/decisions/ADR-014-private-first-public-ready.md) | Private-first, public-ready | Private Historie darf eine spätere Veröffentlichung nicht blockieren. |
 | [ADR-015](docs/decisions/ADR-015-product-language-policy.md) | English-only Product mit deutscher Requirements-Ausnahme | App und öffentliche Inhalte sind Englisch; ausschließlich dieses normative Dokument bleibt Deutsch. |
 | [ADR-016](docs/decisions/ADR-016-consent-bound-sources-and-volume-identity.md) | Quellen sind zustimmungsgebunden und über Volume-ID plus relativen Pfad abgesichert | Pfadstrings allein sind weder Autorisierung noch stabile Datenträgeridentität. |
@@ -682,7 +682,7 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 - **NFR-L10N-001:** Produktsprache ist ausschließlich Englisch. Alle UI-Texte, Menüs, Fehlermeldungen, Accessibility-Labels, Onboarding-Texte und Release-Artefakte MUST Englisch sein.
 - **NFR-L10N-002:** Architektur MUST String Catalogs und stabile Localization Keys verwenden; sichtbare Strings dürfen nicht im Swift-Code hardcodiert werden. Weitere Produktsprachen sind eine spätere Entscheidung.
 - **NFR-L10N-003:** Dieses deutschsprachige `REQUIREMENTS.md` ist die einzige zulässige nicht-englische Datei im öffentlichen Repository und die normative Produktspezifikation.
-- **NFR-L10N-004:** Mit Ausnahme von `REQUIREMENTS.md` MUST jeder öffentliche GitHub-Inhalt Englisch sein, einschließlich README, Docs, ADRs, Issues, Forms, Discussions, Project, PRs, Changelog, Release Notes, Code Comments und Commit-/Tag-Beschreibungen.
+- **NFR-L10N-004:** Mit Ausnahme von `REQUIREMENTS.md` MUST jeder öffentliche GitHub-Inhalt Englisch sein, einschließlich README, Docs, ADRs, Issues, Forms, PRs, Changelog, Release Notes, Code Comments und Commit-/Tag-Beschreibungen.
 - **NFR-L10N-005:** Website, DMG-Texte, Update-Feed, Support- und Security-Kommunikation MUST Englisch sein.
 - **NFR-L10N-006:** Größen nutzen dezimale GB in der UI; exakte Bytes sind im Inspector verfügbar. Datums- und Zahlenformatierung folgt der Nutzer-Locale, obwohl die Produktoberfläche Englisch bleibt.
 
@@ -823,7 +823,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - **GH-OPS-003:** Private Entwicklung darf keine Secrets, proprietären Fixtures, persönlichen Pfade oder inkompatible Lizenzen in Commit-Historie aufnehmen; bloßes Löschen vor Veröffentlichung reicht nicht.
 - **GH-OPS-004:** Es werden alle fachlich relevanten GitHub-Funktionen genutzt. Nicht benötigte Produkte wie Wiki, Packages oder Codespaces werden nicht ohne konkreten Owner und Use Case aktiviert.
 - **GH-OPS-005:** Repository- und Releaseoperationen SHOULD über versionierte Skripte und `gh` CLI wiederholbar und nachvollziehbar sein; kritische Einstellungen werden in `docs/github-configuration.md` dokumentiert.
-- **GH-OPS-006:** Repositoryname, Topics, Description, Social Preview, Dateien, Commit Messages, Branches, Issues, Discussions, Projects, Pull Requests und Releases MUST vollständig Englisch sein; einzige Dateiausnahme ist `REQUIREMENTS.md`.
+- **GH-OPS-006:** Repositoryname, Topics, Description, Social Preview, Dateien, Commit Messages, Branches, Issues, Pull Requests und Releases MUST vollständig Englisch sein; einzige Dateiausnahme ist `REQUIREMENTS.md`.
 - **GH-OPS-007:** `REQUIREMENTS.md` wird in deutscher Sprache versioniert und ist normativ. Englische Produkt- und Entwicklerdokumentation darf Anforderungen erklären oder verlinken, bildet aber keine zweite normative Requirements-Kopie.
 - **GH-OPS-008:** README und Website verlinken die Datei sichtbar als `Requirements (German, normative)` und weisen darauf hin, dass Browser-/Nutzerübersetzungen nicht vom Projekt gepflegt oder normativ sind.
 
@@ -844,9 +844,7 @@ Das Repository MUST enthalten:
 - Screenshots und Fixtures ohne private Pfade, Benutzernamen, Modelllizenzen oder Tokens.
 
 - **GH-COM-001:** GitHub Issues erfassen konkrete, reproduzierbare Bugs und umsetzbare Tasks. Bug Forms fragen WTM-Version, macOS, Architektur, Provider, redigierte Logs und Reproduktionsschritte ab.
-- **GH-COM-002:** GitHub Discussions dienen Q&A, Ideen, Showcases und allgemeiner Adapterplanung; bestätigte Arbeit wird in ein Issue überführt.
 - **GH-COM-003:** Sicherheitslücken dürfen nicht als öffentliches Issue gemeldet werden; `SECURITY.md` verweist auf GitHub Private Vulnerability Reporting/Security Advisories.
-- **GH-COM-004:** Ein GitHub Project bildet Roadmap und Status ab. Unter GitHub Free wird maximal der verfügbare automatische Auto-add-Workflow vorausgesetzt.
 - **GH-COM-005:** Labels MUST mindestens `bug`, `enhancement`, `provider`, `runtime`, `security`, `accessibility`, `good first issue`, `help wanted`, `needs reproduction` und Prioritäten abdecken.
 - **GH-COM-006:** Pull Requests MUST klein, reviewbar und mit Tests, Changelog-/Dokumentationswirkung und aktualisierten Adapterfixtures versehen sein.
 - **GH-COM-007:** Releases und geschlossene Milestones erzeugen Community-taugliche Release Notes; Breaking Changes und Migrationen stehen zuerst.
@@ -900,9 +898,9 @@ Das Repository MUST enthalten:
 ### 16.6 Badges und Public-Readiness
 
 - **GH-PUB-001:** README MUST dynamische Badges für CI, Tests/Coverage, Latest Release, macOS, Swift und Lizenz enthalten. Badges verlinken auf ihre überprüfbare Quelle und dürfen keinen manuellen Fantasiestatus zeigen.
-- **GH-PUB-002:** Optionale Badges für offene Issues, Discussions und Downloads sind erst nach öffentlicher Aktivierung zulässig.
+- **GH-PUB-002:** Optionale Badges für offene Issues und Downloads sind erst nach öffentlicher Aktivierung zulässig.
 - **GH-PUB-003:** Vor Veröffentlichung MUST ein History-/Secret-/PII-Audit, Lizenzreview, Fixture-Review, Markencheck und Security Review abgeschlossen sein.
-- **GH-PUB-004:** Beim Umschalten auf public werden Pages, Discussions, öffentliche Issue Forms, Dependabot-/Security-Funktionen, Artifact Attestations und Community-Links in einem dokumentierten Launch-Runbook aktiviert.
+- **GH-PUB-004:** Beim Umschalten auf public werden Pages, öffentliche Issue Forms, Dependabot-/Security-Funktionen, Artifact Attestations und Community-Links in einem dokumentierten Launch-Runbook aktiviert.
 - **GH-PUB-005:** Der private Free-Plan hat begrenzte Actions-Minuten; öffentliche Standardrunner sind kostenlos. Planannahmen werden vor Aktivierung jeder kostenrelevanten Pipeline erneut geprüft und dokumentiert.
 
 ## 17. Abnahmekriterien der Phase 1 — Read-only Beta
@@ -1045,7 +1043,6 @@ Eine spätere Mac-App-Store-Ausgabe wäre ein separates, funktional reduziertes 
 - [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages)
 - [Custom workflows with GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
 - [GitHub security features](https://docs.github.com/en/code-security/getting-started/github-security-features)
-- [GitHub Discussions](https://docs.github.com/en/discussions/quickstart)
 - [GitHub product usage by plan](https://docs.github.com/en/billing/reference/product-usage-included)
 
 ### Requirements-Sprache

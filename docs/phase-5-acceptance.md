@@ -1,22 +1,22 @@
 # Phase 5 Acceptance
 
-Phase 5 is Stable Public Release. The local implementation covers the public release
-chain and the privacy-preserving WTM update path. The phase remains open until the
-protected GitHub Environment, public repository launch, notarized release, and Pages
-deployment evidence below are recorded.
+Phase 5 is Stable Public Release. The public launch and release chain are operational. The
+phase remains `Implemented`, not `Completed`, until the final security disposition and a
+VoiceOver release-candidate pass are recorded.
 
 | Gate | Evidence |
 |---|---|
-| Update source | `UpdateChecker` uses only `https://api.github.com/repos/powtac/wtm/releases` and official GitHub release URLs |
-| Stable selection | Strict SemVer comparison ignores prereleases, drafts, malformed tags, and untrusted release URLs |
-| Cache | Automatic checks are limited to one per seven days; manual checks use the same checker and status |
-| Failure states | `Up to Date`, `Update Available`, `No Release Available`, `Offline`, `Rate Limited`, and `Check Failed` are distinct and text-based |
-| Privacy | Update requests contain only GitHub API headers; no inventory, model, path, hardware, account, or telemetry data is sent |
-| About | Native About window shows product name, version, build, repository, license, update status, release notes, and download links |
-| Entry points | App menu, About, and `Settings > General` call the same `UpdateChecker`; Settings keeps the stable five-pane structure |
-| Automated verification | SemVer, stable/prerelease, equal version, empty releases, invalid metadata, offline, rate-limit, and seven-day cache tests are included |
-| Release pipeline | Exact-SHA CI reuse plus fail-closed Developer ID, notarization, stapling, Gatekeeper, DMG mount/copy/start, SBOM, checksum, secret audit, attestation, draft release, and atomic publish gates are versioned |
-| Website | Versioned English Pages site, accessibility/link validation, extension guide, and official latest-release link are present |
+| Update source | `UpdateChecker` uses only the official `powtac/wtm` GitHub Releases API and release URLs; stable SemVer, failure-state, offline, rate-limit, and seven-day cache tests pass |
+| About and entry points | Native About, app menu, and `Settings > General` share the same update checker and official release/download links |
+| Release pipeline | Exact-SHA CI reuse plus fail-closed Developer ID signing, notarization, stapling, Gatekeeper, DMG mount/copy/start, SBOM, checksum, secret audit, attestation, draft, and atomic publish gates are versioned |
+| Public release | v0.3.7 is public with DMG, SHA-256 manifest, SPDX SBOM, build metadata, and an artifact attestation tied to release run `32897247933` |
+| Independent DMG verification | Checksums, strict/deep code signing, notarized Gatekeeper acceptance, app/DMG stapling, DMG copy-and-launch, metadata, and the attestation were reverified on 2026-08-26 |
+| Public repository | `powtac/wtm` is public; Issues are enabled; Discussions and Projects are intentionally disabled |
+| Pages | GitHub Actions deployment is configured and `https://powtac.github.io/wtm/` returned HTTP 200 on 2026-08-26 |
+| Protected release | Environment `release`, required reviewer, and all five required Environment secrets are configured |
+| Repository security | Secret scanning and push protection are enabled; Swift code-scanning default setup is enabled; Dependabot security updates are enabled; `.github/dependabot.yml` adds weekly Actions updates |
+| Automated verification | `./scripts/test`, `./scripts/test-ui`, `./scripts/check-release`, and `./script/build_and_run.sh --verify` pass on 2026-08-26 |
+| Accessibility | Four UI smoke tests and native accessibility-tree inspection pass; the explicit VoiceOver release-candidate pass remains open |
 
 ## Verification commands
 
@@ -27,20 +27,16 @@ deployment evidence below are recorded.
 ./script/build_and_run.sh --verify
 ```
 
-The public release workflow additionally requires repository visibility `public`, exact
-tag `vMAJOR.MINOR.PATCH`, successful `Build and test` and `Secret scan` jobs from the `main`
-CI push run for the exact commit, protected Environment `release`, five Environment secrets,
-a successful Apple notarization, and manual public-launch checks. No release tag or public
-repository mutation is performed by local tests.
+## Remaining gates
 
-## Open manual gates
+1. Resolve or explicitly accept SEC-001 through SEC-005 from
+   `docs/audits/security-review-2026-08-26.md`, add their regression evidence, and re-run the
+   security review against the final release candidate.
+2. Record a VoiceOver pass against that release candidate. Automated accessibility hierarchy
+   coverage is evidence, but it is not represented as a VoiceOver session.
+3. Record the final history/PII and trademark audit. Fixture licenses and automated secret
+   scans already pass.
 
-1. Complete the history/secret/PII, fixture-license, trademark, and security audit.
-2. Change `powtac/wtm` to public and enable Discussions, Pages, Dependabot, code scanning,
-   secret scanning, push protection, and artifact attestations where supported.
-3. Configure the protected `release` Environment and verify the first tagged release
-   from a clean commit.
-4. Record notarized DMG, Gatekeeper, Pages, update-link, Accessibility Inspector, and
-   VoiceOver evidence.
-
-Phase 6 must not be treated as started until these Phase 5 release gates are accepted.
+The public v0.3.7 distribution is real and independently verified. These remaining gates
+block the `Completed` label and the next stable tag; they do not invalidate the published
+artifact evidence.

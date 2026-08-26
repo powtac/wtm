@@ -43,8 +43,13 @@ struct InstallationReconciler: Sendable {
         && candidatePaths == preferredPaths
     }
 
-    guard candidate.providerID == .manual, preferred.providerID != .manual else { return false }
-    return candidatePaths.isSubset(of: preferredPaths)
+    if candidate.providerID == .manual, preferred.providerID != .manual {
+      return candidatePaths.isSubset(of: preferredPaths)
+    }
+    if candidate.providerID == .huggingFace, preferred.providerID == .mlx {
+      return preferredPaths.isSubset(of: candidatePaths)
+    }
+    return false
   }
 
   private func artifactPaths(_ installation: ModelInstallation) -> Set<String> {
@@ -52,6 +57,10 @@ struct InstallationReconciler: Sendable {
   }
 
   private func providerPriority(_ providerID: ProviderID) -> Int {
-    providerID == .manual ? 1 : 0
+    switch providerID {
+    case .mlx: 0
+    case .manual: 2
+    default: 1
+    }
   }
 }

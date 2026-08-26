@@ -53,12 +53,18 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+### Added
+
+- Phase 6 storage-only MLX-LM inventory through a compiled read-only adapter, explicit
+  source consent, conservative structural evidence, partial-shard detection, and dedicated
+  fixtures and UI coverage.
+
 ### Fixed
 
 - Verify only downloaded files from the multi-asset release checksum manifest in the
   website's Terminal installer.
 
-### Added
+### Earlier additions
 
 - A fixed `Settings…` footer below the collapsible inventory sidebar, backed by the native
   macOS Settings scene and covered by UI automation.

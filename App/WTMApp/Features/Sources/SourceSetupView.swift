@@ -39,6 +39,9 @@ struct SourceSetupView: View {
         Button("source.add-folder.action") {
           model.addManualFolder()
         }
+        Button("source.add-mlx-folder.action") {
+          model.addMLXFolder()
+        }
         Spacer()
         Button("source.scan-enabled.action") {
           model.completeOnboardingAndStartScan()

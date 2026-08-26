@@ -22,6 +22,21 @@
       "origin": "Generated WTM test fixture; contains no model weights"
     },
     {
+      "path": "mlx/tiny-4bit/config.json",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM MLX-LM structure fixture"
+    },
+    {
+      "path": "mlx/tiny-4bit/model.safetensors",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM test fixture; contains no tensors or model weights"
+    },
+    {
+      "path": "mlx/tiny-4bit/tokenizer.json",
+      "license": "CC0-1.0",
+      "origin": "Generated WTM tokenizer fixture"
+    },
+    {
       "path": "ollama/blobs/sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "license": "CC0-1.0",
       "origin": "Generated WTM test fixture; contains no model data"

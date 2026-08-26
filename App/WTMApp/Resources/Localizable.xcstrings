@@ -1501,6 +1501,16 @@
         }
       }
     },
+    "issue.mlx" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MLX model data is incomplete, invalid, or structurally unconfirmed."
+          }
+        }
+      }
+    },
     "issue.ollama" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1694,6 +1704,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manual Folder"
+          }
+        }
+      }
+    },
+    "provider.mlx" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MLX"
           }
         }
       }
@@ -2890,6 +2910,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Add Folder…"
+          }
+        }
+      }
+    },
+    "source.add-mlx-folder.action" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add MLX Folder…"
           }
         }
       }

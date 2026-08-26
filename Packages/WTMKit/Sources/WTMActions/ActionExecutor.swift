@@ -19,6 +19,7 @@ public enum ActionExecutorError: Error, Equatable, Sendable {
 
 /// Serializes Phase 2 cleanup, consumes every plan once, and revalidates before mutation.
 public actor ActionExecutor {
+  public nonisolated let supportedProviderIDs: Set<ProviderID>
   private let registry: StorageActionAdapterRegistry
   private let trashMover: any TrashMoving
   private let auditStore: any ActionAuditStoring
@@ -37,6 +38,7 @@ public actor ActionExecutor {
     planLifetime: TimeInterval = 300,
     now: @escaping @Sendable () -> Date = { .now }
   ) {
+    supportedProviderIDs = registry.providerIDs
     self.registry = registry
     self.trashMover = trashMover
     self.auditStore = auditStore

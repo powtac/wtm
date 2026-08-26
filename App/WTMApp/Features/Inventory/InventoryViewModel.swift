@@ -78,6 +78,7 @@ final class InventoryViewModel {
   private let coordinator: (any InventoryScanning)?
   private let defaultSources: [ScanSource]
   private let sourceSettingsStore: any SourceSettingsStoring
+  private let registeredStorageProviderIDs: Set<ProviderID>
   private let folderSelector: any FolderSelecting
   private let fileRevealer: any FileRevealing
   private let volumeCatalog: any VolumeCataloging
@@ -107,6 +108,7 @@ final class InventoryViewModel {
     coordinator: (any InventoryScanning)?,
     initialSources: [ScanSource],
     sourceSettingsStore: any SourceSettingsStoring,
+    registeredStorageProviderIDs: Set<ProviderID> = [],
     folderSelector: any FolderSelecting,
     fileRevealer: any FileRevealing,
     volumeCatalog: any VolumeCataloging,
@@ -127,6 +129,7 @@ final class InventoryViewModel {
     sources = initialSources
     defaultSources = initialSources
     self.sourceSettingsStore = sourceSettingsStore
+    self.registeredStorageProviderIDs = registeredStorageProviderIDs
     self.folderSelector = folderSelector
     self.fileRevealer = fileRevealer
     self.volumeCatalog = volumeCatalog
@@ -214,7 +217,10 @@ final class InventoryViewModel {
   }
 
   var canPrepareDeletion: Bool {
-    actionExecutor != nil && !selectedInstallationIDs.isEmpty && !isScanning
+    actionExecutor != nil && !selectedInstallationIDs.isEmpty
+      && selectedInstallations.allSatisfy {
+        actionExecutor?.supportedProviderIDs.contains($0.providerID) == true
+      } && !isScanning
       && !isPreparingDeletion && !isDeleting
   }
 
@@ -246,7 +252,7 @@ final class InventoryViewModel {
   }
 
   var availableStorageProviderIDs: [ProviderID] {
-    Array(Set(sources.map(\.providerID))).sorted { left, right in
+    Array(registeredStorageProviderIDs.union(sources.map(\.providerID))).sorted { left, right in
       left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
     }
   }
@@ -724,13 +730,27 @@ final class InventoryViewModel {
   }
 
   func addManualFolder(startingAt url: URL? = nil) {
+    addFolder(providerID: .manual, startingAt: url)
+  }
+
+  func addMLXFolder(startingAt url: URL? = nil) {
+    addFolder(providerID: .mlx, startingAt: url)
+  }
+
+  private func addFolder(providerID: ProviderID, startingAt url: URL?) {
     guard let url = folderSelector.chooseFolder(startingAt: url) else { return }
     let settingsStore = sourceSettingsStore
     Task { [weak self, settingsStore] in
-      let source = await settingsStore.makeManualSource(for: url)
+      let source =
+        if providerID == .mlx {
+          await settingsStore.makeMLXSource(for: url)
+        } else {
+          await settingsStore.makeManualSource(for: url)
+        }
       guard let self,
         !self.sources.contains(where: {
-          $0.rootURL.standardizedFileURL == source.rootURL.standardizedFileURL
+          $0.providerID == source.providerID
+            && $0.rootURL.standardizedFileURL == source.rootURL.standardizedFileURL
         })
       else { return }
       self.sources.append(source)

@@ -53,8 +53,9 @@ Runtime adapters never receive shell strings and never launch processes directly
 return typed plans to the central broker. Compatibility, health, inference, and ownership
 remain separate facts.
 
-MLX is intentionally not part of the current runtime list. Phase 6 first adds a compiled
-read-only storage adapter. A later runtime sub-gate must bind the Python interpreter and
+MLX is intentionally not part of the runtime list. Phase 6 ships a compiled read-only
+storage adapter that requires MLX-LM quantization metadata instead of trusting filenames or
+generic Safetensors structure. A later runtime sub-gate must bind the Python interpreter and
 package graph, reject inherited module paths and implicit Hub downloads, and satisfy the
 same loopback/evidence/ownership rules. If that identity cannot be revalidated fail-closed,
 MLX remains storage-only. See
