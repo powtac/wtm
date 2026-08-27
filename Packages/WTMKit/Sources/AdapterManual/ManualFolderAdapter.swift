@@ -28,6 +28,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
   public let id = ProviderID.manual
   public let displayName = "Manual Folder"
   private let budget: ManualScanBudget
+  private let ggufReader = GGUFHeaderReader()
 
   public init(budget: ManualScanBudget = ManualScanBudget()) {
     self.budget = budget
@@ -180,7 +181,10 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
   private func installation(forGGUF entry: FileSystemEntry, source: ScanSource)
     -> ModelInstallation?
   {
-    guard let artifact = artifact(for: entry.url, kind: .weights) else { return nil }
+    guard let inspection = try? ggufReader.inspect(at: entry.resolvedURL) else { return nil }
+    let containsModelWeights = inspection.containsModelWeights
+    let artifactKind: ArtifactKind = containsModelWeights ? .weights : .tokenizer
+    guard let artifact = artifact(for: entry.url, kind: artifactKind) else { return nil }
     let name = entry.url.deletingPathExtension().lastPathComponent
     let identityID = "manual:\(name.lowercased())"
     let variantID = "\(identityID):gguf"
@@ -189,7 +193,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       id: variantID,
       identityID: identityID,
       format: .gguf,
-      quantization: quantization(from: name)
+      quantization: containsModelWeights ? quantization(from: name) : nil
     )
     return ModelInstallation(
       id: "\(source.id):\(entry.url.path)",
@@ -198,9 +202,19 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       sourceID: source.id,
       providerID: id,
       rootURL: entry.url,
-      state: .stored,
+      state: containsModelWeights ? .stored : .incomplete,
       artifacts: [artifact],
-      timestamps: timestamps(for: entry.url)
+      timestamps: timestamps(for: entry.url),
+      modelCard: inspection.huggingFaceRepositoryID.flatMap(modelCard)
+    )
+  }
+
+  private func modelCard(for repositoryID: String) -> ModelCardLink? {
+    guard let url = URL(string: "https://huggingface.co/\(repositoryID)") else { return nil }
+    return ModelCardLink(
+      url: url,
+      confidence: .confirmed,
+      evidence: "Validated GGUF Hugging Face repository metadata"
     )
   }
 
