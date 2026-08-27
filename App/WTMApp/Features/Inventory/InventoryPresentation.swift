@@ -136,6 +136,10 @@ struct InventoryTableRow: Identifiable {
   var sortPath: String { installation.inventorySortPath }
 }
 
+let defaultInventorySortOrder = [
+  KeyPathComparator(\InventoryTableRow.sortSize, order: .reverse)
+]
+
 struct InventoryTableColumnWidths: Equatable {
   static let minimum: CGFloat = 24
 

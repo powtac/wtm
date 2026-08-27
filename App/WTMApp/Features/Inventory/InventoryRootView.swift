@@ -8,9 +8,7 @@ struct InventoryRootView: View {
     StorageDisplayMode.absolute.rawValue
   @AppStorage("inventory.table-columns") private var columnCustomization =
     TableColumnCustomization<InventoryTableRow>()
-  @State private var sortOrder = [
-    KeyPathComparator(\InventoryTableRow.sortName, order: .forward)
-  ]
+  @State private var sortOrder = defaultInventorySortOrder
 
   @ViewBuilder
   var body: some View {

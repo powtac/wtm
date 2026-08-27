@@ -240,6 +240,31 @@ func inventoryRowsSupportColumnSorting() {
   #expect(installations.sorted(using: descending).map(\.identity.displayName) == ["Zeta", "Alpha"])
 }
 
+@Test("Inventory list defaults to largest models first")
+func inventoryListDefaultsToLargestModelsFirst() {
+  let rows = [("Small", 10), ("Large", 100)].map { name, byteCount in
+    let identity = ModelIdentity(id: name, displayName: name)
+    let variant = ModelVariant(id: "\(name):variant", identityID: identity.id, format: .gguf)
+    let installation = ModelInstallation(
+      id: name,
+      identity: identity,
+      variant: variant,
+      sourceID: "source",
+      providerID: .manual,
+      rootURL: URL(filePath: "/tmp/\(name)"),
+      state: .stored,
+      artifacts: []
+    )
+    return InventoryTableRow(
+      installation: installation,
+      displayedByteCount: Int64(byteCount),
+      reclaimableByteCount: 0
+    )
+  }
+
+  #expect(rows.sorted(using: defaultInventorySortOrder).map(\.sortSize) == [100, 10])
+}
+
 @Test("Inventory copy representations preserve model identity and absolute paths")
 func inventoryCopyRepresentations() {
   let huggingFaceIdentity = ModelIdentity(
