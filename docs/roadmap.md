@@ -10,7 +10,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | 2 — Safe Actions | Completed | Revalidated plans, provider actions, Trash, audit, targeted verification, recovery tests, and fresh notarized distribution are verified |
 | 3 — Runtimes | Completed | Evidence-gated runtime checks, owned process lifecycle, tool definitions, automated gates, and fresh notarized distribution are verified |
 | 4 — Integrations | Completed | Native menu bar, independent login item, reviewed OpenClaw/Unsloth handoffs, manual UI evidence, and notarized distribution evidence are verified |
-| 5 — Stable Public Release | Implemented | Public v0.3.7, Pages, protected release environment, notarized DMG, SBOM, checksum, and attestation are verified; final security disposition and VoiceOver evidence remain open |
+| 5 — Stable Public Release | Implemented | Public v0.4.0, Pages, protected release environment, notarized DMG, SBOM, checksum, and attestation are verified; final security disposition and VoiceOver evidence remain open |
 | 6 — MLX Support | Implemented | Compiled read-only MLX-LM storage inventory is verified; runtime remains deliberately blocked by the interpreter/package trust gate in ADR-028 |
 
 The normative scope and acceptance criteria are in

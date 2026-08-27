@@ -9,7 +9,7 @@ VoiceOver release-candidate pass are recorded.
 | Update source | `UpdateChecker` uses only the official `powtac/wtm` GitHub Releases API and release URLs; stable SemVer, failure-state, offline, rate-limit, and seven-day cache tests pass |
 | About and entry points | Native About, app menu, and `Settings > General` share the same update checker and official release/download links |
 | Release pipeline | Exact-SHA CI reuse plus fail-closed Developer ID signing, notarization, stapling, Gatekeeper, DMG mount/copy/start, SBOM, checksum, secret audit, attestation, draft, and atomic publish gates are versioned |
-| Public release | v0.3.7 is public with DMG, SHA-256 manifest, SPDX SBOM, build metadata, and an artifact attestation tied to release run `32897247933` |
+| Public release | v0.4.0 is public with DMG, SHA-256 manifest, SPDX SBOM, build metadata, and an artifact attestation tied to release run `33090990452` |
 | Independent DMG verification | Checksums, strict/deep code signing, notarized Gatekeeper acceptance, app/DMG stapling, DMG copy-and-launch, metadata, and the attestation were reverified on 2026-08-26 |
 | Public repository | `powtac/wtm` is public; Issues are enabled; Discussions and Projects are intentionally disabled |
 | Pages | GitHub Actions deployment is configured and `https://powtac.github.io/wtm/` returned HTTP 200 on 2026-08-26 |
@@ -37,6 +37,6 @@ VoiceOver release-candidate pass are recorded.
 3. Record the final history/PII and trademark audit. Fixture licenses and automated secret
    scans already pass.
 
-The public v0.3.7 distribution is real and independently verified. These remaining gates
+The public v0.4.0 distribution is real and independently verified. These remaining gates
 block the `Completed` label and the next stable tag; they do not invalidate the published
 artifact evidence.

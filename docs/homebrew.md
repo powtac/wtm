@@ -5,7 +5,7 @@ in Homebrew Cask, not Homebrew Formula: a Formula is for command-line software b
 source; a Cask installs an application bundle.
 
 The source definition is [`packaging/homebrew/Casks/wtm.rb`](../packaging/homebrew/Casks/wtm.rb).
-It is intentionally pinned to the public `v0.3.7` release. Do not point a Cask at `main`,
+It is intentionally pinned to the public `v0.4.0` release. Do not point a Cask at `main`,
 an unpublished tag, or a mutable download URL.
 
 ## Publish the tap
