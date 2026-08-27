@@ -432,6 +432,17 @@ func inventoryRowsUseStaticInventoryShare() {
   #expect(row.displayedByteCount == breakdown.totalByteCount)
 }
 
+@Test("Inventory size bars compare models against the largest found model")
+func inventorySizeBarsCompareAgainstLargestModel() {
+  #expect(inventorySizeBarFraction(byteCount: 100, maximumByteCount: 100) == 1)
+  #expect(
+    abs(inventorySizeBarFraction(byteCount: 25, maximumByteCount: 100) - 0.25) < 0.0001
+  )
+  #expect(inventorySizeBarFraction(byteCount: 0, maximumByteCount: 100) == 0)
+  #expect(inventorySizeBarFraction(byteCount: 100, maximumByteCount: 0) == 0)
+  #expect(inventorySizeBarFraction(byteCount: -1, maximumByteCount: 100) == 0)
+}
+
 @MainActor
 @Test("Changing a source setting automatically starts a rescan")
 func sourceSettingsAutomaticallyTriggerRescan() async throws {

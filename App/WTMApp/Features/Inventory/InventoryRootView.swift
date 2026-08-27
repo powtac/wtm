@@ -168,6 +168,7 @@ struct InventoryRootView: View {
           installations: model.installations,
           breakdown: model.storageBreakdown
         )
+        let maximumDisplayedByteCount = allRows.map(\.displayedByteCount).max() ?? 0
         let sourceNames = Dictionary(
           uniqueKeysWithValues: model.sources.map { ($0.id, $0.displayName) }
         )
@@ -222,10 +223,14 @@ struct InventoryRootView: View {
           )
           .customizationID("state")
           TableColumn("inventory.column.share", value: \.sortSize) { row in
-            Text(
-              percentageText(
+            InventorySizeCell(
+              text: percentageText(
                 row.displayedByteCount,
                 of: model.storageBreakdown.totalByteCount
+              ),
+              fraction: inventorySizeBarFraction(
+                byteCount: row.displayedByteCount,
+                maximumByteCount: maximumDisplayedByteCount
               )
             )
           }
@@ -619,4 +624,23 @@ struct InventoryRootView: View {
     .accessibilityElement(children: .combine)
   }
 
+}
+
+private struct InventorySizeCell: View {
+  let text: String
+  let fraction: CGFloat
+
+  var body: some View {
+    Text(text)
+      .monospacedDigit()
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .background(alignment: .leading) {
+        GeometryReader { proxy in
+          RoundedRectangle(cornerRadius: 3)
+            .fill(Color.accentColor.opacity(0.16))
+            .frame(width: proxy.size.width * fraction)
+        }
+        .allowsHitTesting(false)
+      }
+  }
 }

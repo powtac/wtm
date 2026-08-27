@@ -249,6 +249,12 @@ func percentageText(_ byteCount: Int64, of totalByteCount: Int64) -> String {
   )
 }
 
+func inventorySizeBarFraction(byteCount: Int64, maximumByteCount: Int64) -> CGFloat {
+  guard maximumByteCount > 0 else { return 0 }
+  let fraction = Double(max(0, byteCount)) / Double(maximumByteCount)
+  return CGFloat(min(1, fraction))
+}
+
 func validatedModelCardURL(_ link: ModelCardLink?) -> URL? {
   guard let url = link?.url, url.scheme?.lowercased() == "https", url.host() != nil else {
     return nil
