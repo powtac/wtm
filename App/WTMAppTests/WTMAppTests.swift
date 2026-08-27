@@ -92,6 +92,79 @@ func storedRuntimeOverrideSuppressesDefault() async {
 }
 
 @MainActor
+@Test("Reset to defaults restores source and runtime settings")
+func resetToDefaultsRestoresSettings() async throws {
+  let defaultSource = ScanSource(
+    id: "default:test",
+    displayName: "Default",
+    providerID: .manual,
+    rootURL: FileManager.default.temporaryDirectory
+  )
+  let customSource = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "manual:custom",
+      displayName: "Custom",
+      providerID: .manual,
+      rootURL: FileManager.default.temporaryDirectory,
+      accessState: .allowed,
+      isEnabled: true
+    )
+  )
+  let defaultTool = ToolDefinition(
+    id: UUID(),
+    displayName: "Default Tool",
+    role: .runtime,
+    runtimeAdapterID: .llamaCpp,
+    origin: .builtIn,
+    isEnabled: false,
+    executableURL: URL(filePath: "/usr/bin/true"),
+    arguments: [.placeholder(.modelPath)],
+    supportedFormats: [.gguf]
+  )
+  let customTool = ToolDefinition(
+    id: UUID(),
+    displayName: "Custom Tool",
+    role: .runtime,
+    runtimeAdapterID: .llamaCpp,
+    origin: .imported,
+    isEnabled: false,
+    executableURL: URL(filePath: "/usr/bin/false"),
+    arguments: [.placeholder(.modelPath)],
+    supportedFormats: [.gguf]
+  )
+  let model = InventoryViewModel(
+    coordinator: nil,
+    initialSources: [defaultSource],
+    sourceSettingsStore: FixtureSourceSettingsStore(
+      snapshot: SourceSettingsSnapshot(
+        revision: 1,
+        sources: [customSource],
+        hasCompletedOnboarding: true,
+        scanOnLaunch: false,
+        oldModelThresholdDays: 180
+      )
+    ),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog(),
+    toolSettingsStore: FixtureToolSettingsStore(
+      snapshot: ToolSettingsSnapshot(revision: 1, definitions: [customTool], approvals: [])
+    ),
+    initialToolDefinitions: [defaultTool]
+  )
+
+  await model.prepareForLaunch()
+  model.resetToDefaults()
+
+  #expect(model.sources == [defaultSource])
+  #expect(!model.hasCompletedOnboarding)
+  #expect(model.scanOnLaunch)
+  #expect(model.oldModelThresholdDays == 90)
+  #expect(model.toolDefinitions == [defaultTool])
+  #expect(model.toolApprovals.isEmpty)
+}
+
+@MainActor
 @Test("Launch at login remains independent and uses the injected system service")
 func launchAtLoginUsesSystemService() {
   let manager = FixtureLaunchAtLoginManager()
@@ -521,6 +594,66 @@ func sourceSettingsRoundTrip() async throws {
   let payload = try String(contentsOf: settingsURL, encoding: .utf8)
   #expect(!payload.contains("installations"))
   #expect(!payload.contains("artifacts"))
+}
+
+@Test("Legacy source settings recover a missing source identity")
+func legacySourceSettingsRecoverIdentity() async throws {
+  struct LegacyStoredSource: Encodable {
+    let source: ScanSource
+    let bookmarkData: Data?
+  }
+
+  struct LegacyPayload: Encodable {
+    let version: Int
+    let revision: UInt64
+    let sources: [LegacyStoredSource]
+    let hasCompletedOnboarding: Bool
+    let scanOnLaunch: Bool
+    let oldModelThresholdDays: Int?
+  }
+
+  let directoryURL = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: directoryURL) }
+
+  let source = ScanSource(
+    id: "legacy-manual",
+    displayName: "Legacy Models",
+    providerID: .manual,
+    rootURL: directoryURL,
+    accessState: .stale,
+    isEnabled: true
+  )
+  let bookmarkData = try directoryURL.bookmarkData(
+    options: [],
+    includingResourceValuesForKeys: [.volumeIdentifierKey, .volumeUUIDStringKey, .volumeURLKey],
+    relativeTo: nil
+  )
+  let payload = LegacyPayload(
+    version: 1,
+    revision: 1,
+    sources: [LegacyStoredSource(source: source, bookmarkData: bookmarkData)],
+    hasCompletedOnboarding: true,
+    scanOnLaunch: true,
+    oldModelThresholdDays: 90
+  )
+  let settingsURL = directoryURL.appending(path: "source-settings.json")
+  try JSONEncoder().encode(payload).write(to: settingsURL, options: [.atomic])
+
+  let loaded = try #require(try await JSONSourceSettingsStore(settingsURL: settingsURL).load())
+  let migrated = try #require(loaded.sources.first)
+
+  #expect(migrated.rootIdentity != nil)
+  #expect(migrated.accessState == .allowed)
+  #expect(migrated.rootURL.standardizedFileURL == directoryURL.standardizedFileURL)
+
+  let reloaded = try #require(
+    try await JSONSourceSettingsStore(settingsURL: settingsURL).load()
+  )
+  #expect(reloaded.sources.first?.rootIdentity != nil)
 }
 
 @MainActor

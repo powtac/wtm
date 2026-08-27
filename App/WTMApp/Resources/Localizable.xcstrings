@@ -2388,6 +2388,27 @@
         }
       }
     },
+    "settings.defaults.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore WTM's source, scan, runtime, and interface settings. Models and audit history are not deleted."
+          }
+        }
+      }
+    },
+    "settings.defaults.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defaults"
+          }
+        }
+      }
+    },
     "settings.age.section" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2542,6 +2563,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "General"
+          }
+        }
+      }
+    },
+    "settings.reset.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Defaults"
+          }
+        }
+      }
+    },
+    "settings.reset.confirmation.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom sources and runtime settings will be removed. Models and audit history remain untouched."
+          }
+        }
+      }
+    },
+    "settings.reset.confirmation.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset WTM Settings?"
           }
         }
       }

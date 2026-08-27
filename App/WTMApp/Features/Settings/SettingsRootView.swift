@@ -7,6 +7,7 @@ struct SettingsRootView: View {
   @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
   @State private var pendingRevocationSourceID: ScanSource.ID?
   @State private var isAuditClearConfirmationPresented = false
+  @State private var isResetConfirmationPresented = false
 
   var body: some View {
     TabView {
@@ -53,6 +54,18 @@ struct SettingsRootView: View {
       Button("action.cancel", role: .cancel) {}
     } message: {
       Text("settings.audit.clear-confirmation.message")
+    }
+    .confirmationDialog(
+      "settings.reset.confirmation.title",
+      isPresented: $isResetConfirmationPresented,
+      titleVisibility: .visible
+    ) {
+      Button("settings.reset.action", role: .destructive) {
+        resetToDefaults()
+      }
+      Button("action.cancel", role: .cancel) {}
+    } message: {
+      Text("settings.reset.confirmation.message")
     }
     .sheet(isPresented: toolImportIsPresented) {
       if let preview = model.toolImportPreview {
@@ -385,7 +398,24 @@ struct SettingsRootView: View {
           .foregroundStyle(.secondary)
         adapterGuideLink(anchor: "choose")
       }
+
+      Section("settings.defaults.section") {
+        Text("settings.defaults.description")
+          .foregroundStyle(.secondary)
+        Button("settings.reset.action", role: .destructive) {
+          isResetConfirmationPresented = true
+        }
+        .disabled(model.isPreparingDeletion || model.isDeleting)
+      }
     }
+  }
+
+  private func resetToDefaults() {
+    isMenuBarEnabled = true
+    UserDefaults.standard.removeObject(forKey: "inventory.storage-display-mode")
+    UserDefaults.standard.removeObject(forKey: "inventory.table-columns")
+    model.setLaunchAtLogin(false)
+    model.resetToDefaults()
   }
 
   private func adapterGuideLink(anchor: String) -> some View {

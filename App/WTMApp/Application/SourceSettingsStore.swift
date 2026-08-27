@@ -63,13 +63,25 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
     guard payload.version == Payload.currentVersion else { return nil }
 
     highestSavedRevision = payload.revision
-    return SourceSettingsSnapshot(
+    var didMigrateSourceIdentity = false
+    let sources = payload.sources.map { record in
+      let source = resolve(record)
+      didMigrateSourceIdentity =
+        didMigrateSourceIdentity
+        || (record.source.rootIdentity == nil && source.rootIdentity != nil)
+      return source
+    }
+    let snapshot = SourceSettingsSnapshot(
       revision: payload.revision,
-      sources: payload.sources.map(resolve),
+      sources: sources,
       hasCompletedOnboarding: payload.hasCompletedOnboarding,
       scanOnLaunch: payload.scanOnLaunch,
       oldModelThresholdDays: payload.oldModelThresholdDays ?? 90
     )
+    if didMigrateSourceIdentity {
+      try? save(snapshot)
+    }
+    return snapshot
   }
 
   func save(_ snapshot: SourceSettingsSnapshot) throws {
@@ -163,7 +175,7 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
     }
 
     let source = record.source
-    return ScanSource(
+    let resolvedSource = ScanSource(
       id: source.id,
       displayName: source.displayName,
       providerID: source.providerID,
@@ -173,6 +185,16 @@ actor JSONSourceSettingsStore: SourceSettingsStoring {
       accessState: isStale ? .stale : source.accessState,
       isEnabled: source.isEnabled
     )
+
+    guard !isStale, source.rootIdentity == nil, source.isEnabled,
+      source.accessState == .allowed || source.accessState == .stale
+    else {
+      return resolvedSource
+    }
+
+    // A valid, non-stale bookmark is the user's prior explicit source selection.
+    // Re-capture only the filesystem identity introduced after older settings were saved.
+    return (try? SourceApprovalPolicy().approve(resolvedSource)) ?? resolvedSource
   }
 
   private func bookmarkData(for url: URL) throws -> Data {

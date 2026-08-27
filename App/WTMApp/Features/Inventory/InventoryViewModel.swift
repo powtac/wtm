@@ -852,6 +852,38 @@ final class InventoryViewModel {
     persistSourceSettings()
   }
 
+  func resetToDefaults() {
+    guard !isDeleting else { return }
+    if isScanning { cancelScan() }
+
+    installations = []
+    issues = []
+    lastScanDate = nil
+    scanSummary = nil
+    selectedInstallationIDs = []
+    selectedSection = .all
+    searchText = ""
+    clearInventoryFilters()
+    invalidateDeletionPreview()
+    deletionError = nil
+    deletionReport = nil
+
+    sources = defaultSources
+    hasCompletedOnboarding = false
+    scanOnLaunch = true
+    oldModelThresholdDays = 90
+    refreshSourceAccess()
+    persistSourceSettings()
+
+    runtimeTask?.cancel()
+    runtimePlanPreview = nil
+    runtimeReadiness = [:]
+    runtimeError = nil
+    toolDefinitions = initialToolDefinitions
+    toolApprovals = [:]
+    persistToolSettings()
+  }
+
   func completeOnboardingAndStartScan() {
     guard sources.contains(where: \.isEnabled) else { return }
     hasCompletedOnboarding = true

@@ -131,6 +131,23 @@ func manualFixtureIsInventoried() async throws {
   #expect(result.installations.first?.variant.quantization == "Q4_K_M")
 }
 
+@Test("Inventory coordinator performs a basic filesystem scan")
+func coordinatorScansBasicManualFolder() async throws {
+  let root = try #require(fixtureRoot("manual"))
+  let source = allowedSource(id: "manual-coordinator", provider: .manual, root: root)
+  let registry = try AdapterRegistry(adapters: [ManualFolderAdapter()])
+
+  let snapshot = await InventoryCoordinator(registry: registry).scan(sources: [source])
+
+  #expect(snapshot.scannedSourceIDs == [source.id])
+  #expect(snapshot.issues.isEmpty)
+  #expect(snapshot.installations.count == 1)
+  let installation = try #require(snapshot.installations.first)
+  #expect(installation.providerID == .manual)
+  #expect(installation.variant.format == .gguf)
+  #expect(installation.variant.quantization == "Q4_K_M")
+}
+
 @Test("Manual scan stops visibly at its retained-entry budget")
 func manualScanBudgetIsVisible() async throws {
   let root = FileManager.default.temporaryDirectory.appending(
