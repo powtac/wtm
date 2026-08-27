@@ -18,7 +18,7 @@ bookmarks, volume identity, and UI preferences persist.
 | Config and secret handling | Configuration allowlist, harmless-dotfile, secret-pattern, and Finder-target tests |
 | Model cards | [ADR-020](decisions/ADR-020-confirmed-external-model-links.md), confirmed HTTPS-only link validation, canonical `owner/model`, reviewed shorthand alias, and unknown-owner negative contract tests |
 | Extensibility | Immutable adapter registry, role-separated targets, data-driven Settings, and `docs/adapters.md` |
-| Scan streaming | [ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md), one coordinator, deterministic order, bounded events, cancellation, generation gating, and cancelled/replacement race regression |
+| Scan streaming | [ADR-017](decisions/ADR-017-streaming-full-rescan-generations.md), one coordinator, `SourcePrioritizer` ordering, deterministic nested-source precedence, bounded events, cancellation, generation gating, and cancelled/replacement race regression |
 | Product language | `scripts/check-language`; English string catalog and public documentation, with German normative requirements only |
 | UI and accessibility | Fresh first-run labeled-control smoke through the macOS accessibility tree on local and ad-hoc CI signing |
 | Distribution | Developer ID app beta, hardened runtime, notarization, stapling, and Gatekeeper evidence recorded below |

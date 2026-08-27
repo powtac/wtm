@@ -4,8 +4,6 @@ import WTMDomain
 struct InventoryRootView: View {
   @Environment(\.openSettings) private var openSettings
   @Bindable var model: InventoryViewModel
-  @AppStorage("inventory.storage-display-mode") private var storageDisplayModeRaw =
-    StorageDisplayMode.absolute.rawValue
   @AppStorage("inventory.table-columns") private var columnCustomization =
     TableColumnCustomization<InventoryTableRow>()
   @State private var sortOrder = defaultInventorySortOrder
@@ -40,6 +38,13 @@ struct InventoryRootView: View {
               .padding(.horizontal, 12)
               .padding(.vertical, 10)
               .accessibilityIdentifier("sidebar-settings-button")
+              Text("Version \(appVersionText)")
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 8)
+                .accessibilityIdentifier("app-version")
             }
             .background(.bar)
           }
@@ -157,12 +162,10 @@ struct InventoryRootView: View {
       } else {
         let rows = inventoryTableRows(
           installations: model.visibleInstallations,
-          mode: storageDisplayMode,
           breakdown: model.storageBreakdown
         )
         let allRows = inventoryTableRows(
           installations: model.installations,
-          mode: storageDisplayMode,
           breakdown: model.storageBreakdown
         )
         let sourceNames = Dictionary(
@@ -170,7 +173,6 @@ struct InventoryRootView: View {
         )
         let columnWidths = inventoryTableColumnWidths(
           rows: allRows,
-          mode: storageDisplayMode,
           totalByteCount: model.storageBreakdown.totalByteCount,
           sourceName: { sourceNames[$0] ?? $0 }
         )
@@ -219,17 +221,13 @@ struct InventoryRootView: View {
             max: .infinity
           )
           .customizationID("state")
-          TableColumn(storageColumnTitle, value: \.sortSize) { row in
-            if storageDisplayMode == .absolute {
-              Text(wholeByteCount(row.displayedByteCount))
-            } else {
-              Text(
-                percentageText(
-                  row.displayedByteCount,
-                  of: model.storageBreakdown.totalByteCount
-                )
+          TableColumn("inventory.column.share", value: \.sortSize) { row in
+            Text(
+              percentageText(
+                row.displayedByteCount,
+                of: model.storageBreakdown.totalByteCount
               )
-            }
+            )
           }
           .width(
             min: InventoryTableColumnWidths.minimum,
@@ -351,37 +349,17 @@ struct InventoryRootView: View {
     }
   }
 
-  private var storageDisplayMode: StorageDisplayMode {
-    StorageDisplayMode(rawValue: storageDisplayModeRaw) ?? .absolute
-  }
-
-  private var storageColumnTitle: String {
-    switch storageDisplayMode {
-    case .absolute: String(localized: "inventory.column.size")
-    case .share: String(localized: "inventory.column.share")
-    }
-  }
-
   private var storageControls: some View {
     let breakdown = model.storageBreakdown
     return HStack(spacing: 10) {
-      Picker("storage.mode.label", selection: $storageDisplayModeRaw) {
-        Text("storage.mode.absolute").tag(StorageDisplayMode.absolute.rawValue)
-        Text("storage.mode.share").tag(StorageDisplayMode.share.rawValue)
-      }
-      .pickerStyle(.segmented)
-      .fixedSize()
-
-      if storageDisplayMode == .share {
-        Text("storage.shared")
-          .foregroundStyle(.secondary)
-        Text(percentageText(breakdown.sharedByteCount, of: breakdown.totalByteCount))
-          .monospacedDigit()
-        Text("storage.unknown")
-          .foregroundStyle(.secondary)
-        Text(percentageText(breakdown.unknownByteCount, of: breakdown.totalByteCount))
-          .monospacedDigit()
-      }
+      Text("storage.shared")
+        .foregroundStyle(.secondary)
+      Text(percentageText(breakdown.sharedByteCount, of: breakdown.totalByteCount))
+        .monospacedDigit()
+      Text("storage.unknown")
+        .foregroundStyle(.secondary)
+      Text(percentageText(breakdown.unknownByteCount, of: breakdown.totalByteCount))
+        .monospacedDigit()
       Spacer()
       Text(wholeByteCount(breakdown.totalByteCount))
         .monospacedDigit()
@@ -392,6 +370,10 @@ struct InventoryRootView: View {
     .padding(.horizontal, 14)
     .padding(.vertical, 7)
     .help("storage.share.help")
+  }
+
+  private var appVersionText: String {
+    Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
   }
 
   private var inventoryListControls: some View {

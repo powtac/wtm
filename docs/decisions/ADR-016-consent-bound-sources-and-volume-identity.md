@@ -24,7 +24,8 @@ source is never silently mapped to another mount.
   flows in Settings.
 - Bookmark data restores URLs but does not equal current authorization or readability.
 - Offline configuration persists while its ephemeral inventory does not.
-- Source order is deterministic: provider-specific roots precede overlapping manual roots.
+- Source consent and identity remain defined here; operational scan ordering is defined by
+  [ADR-029](ADR-029-specific-source-scan-priority.md).
 
 ## Requirements impact
 

@@ -4,7 +4,7 @@
 |---|---|
 | Status | **Accepted Baseline** |
 | Version | 0.4.1 |
-| Datum | 2026-08-25 |
+| Datum | 2026-08-27 |
 | Plattform | macOS, Apple Silicon |
 | Ziel | Allgemeine, veröffentlichbare Open-Source-App auf GitHub |
 | Dokumentsprache | Deutsch |
@@ -84,7 +84,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | UC-08 | Eigene Tools konfigurieren | Executable, Argumente und unterstützte Formate sind ohne Shell-Interpolation definierbar. |
 | UC-09 | Zusätzliche Datenträger erfassen | Aktivierte HDDs/SSDs bleiben als eigene Quellen identifizierbar und werden nach erneutem Mounten wiedererkannt. |
 | UC-10 | Kompaktstatus sehen | Das Menüleisten-Symbol zeigt Bestand, Speicher, Probleme und laufende Modelle ohne Öffnen des Hauptfensters. |
-| UC-11 | Speicheranteil vergleichen | Nutzer wechseln zwischen absoluten Größen und Prozentanteilen am gesamten gefundenen Modellbestand. |
+| UC-11 | Speicheranteil vergleichen | Nutzer vergleichen `Inventory Share` innerhalb des aktuell gescannten Modellbestands; absolute Bytes bleiben in den Modelldetails verfügbar. |
 | UC-12 | Model Card öffnen | Ein bestätigter Providerlink öffnet die zugehörige Model Card im Standardbrowser. |
 | UC-13 | Bestand und Alter verstehen | Gespeicherte, geladene, nutzbare, alte und zeitlich unbekannte Modelle sind getrennt filterbar. |
 | UC-14 | Scan-Zugriff korrigieren | Abgelehnter oder falsch gewählter Zugriff kann jederzeit erklärt, erneut angefordert oder geändert werden. |
@@ -122,6 +122,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-026](docs/decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md) | Menüleiste ist eine passive Projektion; Client-Handoffs sind kurzlebig und reviewt | Kein zweiter Scanner, keine implizite Clientkonfiguration und keine ungeprüfte Skript- oder Interpreterausführung. |
 | [ADR-027](docs/decisions/ADR-027-fail-closed-public-release-chain.md) | Öffentliche Releases werden fail-closed aus einem exakten Tag erzeugt | Signierung, Notarisierung, DMG-Prüfung, SBOM, Attestation und Veröffentlichung bilden eine geordnete Trust Chain; private Vorbereitung veröffentlicht nichts implizit. |
 | [ADR-028](docs/decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md) | MLX erhält nach dem stabilen Public Release eine eigene Phase | MLX-Inventar und Python-basierte Runtimeausführung benötigen andere Evidenz- und Trust-Grenzen als Phase-4-Client-Handoffs; Downloads bleiben nochmals getrennt. |
+| [ADR-029](docs/decisions/ADR-029-specific-source-scan-priority.md) | Spezifisch konfigurierte Quellen werden zuerst gescannt | `SourcePrioritizer` ordnet tiefere Pfade vor ihren Eltern; der Auslöser bleibt Launch, manueller Scan oder erfolgreich gespeicherte Quellenänderung. |
 
 ### 5.1 Entscheidungs- und Requirements-Governance
 
@@ -329,7 +330,8 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-SRC-012 (P0):** Beliebige Ordner und Volume-Wurzeln werden über `NSOpenPanel` ausgewählt. WTM speichert Volume-ID, relativen Pfad und einen stabilen URL-Bookmark zur Wiedererkennung, behauptet im direkten Distributionsprofil aber keinen Security Scope.
 - **FR-SRC-013 (P0):** WTM MUST einen versionierten, geordneten Katalog konkreter Standardquellen im Benutzerverzeichnis pflegen. Er enthält providerbezogene Wurzeln wie `~/.ollama/models`, `~/.cache/huggingface/hub` und `~/.unsloth` sowie MAY enge generische Modellordner wie `~/.models` vorschlagen. Reihenfolge, Providerrolle, erwartete Struktur und Herkunft sind Daten des Quellenkatalogs und keine fest codierten UI-Sonderfälle.
 - **FR-SRC-014 (P0):** Breite Elternverzeichnisse wie `~`, `~/.cache`, `~/Library` oder `~/Library/Application Support` dürfen weder als automatische Standardquelle aktiviert noch rekursiv als Ersatz für konkrete Providerwurzeln traversiert werden. Vor Zustimmung ist ausschließlich eine nicht rekursive Existenz- und Lesbarkeitsprüfung der katalogisierten Kandidaten zulässig.
-- **FR-SRC-015 (P1):** Der Quellenkatalog MUST deterministisch abgearbeitet werden: zuerst bestätigte providerbezogene Quellen, danach explizit aktivierte generische oder benutzerdefinierte Ordner. Nutzerprioritäten und deaktivierte Einträge bleiben persistent; die Reihenfolge darf die Modellidentität oder Speicherzählung nicht beeinflussen.
+- **FR-SRC-015 (P1):** Die operative Scanliste MUST deterministisch priorisiert werden: explizit konfigurierte Quellen mit stärkerer Pfadverschachtelung werden vor weniger verschachtelten Quellen durchsucht (`$HOME/.models` vor `$HOME`). Bei gleicher Verschachtelung haben bestätigte providerbezogene Quellen Vorrang vor generischen Quellen; danach entscheidet die persistierte Quellenreihenfolge. Verschachtelte Quellen dürfen allein wegen einer übergeordneten Quelle nicht verworfen werden.
+- **FR-SRC-016 (P0):** Nach jeder erfolgreich gespeicherten Änderung an aktivierten, hinzugefügten, erneut freigegebenen oder widerrufenen Quellen MUST WTM nach abgeschlossenem Onboarding automatisch einen vollständigen Rescan starten. Ein laufender Scan wird dabei sicher abgebrochen und durch die neue Generation ersetzt; deaktivierte oder widerrufene Quellen dürfen danach keine Inventar- oder Issue-Einträge behalten.
 
 ### 9.2 Scan-Freigabe und Recovery
 
@@ -365,8 +367,8 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-SCN-010 (P1):** Alias- und Duplikatverdacht MUST getrennt von bestätigter physischer Identität dargestellt werden.
 - **FR-SCN-011 (P1):** Eine aktivierte FSEvents-Implementierung MUST `MustScanSubDirs`, `UserDropped`, `KernelDropped`, `RootChanged` sowie Unmount behandeln. Bei verlorenen Events wird die betroffene Quelle kontrolliert vollständig neu gescannt; ohne FSEvents bleibt manueller Rescan verfügbar.
 - **FR-SCN-012 (P0):** Beim App-Start baut WTM zuerst die UI auf und startet danach den vollständigen Launch-Scan. Bis zu den ersten Ergebnissen bleibt ein erklärender Scan-/Empty State sichtbar; Modell- und Artefaktresultate aus früheren App-Sitzungen werden nicht geladen.
-- **FR-SCN-013 (P0):** Adapterergebnisse MUST während des Scans in begrenzten Batches in den flüchtigen normalisierten Graphen und die sichtbare Liste übernommen werden. Neue oder aktualisierte Einträge erscheinen ohne Warten auf den Gesamtscan; Auswahl, Sortierung und Scrollposition dürfen durch Batch-Updates nicht unnötig springen.
-- **FR-SCN-014 (P0):** Automatischer Launch-Scan, manueller `Scan Now` und manueller `Rescan` verwenden denselben Coordinator, dieselben Scope- und Read-only-Garantien sowie dieselbe Cancel-/Fehlersemantik. Gleichzeitige Scans derselben Quelle werden zusammengeführt oder abgewiesen, nicht parallel dupliziert.
+- **FR-SCN-013 (P0):** Adapterergebnisse MUST während des Scans in begrenzten Batches unmittelbar nach ihrer Verfügbarkeit in den flüchtigen normalisierten Graphen und die sichtbare Liste übernommen werden. Neue oder aktualisierte Einträge erscheinen ohne Warten auf den Gesamtscan. Adapter SHOULD bei langen Scans inkrementelle Batches liefern; wenn Einzelupdates nicht performant sind, soll die Liste ungefähr alle 3–4 Sekunden aktualisiert werden. Auswahl, Sortierung und Scrollposition dürfen durch Batch-Updates nicht unnötig springen.
+- **FR-SCN-014 (P0):** Automatischer Launch-Scan, manueller `Scan Now`, manueller `Rescan` und ein durch Quellenänderung ausgelöster Rescan verwenden denselben Coordinator, dieselben Scope- und Read-only-Garantien sowie dieselbe Cancel-/Fehlersemantik. Gleichzeitige Scans derselben Quelle werden zusammengeführt oder abgewiesen, nicht parallel dupliziert.
 - **FR-SCN-015 (P0):** Überlappt eine generische manuelle Quelle eine erkannte Providerquelle, MUST die providerseitig belegte Installation die generische Sicht auf dieselben Artefaktpfade ersetzen. Physisch oder pfadseitig getrennte Installationen bleiben getrennt; bloß gleiche Namen oder Digests dürfen keine Installation entfernen.
 - **FR-SCN-016 (P0):** Jeder Scan MUST eine eindeutige sitzungsbezogene Generation besitzen. Nach Abbruch oder Beginn einer neueren Generation dürfen verspätete Batches, Fehler oder Abschlussereignisse der älteren Generation weder Liste, Auswahl, Zähler noch Scan-Zusammenfassung verändern. Der Coordinator MUST Single-Flight pro Quelle gewährleisten und genau einen terminalen Zustand `completed` oder `cancelled` je Generation liefern.
 
@@ -384,8 +386,8 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-INV-010 (P0):** Die App MUST ein vom Nutzer deaktivierbares macOS-Menüleisten-Symbol anbieten.
 - **FR-INV-011 (P0):** Die vereinfachte Menüleisten-Übersicht MUST Anzahl gefundener Modelle, gesamten Modellbestand, alte Modelle, unvollständige Bytes, Problemzahl, laufende Modelle, Offline-Quellen und Zeitpunkt des letzten erfolgreichen Scans zeigen.
 - **FR-INV-012 (P0):** Die native Menüleisten-Oberfläche MUST mindestens `Open WTM`, `Scan Now`, Problemübersicht und laufende Modelle anbieten. Detailaktionen öffnen das Hauptfenster im passenden Kontext. Die konkrete Darstellung als `NSMenu` statt Popover folgt ADR-026.
-- **FR-INV-013 (P0):** Hauptansicht und Speichervisualisierung MUST zwischen `Absolute` und `Share of Model Inventory` umschaltbar sein.
-- **FR-INV-014 (P0):** Die absolute Ansicht MUST den gewählten Größenbegriff und exakte Einheit anzeigen; Standard ist die allokierte Größe.
+- **FR-INV-013 (P0):** Die Hauptansicht MUST eine statische Spalte `Inventory Share` mit dem prozentualen Anteil am aktiven Model Inventory zeigen; eine Umschaltung auf `Absolute` entfällt.
+- **FR-INV-014 (P0):** Die `Inventory Share`-Spalte MUST ausschließlich best-effort eindeutig zuordenbare, allokierte Bytes als Prozentwert des aktiven Scopes anzeigen.
 - **FR-INV-015 (P0):** Der standardmäßige prozentuale Anteil MUST sich ausschließlich auf den in der aktuellen App-Sitzung gescannten Speicherbestand verbundener Quellen beziehen. Der sichtbare Nenner wird nicht still durch Tabellenfilter oder offline konfigurierte Quellen verändert.
 - **FR-INV-016 (P0):** Innerhalb eines klar benannten Scopes werden best-effort eindeutig gezählte, allokierte Bytes verwendet. Shared oder nicht sicher zuordenbare Artefakte erscheinen einmalig als `Shared` beziehungsweise `Unknown`; alle sichtbaren Kategorien dieses Scopes ergeben 100 Prozent.
 - **FR-INV-017 (P1):** Nutzer MAY die Prozentansicht explizit auf einen Provider oder ein Volume begrenzen; der aktive Scope und neue Nenner müssen deutlich sichtbar sein.
@@ -401,6 +403,7 @@ Gemischte Requirements gelten erst in der höchsten benötigten Phase; Phase 1 d
 - **FR-INV-027 (P0):** IDs für Identität, Variante, Installation und Artefakt sind opaque und kollisionsfrei in ihrem dokumentierten Namespace. Phase 1 MUST sie innerhalb einer Scan-Generation deterministisch bilden, darf aber ohne persistenten Index keine sitzungsübergreifende Stabilität versprechen. UI-Auswahl und Batch-Reconciliation dürfen deshalb keine zufällig bei jedem Batch neu erzeugten IDs verwenden.
 - **FR-INV-028 (P0):** Enthält das Sitzungsinventar Modelle, aber Seitenleistenscope, Suche oder strukturierte Filter liefern keine sichtbaren Treffer, MUST der Listenbereich `No Models Match This View` anzeigen und die einschränkenden Mechanismen nennen. Die primäre Recovery-Aktion `Show All Models` MUST `All Models` wählen sowie Suche und strukturierte Filter atomar leeren; der Empty State darf keinen zusätzlichen Scan als Abhilfe anbieten.
 - **FR-INV-029 (P0):** Ein Rechtsklick auf eine oder mehrere Modellzeilen MUST ein natives Untermenü `Copy` mit mindestens `Model Name`, `Provider / Model Name` und `Absolute Model Path` anbieten. Die Providerreferenz verwendet eine bestätigte kanonische Modell-ID wie `owner/model`, sofern vorhanden; andernfalls `provider-id/model-name`, ohne Namespace zu raten. Mehrfachauswahl wird in sichtbarer Tabellenreihenfolge mit genau einem Wert pro Zeile kopiert. Pfade werden lexikalisch standardisiert, aber nicht über Symlinks aufgelöst; Dateiinhalt und Secrets werden nie gelesen.
+- **FR-INV-030 (P0):** Das Hauptfenster MUST die aktuelle App-Version aus der Bundle-Konfiguration klein, dauerhaft und barrierefrei sichtbar anzeigen. Die Anzeige darf keine fest codierte Versionsnummer als eigene Quelle verwenden.
 
 ### 9.5 Model Cards und externe Links
 
@@ -777,10 +780,12 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - UI-Tests für Ablehnen, späteres Erlauben, falschen Ordner, Widerruf und erneute Freigabe.
 - UI- und Integrationstests für ersten Start ohne vorzeitigen Scan, unmittelbaren Scan nach `Start Scan`, automatischen Folgestart-Scan und deaktiviertes `Scan on Launch`.
 - UI-Test für den festen Settings-Footer außerhalb der Sidebar-Scope-Auswahl und das Öffnen des nativen Settings-Fensters.
-- Tests für deterministische Standardquellen-Reihenfolge und die Invariante, dass `~`, `~/.cache`, `~/Library` und andere breite Elternpfade nicht als automatische Scanwurzeln verwendet werden.
+- Tests für `SourcePrioritizer`: tiefere Quellen vor ihren Eltern, stabile Tie-Breaker, Beibehaltung explizit ausgewählter verschachtelter Quellen und Deduplizierung identischer Roots; `~`, `~/.cache`, `~/Library` und andere breite Elternpfade werden weiterhin nicht als automatische Scanwurzeln verwendet.
 - Tests für überlappende Provider-/manuelle Quellen: kanonischer Providerfund statt generischem `local`-Duplikat, aber Erhalt tatsächlich getrennter Installationspfade.
 - Tests für Scan-Generationen: Abbruch, sofortiger Rescan und verspätete Batches einer älteren Generation dürfen den aktiven Snapshot, Auswahl, Zähler und Abschlussstatus nicht verändern.
 - UI-Tests für fortlaufende Batch-Ergebnisse bei stabiler Auswahl sowie die dauerhafte Trennung von listenbezogenem Scan und kontextbezogenem `Reveal in Finder`.
+- View-Model- und UI-Tests für den automatischen vollständigen Rescan nach Quellenänderungen, einschließlich Abbruch/Ersetzung eines laufenden Scans und Entfernung deaktivierter Quellenresultate.
+- UI-Test für die dauerhaft kleine, barrierefreie Anzeige der aktuellen Bundle-Version im Hauptfenster.
 - View-Model- und UI-Tests für wahres leeres Inventar, laufenden Scan und null Treffer durch Sidebar, Suche oder Filter; `Show All Models` setzt den vollständigen sichtbaren Scope wieder her.
 - UI-Tests für sichtbaren Scan-Aktivitätsstatus, aktuelle gekürzte Scan-Wurzel, unbestimmten und bestimmten Fortschritt, separaten Abbruch sowie Abschluss- und Abbruchzusammenfassung.
 - Präsentations- und UI-Tests für `0 Artifacts`, `1 Artifact` und pluralisierte Artefaktanzahlen sowie unveränderte `Shared`-/`Unknown`-Kennzeichnung.
@@ -800,7 +805,8 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Getrenntes externes Volume, offline Volume, Read-only-Quelle und gebrochene Symlinks.
 - Mehrere zusätzliche HDDs/SSDs, Unmount während eines Scans und Wiedererkennung nach erneutem Mounten.
 - Große und geteilte HF-/Ollama-Caches mit erwarteter Freigabeprüfung.
-- Absolute und prozentuale Speicheransicht mit sichtbaren `Shared`-/`Unknown`-Kategorien, ausschließlich aktuell gescanntem Active-Scope und einer 100-Prozent-Summe nur innerhalb des gewählten Scopes.
+- Statische `Inventory Share`-Spalte ohne Umschaltung auf `Absolute`, mit sichtbaren `Shared`-/`Unknown`-Kategorien, ausschließlich aktuell gescanntem Active-Scope und einer 100-Prozent-Summe nur innerhalb des gewählten Scopes.
+- Scan mit sichtbaren Zwischenresultaten während einer großen Quelle, automatischem Re-Scan nach einer Quellenänderung und kleiner sichtbarer Versionsnummer im Hauptfenster.
 - Menüleisten-Popover, deaktiviertes Symbol und Navigation vom Kompaktstatus ins Hauptfenster.
 - Bestätigte, mehrdeutige und manuell ergänzte Model-Card-Links ohne automatischen Netzwerkabruf.
 - Erstfreigabe, Ablehnung, Recovery, Widerruf und read-only Preflight auf einem sauberen Benutzerkonto.
@@ -916,14 +922,15 @@ Die erste nutzbare Beta ist bewusst klein und scan-only. Sie ist fertig, wenn al
 7. Mindestens ein realer und ein Fixture-basierter Teildownload werden korrekt erkannt.
 8. Zeitstempel zeigen ihre Herkunft; `Stored`, `Old`, `Age Unknown` und `Incomplete` sind getrennt sichtbar. Runtimezustände sind nicht Teil der Phase-1-Abnahme.
 9. Config-Dateien sind zugeordnet und Finder-fähig. Bekannte Secret-Dateien werden nicht für Vorschauen geöffnet; harmlose Dotfiles gelten nicht automatisch als geheim.
-10. Absolute Größe und prozentualer aktiver Speicherbestand sind umschaltbar. Offline-Quellen sind ausgeschlossen und verändern den aktuellen Nenner nicht; historische Offline-Snapshots existieren in Phase 1 nicht.
+10. Die Modellliste zeigt statisch `Inventory Share`; eine Umschaltung auf `Absolute` existiert nicht. Offline-Quellen sind ausgeschlossen und verändern den aktuellen Nenner nicht; historische Offline-Snapshots existieren in Phase 1 nicht.
 11. Bestätigte Model Cards öffnen über HTTPS; mehrdeutige oder nur aus Dateinamen vermutete Links werden nicht als bestätigt dargestellt.
 12. Sources und datenbasierte Integrationsdefinitionen sind ohne Core-UI-Sonderfälle konfigurierbar; `How to extend this list` erklärt den späteren PR-Weg für Codeadapter.
 13. Automatisierte Core-, Adapter-, Permission-, Pfad- und Sprachtests sind grün.
 14. App, DMG und alle öffentlichen Inhalte außer `REQUIREMENTS.md` sind Englisch; `REQUIREMENTS.md` ist Deutsch und normativ.
 15. Ein verteiltes Beta-Artefakt ist Developer-ID-signiert, mit Hardened Runtime notarized, gestapelt und wird von Gatekeeper akzeptiert.
-16. Beim ersten Start erklärt WTM die notwendige Inventarisierung und scannt erst nach `Start Scan`; weitere Starts scannen bestätigte Quellen standardmäßig vollständig neu, während Ergebnisse fortlaufend und ohne Vermischung mit der Finder-Aktion erscheinen.
+16. Beim ersten Start erklärt WTM die notwendige Inventarisierung und scannt erst nach `Start Scan`; weitere Starts und erfolgreich gespeicherte Quellenänderungen scannen bestätigte Quellen standardmäßig vollständig neu, während Ergebnisse fortlaufend und ohne Vermischung mit der Finder-Aktion erscheinen. Die aktuelle App-Version ist im Hauptfenster sichtbar.
 17. Der ausgelieferte Build fordert keinen Mikrofon-, Audio-Capture-, Media-Library-, Apple-Music- oder Spracherkennungszugriff an; das First-Run-Onboarding kommuniziert diesen Ausschluss.
+18. Bei mehreren explizit aktivierten, verschachtelten Quellen werden spezifischere Pfade zuerst gescannt; ein übergeordneter, ebenfalls aktivierter Pfad bleibt anschließend Teil desselben vollständigen Scans.
 
 ## 18. Phasenplan
 

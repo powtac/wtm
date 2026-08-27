@@ -1,0 +1,67 @@
+#!/bin/zsh
+set -euo pipefail
+
+repository_root="${0:A:h:h}"
+cd "$repository_root"
+catalog="$repository_root/App/WTMApp/Resources/Localizable.xcstrings"
+
+typeset -A catalog_keys
+while IFS= read -r key; do
+  catalog_keys["$key"]=1
+done < <(jq -r '.strings | keys[]' "$catalog")
+
+violations="$({
+  /usr/bin/perl -MFile::Find -e '
+    find({wanted => sub {
+      return unless -f $_ && /\.swift\z/ && $File::Find::name =~ m{^App/WTMApp/};
+      open my $fh, "<", $_ or die "$File::Find::name: $!";
+      my $line = 0;
+      while (my $source = <$fh>) {
+        ++$line;
+        while ($source =~ /\b(Text|Label|Button|Section|Picker|LabeledContent|ProgressView|ContentUnavailableView|Link|Window)\("([^"]*)"/g) {
+          my ($kind, $value) = ($1, $2);
+          next if $value =~ /\\/ || $value eq "·";
+          if ($value =~ /^[a-z0-9][a-z0-9_.-]*$/) {
+            print "key\t$File::Find::name:$line: $kind\t$value\n";
+          } else {
+            print "hard\t$File::Find::name:$line: $kind(\"$value\")\t$value\n";
+          }
+        }
+        while ($source =~ /accessibilityLabel\("([^"]*)"/g) {
+          my $value = $1;
+          next if $value =~ /\\/ || $value eq "·";
+          if ($value =~ /^[a-z0-9][a-z0-9_.-]*$/) {
+            print "key\t$File::Find::name:$line: accessibilityLabel\t$value\n";
+          } else {
+            print "hard\t$File::Find::name:$line: accessibilityLabel(\"$value\")\t$value\n";
+          }
+        }
+      }
+    }, no_chdir => 1}, "App/WTMApp");
+  ';
+} || true)"
+
+missing_keys=()
+hard_coded=()
+while IFS=$'\t' read -r kind location value; do
+  [[ -n "$kind" ]] || continue
+  if [[ "$kind" == "key" && -z "${catalog_keys["$value"]+present}" ]]; then
+    missing_keys+=("$location: missing catalog key $value")
+  elif [[ "$kind" == "hard" ]]; then
+    hard_coded+=("$location")
+  fi
+done <<< "$violations"
+
+if (( ${#missing_keys[@]} > 0 || ${#hard_coded[@]} > 0 )); then
+  if (( ${#missing_keys[@]} > 0 )); then
+    echo "Missing String Catalog keys:" >&2
+    printf '%s\n' "${missing_keys[@]}" >&2
+  fi
+  if (( ${#hard_coded[@]} > 0 )); then
+    echo "Hard-coded visible UI strings found; use a String Catalog key:" >&2
+    printf '%s\n' "${hard_coded[@]}" >&2
+  fi
+  exit 1
+fi
+
+echo "Localization lint passed: visible SwiftUI strings use catalog keys."

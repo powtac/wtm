@@ -45,10 +45,10 @@ struct WTMApp: App {
     .defaultSize(width: 1_180, height: 760)
     .commands {
       CommandGroup(replacing: .appInfo) {
-        Button("About What The Model") {
+        Button("app.about.action") {
           openWindow(id: "about")
         }
-        Button("Check for Updates…") {
+        Button("update.check.action") {
           updateChecker.checkManually()
         }
       }
@@ -59,7 +59,7 @@ struct WTMApp: App {
         .frame(width: 620, height: 440)
     }
 
-    Window("About What The Model", id: "about") {
+    Window("app.about.window", id: "about") {
       AboutView(checker: updateChecker)
     }
     .defaultSize(width: 560, height: 520)

@@ -50,6 +50,7 @@ before merge.
 | [ADR-026](ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md) | Passive menu bar and reviewed client handoffs | Phase 4 boundary |
 | [ADR-027](ADR-027-fail-closed-public-release-chain.md) | Fail-closed public release chain | Phase 5 boundary |
 | [ADR-028](ADR-028-defer-mlx-to-a-dedicated-phase.md) | Defer MLX to a dedicated phase | Phase 6 boundary |
+| [ADR-029](ADR-029-specific-source-scan-priority.md) | Specific source scan priority | Phase 1 learning |
 
 ## Requirements revision checklist
 

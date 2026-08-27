@@ -100,7 +100,7 @@ struct SettingsRootView: View {
         )
       }
 
-      Section("Updates") {
+      Section("settings.updates.section") {
         UpdateStatusView(checker: updateChecker)
       }
 
@@ -205,7 +205,7 @@ struct SettingsRootView: View {
   private var integrationSettings: some View {
     Form {
       Section("settings.runtimes.section") {
-        LabeledContent("Ollama") {
+        LabeledContent("settings.runtime.ollama") {
           Text("settings.runtime.local-api")
             .foregroundStyle(.secondary)
         }

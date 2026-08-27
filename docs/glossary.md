@@ -18,7 +18,7 @@ download service, inference host, or client configuration manager.
 | Right column | Detail pane | Details and actions for the selected model or selection. “Inspector” is an informal synonym. |
 | Top of the list | List controls | `Scan Now`/`Rescan`, search, and filters. |
 | Below list controls | Scan status or scan summary | Live progress while scanning, or the last completed/cancelled scan result. |
-| Above the table | Storage controls | `Absolute`/`Share` display mode and the total for the active inventory scope. |
+| Above the table | Storage controls | Shared/unknown storage categories and the total for the active inventory scope. |
 | Native preferences window | Settings | The five top-level panes: `General`, `Sources`, `Integrations`, `Security`, and `Advanced`. |
 
 ## Inventory sidebar scopes
@@ -56,10 +56,9 @@ Models`; it does not run another scan.
 | Term | Definition |
 | --- | --- |
 | Logical size | The sum of file sizes as represented by the source. |
-| Allocated Size | The physical disk allocation attributed to the installation. This is the default list column and default sort key; largest allocation appears first. |
+| Allocated Size | The physical disk allocation attributed to the installation. It remains available in model details; the list uses `Inventory Share`. |
 | Exact Bytes | The exact allocated byte count shown in the detail pane. |
-| `Absolute` | Show each row's allocated bytes directly. |
-| `Share` | Show each row's exclusively attributable allocated bytes as a percentage of the active scanned inventory. |
+| `Inventory Share` | Show each row's exclusively attributable allocated bytes as a percentage of the active scanned inventory. |
 | Shared | Physical storage referenced by more than one installation. It is counted separately to avoid double-counting. |
 | Unknown | Physical storage whose ownership cannot be established safely. |
 | Reclaimable | Storage that a reviewed cleanup plan may remove after dependency, identity, and in-use checks. It is an estimate until the action completes. |
@@ -73,7 +72,7 @@ Models`; it does not run another scan.
 | --- | --- |
 | `Stored` | Model data is present on local storage and was inventoried. It does not claim runtime compatibility or successful inference. |
 | `Incomplete` | Required or expected evidence is partial, missing, or still downloading. |
-| `Issue` | The installation has a model-specific problem recorded by the adapter. |
+| `Model Issue` | The installation has a model-specific problem recorded by the adapter. |
 | `Offline` | The installation is known from inventory but its source or volume is currently unavailable. |
 
 ### Source access states
@@ -152,8 +151,6 @@ this glossary. They are recorded here so users do not infer the wrong meaning.
 | Format values | `Ollama` is exposed as a `ModelFormat`, although Ollama is primarily a storage/provider convention rather than a file format. | Prefer `Representation` or `Storage representation` for that field, or explain why provider-backed Ollama variants use the value. |
 | Runtime terminology | The detail pane says `Runtime Verification`, Settings says `Runtime Tools`, and the architecture says `RuntimeAdapter`. | Keep all three only when the role is explicit: verification = evidence, tool = executable definition, adapter = implementation. |
 | Scan result counts | The log says `installations`, the UI says `found`, and the sidebar says `models`. | Use `model installations found` in logs and docs; reserve `model` for the logical identity. |
-| Website support matrix | `Run or handoff` combines runtime execution and client handoff into one column. | Split it into `Runtime` and `Client handoff` so the capability boundary remains visible. |
-| Localization | `SettingsRootView` still contains a hard-coded `Updates` section heading and several menu/update strings, while the product policy requires catalog-backed English UI strings. | Move remaining visible strings into the String Catalog. |
 
 The glossary describes the current behavior and does not silently redefine it.
 Behavioral changes should update this file, the website glossary, the relevant

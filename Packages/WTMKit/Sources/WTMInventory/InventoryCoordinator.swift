@@ -324,14 +324,7 @@ public actor InventoryCoordinator: InventoryScanning {
   }
 
   private nonisolated func orderedEnabledSources(_ sources: [ScanSource]) -> [ScanSource] {
-    ScanSourcePathFilter().filter(sources).enumerated()
-      .sorted { left, right in
-        let leftPriority = left.element.providerID == .manual ? 1 : 0
-        let rightPriority = right.element.providerID == .manual ? 1 : 0
-        if leftPriority != rightPriority { return leftPriority < rightPriority }
-        return left.offset < right.offset
-      }
-      .map(\.element)
+    SourcePrioritizer().prioritize(sources)
   }
 }
 

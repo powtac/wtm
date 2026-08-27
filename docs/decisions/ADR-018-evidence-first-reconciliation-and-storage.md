@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-24
+- Amended: 2026-08-27
 
 ## Context
 
@@ -30,12 +31,14 @@ or `Unknown`. Do not hash multi-gigabyte weights during normal scanning.
 - APFS allocation, clones, sparse files, provider GC, and missing physical IDs limit exactness.
 - Percentages use the current connected active scope, include explicit shared/unknown
   categories, and are calculated before presentation rounding.
+- The inventory table presents only `Inventory Share`; absolute allocated bytes remain
+  available in model details and are not a second table display mode.
 
 ## Requirements impact
 
 Requirements must define entity boundaries, ID scope, reconciliation proof, storage terms,
-physical deduplication, unknown handling, percentage denominator, rounding, and limits on
-claims about reclaimable disk space.
+physical deduplication, unknown handling, percentage denominator, rounding, the static
+`Inventory Share` presentation, and limits on claims about reclaimable disk space.
 
 ## Validation
 

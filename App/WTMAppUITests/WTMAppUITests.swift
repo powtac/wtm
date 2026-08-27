@@ -89,6 +89,7 @@ final class WTMAppUITests: XCTestCase {
 
     let modelName = application.staticTexts["Fixture-Q4_K_M"].firstMatch
     XCTAssertTrue(modelName.waitForExistence(timeout: 10))
+    XCTAssertTrue(application.descendants(matching: .any)["app-version"].exists)
     NSPasteboard.general.clearContents()
     modelName.rightClick()
     let copyMenu = application.menuItems["Copy"].firstMatch

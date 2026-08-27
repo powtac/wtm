@@ -164,14 +164,22 @@ func providerSourcesHaveDeterministicPriority() async throws {
   #expect(startedSourceIDs == ["hugging-face", "manual"])
 }
 
-@Test("Nested sources are scanned once per provider")
-func nestedSourcesAreFilteredPerProvider() {
+@Test("Source prioritizer prefers nested roots and retains their parent")
+func sourcePrioritizerPrefersNestedRoots() {
   let rootURL = URL(filePath: "/tmp/wtm-home")
   let nestedURL = rootURL.appending(path: ".models", directoryHint: .isDirectory)
   let sources = [
     ScanSource(
       id: "nested",
       displayName: "Nested",
+      providerID: .manual,
+      rootURL: nestedURL,
+      accessState: .allowed,
+      isEnabled: true
+    ),
+    ScanSource(
+      id: "nested-duplicate",
+      displayName: "Nested Duplicate",
       providerID: .manual,
       rootURL: nestedURL,
       accessState: .allowed,
@@ -187,7 +195,7 @@ func nestedSourcesAreFilteredPerProvider() {
     ),
   ]
 
-  #expect(ScanSourcePathFilter().filter(sources).map(\.id) == ["root"])
+  #expect(SourcePrioritizer().prioritize(sources).map(\.id) == ["nested", "root"])
 }
 
 @Test("Provider-specific sources remain separate when paths overlap")
@@ -215,8 +223,8 @@ func overlappingProviderSourcesRemainSeparate() {
   #expect(ScanSourcePathFilter().filter(sources).map(\.id) == ["manual", "mlx"])
 }
 
-@Test("Coordinator skips nested same-provider sources")
-func coordinatorSkipsNestedSources() async throws {
+@Test("Coordinator scans nested same-provider sources before their parent")
+func coordinatorPrioritizesNestedSources() async throws {
   let rootURL = FileManager.default.temporaryDirectory.appending(
     path: "wtm-scan-filter-\(UUID().uuidString)",
     directoryHint: .isDirectory
@@ -240,7 +248,7 @@ func coordinatorSkipsNestedSources() async throws {
     }
   }
 
-  #expect(startedSourceIDs == ["root"])
+  #expect(startedSourceIDs == ["nested", "root"])
 }
 
 @Test("Scan events preserve source order and bound installation batches")

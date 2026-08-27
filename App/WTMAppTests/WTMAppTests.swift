@@ -367,7 +367,6 @@ func inventoryColumnWidthsUseCellContent() {
 
   let widths = inventoryTableColumnWidths(
     rows: rows,
-    mode: .absolute,
     totalByteCount: 0,
     sourceName: { _ in "S" },
     measureText: { CGFloat($0.count) }
@@ -376,6 +375,120 @@ func inventoryColumnWidthsUseCellContent() {
   #expect(widths.name == CGFloat("A substantially wider model".count + 16))
   #expect(widths.reclaimableSize == InventoryTableColumnWidths.minimum)
   #expect(widths.reclaimableSize < CGFloat("Reclaimable".count + 16))
+}
+
+@MainActor
+@Test("Inventory rows update before a scan finishes")
+func inventoryRowsUpdateIncrementallyDuringScan() async throws {
+  let source = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "incremental",
+      displayName: "Incremental",
+      providerID: .manual,
+      rootURL: FileManager.default.temporaryDirectory,
+      accessState: .allowed,
+      isEnabled: true
+    )
+  )
+  let scanner = ControlledInventoryScanner()
+  let model = InventoryViewModel(
+    coordinator: scanner,
+    initialSources: [source],
+    sourceSettingsStore: FixtureSourceSettingsStore(snapshot: nil),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog()
+  )
+
+  model.startScan()
+  scanner.yield(
+    .batch(
+      sourceID: source.id,
+      installations: [ageFixture(timestamp: nil, allocatedByteCount: 4_096)],
+      issues: []
+    ),
+    toStreamAt: 0
+  )
+
+  for _ in 0..<100 where model.installations.isEmpty {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+
+  #expect(model.installations.count == 1)
+  #expect(model.isScanning)
+  model.cancelScan()
+}
+
+@Test("Inventory rows use the static inventory share value")
+func inventoryRowsUseStaticInventoryShare() {
+  let installation = ageFixture(timestamp: nil, allocatedByteCount: 4_096)
+  let breakdown = InventoryStorageBreakdown(installations: [installation])
+  let row = inventoryTableRows(
+    installations: [installation],
+    breakdown: breakdown
+  )[0]
+
+  #expect(row.displayedByteCount == 4_096)
+  #expect(row.displayedByteCount == breakdown.totalByteCount)
+}
+
+@MainActor
+@Test("Changing a source setting automatically starts a rescan")
+func sourceSettingsAutomaticallyTriggerRescan() async throws {
+  let rootURL = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+
+  let approved = try SourceApprovalPolicy().approve(
+    ScanSource(
+      id: "settings-rescan",
+      displayName: "Settings Rescan",
+      providerID: .manual,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    )
+  )
+  let disabled = ScanSource(
+    id: approved.id,
+    displayName: approved.displayName,
+    providerID: approved.providerID,
+    rootURL: approved.rootURL,
+    volumeIdentity: approved.volumeIdentity,
+    rootIdentity: approved.rootIdentity,
+    accessState: .notSetUp,
+    isEnabled: false
+  )
+  let scanner = ControlledInventoryScanner()
+  let model = InventoryViewModel(
+    coordinator: scanner,
+    initialSources: [],
+    sourceSettingsStore: FixtureSourceSettingsStore(
+      snapshot: SourceSettingsSnapshot(
+        revision: 1,
+        sources: [disabled],
+        hasCompletedOnboarding: true,
+        scanOnLaunch: false
+      )
+    ),
+    folderSelector: NilFolderSelector(),
+    fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog()
+  )
+
+  await model.prepareForLaunch()
+  model.setSourceEnabled(approved.id, enabled: true)
+
+  for _ in 0..<100 where scanner.streamCount == 0 {
+    try await Task.sleep(for: .milliseconds(5))
+  }
+
+  #expect(scanner.streamCount == 1)
+  #expect(model.isScanning)
+  model.cancelScan()
 }
 
 @Test("Allocated sizes are rounded to whole display units")

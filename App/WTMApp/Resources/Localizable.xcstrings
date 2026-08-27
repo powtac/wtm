@@ -198,12 +198,66 @@
         }
       }
     },
+    "app.about.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About What The Model"
+          }
+        }
+      }
+    },
+    "app.about.window" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About What The Model"
+          }
+        }
+      }
+    },
+    "app.icon.accessibility" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What The Model application icon"
+          }
+        }
+      }
+    },
+    "app.license.link" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apache License 2.0"
+          }
+        }
+      }
+    },
     "app.name" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "What The Model"
+          }
+        }
+      }
+    },
+    "app.repository.link" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repository on GitHub"
           }
         }
       }
@@ -1012,17 +1066,6 @@
         }
       }
     },
-    "detail.source-type" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source Type"
-          }
-        }
-      }
-    },
     "detail.size" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1030,6 +1073,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Allocated Size"
+          }
+        }
+      }
+    },
+    "detail.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
           }
         }
       }
@@ -1056,21 +1110,12 @@
       }
     },
     "filter.any-provider" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Any Provider"
-          }
-        }
-      }
-    },
-    "filter.any-source-type" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Any Source Type"
           }
         }
       }
@@ -1081,6 +1126,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Any Source"
+          }
+        }
+      }
+    },
+    "filter.any-source-type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Source Type"
           }
         }
       }
@@ -1128,17 +1183,6 @@
         }
       }
     },
-    "filter.source-type" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source Type"
-          }
-        }
-      }
-    },
     "filter.show-all" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1157,6 +1201,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Source"
+          }
+        }
+      }
+    },
+    "filter.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
           }
         }
       }
@@ -1337,17 +1392,6 @@
         }
       }
     },
-    "inventory.column.source-type" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source Type"
-          }
-        }
-      }
-    },
     "inventory.column.reclaimable" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1370,17 +1414,6 @@
         }
       }
     },
-    "inventory.column.size" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Allocated Size"
-          }
-        }
-      }
-    },
     "inventory.column.source" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1388,6 +1421,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Source"
+          }
+        }
+      }
+    },
+    "inventory.column.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
           }
         }
       }
@@ -1788,9 +1832,6 @@
       }
     },
     "Published %@" : {
-
-    },
-    "Release notes" : {
 
     },
     "runtime.check.action" : {
@@ -2431,27 +2472,6 @@
         }
       }
     },
-    "settings.defaults.description" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore WTM's source, scan, runtime, and interface settings. Models and audit history are not deleted."
-          }
-        }
-      }
-    },
-    "settings.defaults.section" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Defaults"
-          }
-        }
-      }
-    },
     "settings.age.section" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2567,6 +2587,27 @@
         }
       }
     },
+    "settings.defaults.description" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore WTM's source, scan, runtime, and interface settings. Models and audit history are not deleted."
+          }
+        }
+      }
+    },
+    "settings.defaults.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defaults"
+          }
+        }
+      }
+    },
     "settings.extend.action" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2606,38 +2647,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "General"
-          }
-        }
-      }
-    },
-    "settings.reset.action" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset to Defaults"
-          }
-        }
-      }
-    },
-    "settings.reset.confirmation.message" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Custom sources and runtime settings will be removed. Models and audit history remain untouched."
-          }
-        }
-      }
-    },
-    "settings.reset.confirmation.title" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset WTM Settings?"
           }
         }
       }
@@ -2769,12 +2778,55 @@
         }
       }
     },
+    "settings.reset.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Defaults"
+          }
+        }
+      }
+    },
+    "settings.reset.confirmation.message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom sources and runtime settings will be removed. Models and audit history remain untouched."
+          }
+        }
+      }
+    },
+    "settings.reset.confirmation.title" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset WTM Settings?"
+          }
+        }
+      }
+    },
     "settings.runtime.local-api" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Built-in · Numeric loopback API"
+          }
+        }
+      }
+    },
+    "settings.runtime.ollama" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ollama"
           }
         }
       }
@@ -2873,6 +2925,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Storage Providers"
+          }
+        }
+      }
+    },
+    "settings.updates.section" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Updates"
           }
         }
       }
@@ -3175,6 +3238,7 @@
       }
     },
     "source.type.manual-folder" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3190,37 +3254,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "active scanned inventory"
-          }
-        }
-      }
-    },
-    "storage.mode.absolute" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Absolute"
-          }
-        }
-      }
-    },
-    "storage.mode.label" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Storage Display"
-          }
-        }
-      }
-    },
-    "storage.mode.share" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share"
           }
         }
       }
@@ -3558,6 +3591,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Validate"
+          }
+        }
+      }
+    },
+    "update.check.action" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check for Updates…"
+          }
+        }
+      }
+    },
+    "update.release-notes" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Release notes"
+          }
+        }
+      }
+    },
+    "update.release.download" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download Latest Release"
+          }
+        }
+      }
+    },
+    "update.release.view" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Release on GitHub"
+          }
+        }
+      }
+    },
+    "update.releases.view" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "View Releases on GitHub"
           }
         }
       }

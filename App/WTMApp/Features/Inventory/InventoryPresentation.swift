@@ -105,11 +105,6 @@ extension ModelInstallation {
   var inventorySortPath: String { rootURL.path }
 }
 
-enum StorageDisplayMode: String, CaseIterable {
-  case absolute
-  case share
-}
-
 enum InventoryCopyRepresentation: CaseIterable {
   case modelName
   case providerAndModelName
@@ -162,7 +157,6 @@ struct InventoryTableColumnWidths: Equatable {
 
 func inventoryTableColumnWidths(
   rows: [InventoryTableRow],
-  mode: StorageDisplayMode,
   totalByteCount: Int64,
   sourceName: (ScanSource.ID) -> String,
   relativeTo referenceDate: Date = .now,
@@ -179,11 +173,7 @@ func inventoryTableColumnWidths(
     format: width(for: rows.map { formatAndQuantizationText($0.installation) }),
     state: width(for: rows.map(\.installation.state.localizedName)),
     size: width(
-      for: rows.map { row in
-        mode == .absolute
-          ? wholeByteCount(row.displayedByteCount)
-          : percentageText(row.displayedByteCount, of: totalByteCount)
-      }
+      for: rows.map { percentageText($0.displayedByteCount, of: totalByteCount) }
     ),
     reclaimableSize: width(for: rows.map { wholeByteCount($0.reclaimableByteCount) }),
     age: width(
@@ -203,15 +193,12 @@ func inventoryTableTextWidth(_ text: String) -> CGFloat {
 
 func inventoryTableRows(
   installations: [ModelInstallation],
-  mode: StorageDisplayMode,
   breakdown: InventoryStorageBreakdown
 ) -> [InventoryTableRow] {
   installations.map { installation in
     InventoryTableRow(
       installation: installation,
-      displayedByteCount: mode == .absolute
-        ? installation.allocatedByteCount
-        : breakdown.exclusiveByteCount(for: installation.id),
+      displayedByteCount: breakdown.exclusiveByteCount(for: installation.id),
       reclaimableByteCount: breakdown.exclusiveByteCount(for: installation.id)
     )
   }

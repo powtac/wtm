@@ -719,6 +719,7 @@ final class InventoryViewModel {
   func setSourceEnabled(_ sourceID: ScanSource.ID, enabled: Bool) {
     guard let index = sources.firstIndex(where: { $0.id == sourceID }) else { return }
     let source = sources[index]
+    guard source.isEnabled != enabled else { return }
     var updated = ScanSource(
       id: source.id,
       displayName: source.displayName,
@@ -742,8 +743,17 @@ final class InventoryViewModel {
           isEnabled: true
         )
     }
+    if !enabled {
+      let removedInstallationIDs = Set(
+        installations.filter { $0.sourceID == sourceID }.map(\.id)
+      )
+      installations.removeAll { $0.sourceID == sourceID }
+      issues.removeAll { $0.sourceID == sourceID }
+      selectedInstallationIDs.subtract(removedInstallationIDs)
+    }
     sources[index] = refreshedSource(updated)
     persistSourceSettings()
+    rescanAfterSourceSettingsChange()
   }
 
   func addManualFolder(startingAt url: URL? = nil) {
@@ -772,6 +782,7 @@ final class InventoryViewModel {
       else { return }
       self.sources.append(source)
       self.persistSourceSettings()
+      self.rescanAfterSourceSettingsChange()
     }
   }
 
@@ -786,6 +797,7 @@ final class InventoryViewModel {
       }
       self.sources[index] = self.refreshedSource(replacement)
       self.persistSourceSettings()
+      self.rescanAfterSourceSettingsChange()
     }
   }
 
@@ -807,6 +819,7 @@ final class InventoryViewModel {
       sources.removeAll { $0.id == sourceID }
     }
     persistSourceSettings()
+    rescanAfterSourceSettingsChange()
   }
 
   func refreshMountedVolumes() {
@@ -914,7 +927,7 @@ final class InventoryViewModel {
     }
 
     refreshSourceAccess()
-    let enabledSources = ScanSourcePathFilter().filter(sources).filter { source in
+    let enabledSources = SourcePrioritizer().prioritize(sources).filter { source in
       sourceIDs == nil || sourceIDs?.contains(source.id) == true
     }
     guard !enabledSources.isEmpty else { return }
@@ -1209,6 +1222,13 @@ final class InventoryViewModel {
         self?.reportSettingsIssue(code: "SOURCE_SETTINGS_SAVE_FAILED")
       }
     }
+  }
+
+  private func rescanAfterSourceSettingsChange() {
+    guard hasCompletedOnboarding else { return }
+    if isScanning { cancelScan() }
+    scanSummary = nil
+    startScan()
   }
 
   private func reportSettingsIssue(code: String) {

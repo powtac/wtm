@@ -13,7 +13,7 @@ struct UpdateStatusView: View {
           .font(.headline)
         Spacer()
         if showsCheckButton {
-          Button("Check for Updates…") {
+          Button("update.check.action") {
             checker.checkManually()
           }
           .accessibilityIdentifier("check-for-updates-button")
@@ -29,7 +29,7 @@ struct UpdateStatusView: View {
           Text("Version \(release.version.description)")
           Text("Published \(release.publishedAt, format: .dateTime.year().month().day())")
           if !compact {
-            Text("Release notes")
+            Text("update.release-notes")
               .font(.subheadline.weight(.semibold))
             Text(release.releaseNotes)
               .font(.callout)
@@ -37,15 +37,15 @@ struct UpdateStatusView: View {
               .lineLimit(8)
           }
           HStack {
-            Link("View Release on GitHub", destination: release.htmlURL)
-            Link("Download Latest Release", destination: release.htmlURL)
+            Link("update.release.view", destination: release.htmlURL)
+            Link("update.release.download", destination: release.htmlURL)
               .accessibilityIdentifier("download-latest-release-link")
           }
         }
       } else if !compact {
         HStack {
-          Link("View Releases on GitHub", destination: checker.releaseSourceURL)
-          Link("Download Latest Release", destination: checker.releaseSourceURL)
+          Link("update.releases.view", destination: checker.releaseSourceURL)
+          Link("update.release.download", destination: checker.releaseSourceURL)
             .accessibilityIdentifier("download-latest-release-link")
         }
       }
@@ -109,7 +109,7 @@ struct AboutView: View {
         Image(nsImage: NSImage(named: NSImage.applicationIconName) ?? NSImage())
           .resizable()
           .frame(width: 72, height: 72)
-          .accessibilityLabel("What The Model application icon")
+          .accessibilityLabel(Text("app.icon.accessibility"))
         VStack(alignment: .leading, spacing: 4) {
           Text("app.name")
             .font(.title2.weight(.semibold))
@@ -126,8 +126,8 @@ struct AboutView: View {
       UpdateStatusView(checker: checker)
 
       HStack {
-        Link("Repository on GitHub", destination: UpdateChecker.repositoryURL)
-        Link("Apache License 2.0", destination: UpdateChecker.licenseURL)
+        Link("app.repository.link", destination: UpdateChecker.repositoryURL)
+        Link("app.license.link", destination: UpdateChecker.licenseURL)
       }
     }
     .padding(24)

@@ -11,6 +11,7 @@ load_local_environment "$repository_root"
 ./scripts/check-decisions
 ./scripts/validate-fixtures
 ./scripts/check-language
+./scripts/check-localization
 ./scripts/check-website
 ./scripts/check-release
 bash -n script/build_and_run.sh

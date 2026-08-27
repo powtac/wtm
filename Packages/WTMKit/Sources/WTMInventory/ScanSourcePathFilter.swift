@@ -1,10 +1,10 @@
 import Foundation
 import WTMDomain
 
-/// Removes redundant enabled scan roots for the same provider.
+/// Removes duplicate enabled scan roots for the same provider.
 ///
-/// A readable parent root covers nested roots. Provider-specific roots are kept separate because
-/// adapters interpret the same filesystem differently.
+/// Nested roots are intentionally retained. Their scan order is owned by `SourcePrioritizer`,
+/// because a specifically selected child can produce useful results before its parent scan.
 public struct ScanSourcePathFilter: Sendable {
   public init() {}
 
@@ -12,29 +12,18 @@ public struct ScanSourcePathFilter: Sendable {
     var retained: [ScanSource] = []
 
     for source in sources where source.isEnabled {
-      guard isScanCapable(source) else {
-        retained.append(source)
-        continue
-      }
-
-      guard !retained.contains(where: { covers($0, source) }) else { continue }
-      retained.removeAll { covers(source, $0) }
+      guard
+        !retained.contains(where: {
+          isScanCapable($0)
+            && isScanCapable(source)
+            && $0.providerID == source.providerID
+            && canonicalPath(for: $0.rootURL) == canonicalPath(for: source.rootURL)
+        })
+      else { continue }
       retained.append(source)
     }
 
     return retained
-  }
-
-  private func covers(_ covering: ScanSource, _ candidate: ScanSource) -> Bool {
-    guard isScanCapable(covering), covering.providerID == candidate.providerID else {
-      return false
-    }
-
-    let coveringPath = canonicalPath(for: covering.rootURL)
-    let candidatePath = canonicalPath(for: candidate.rootURL)
-    guard coveringPath != candidatePath else { return true }
-    if coveringPath == "/" { return candidatePath.hasPrefix("/") }
-    return candidatePath.hasPrefix(coveringPath + "/")
   }
 
   private func isScanCapable(_ source: ScanSource) -> Bool {
