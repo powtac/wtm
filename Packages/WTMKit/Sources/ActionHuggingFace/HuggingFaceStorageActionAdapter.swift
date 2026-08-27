@@ -55,7 +55,8 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
         {
           for referenceURL in try matchingReferences(
             repositoryURL: repositoryURL,
-            revision: revision
+            revision: revision,
+            source: source
           ) {
             try addTrashOperation(
               url: referenceURL,
@@ -221,27 +222,25 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
     return destination.standardizedFileURL
   }
 
-  private func matchingReferences(repositoryURL: URL, revision: String) throws -> [URL] {
+  private func matchingReferences(
+    repositoryURL: URL,
+    revision: String,
+    source: ScanSource
+  ) throws -> [URL] {
     let refsURL = repositoryURL.appending(path: "refs", directoryHint: .isDirectory)
     guard FileManager.default.fileExists(atPath: refsURL.path) else { return [] }
-    guard
-      let enumerator = FileManager.default.enumerator(
-        at: refsURL,
-        includingPropertiesForKeys: [.isRegularFileKey],
-        options: [.skipsPackageDescendants],
-        errorHandler: { _, _ in true }
-      )
-    else { return [] }
     var matches: [URL] = []
-    for case let url as URL in enumerator {
+    let entries = try ReadOnlyDirectoryWalker().entries(under: refsURL, approvedBy: source)
+    for entry in entries where entry.isRegularFile {
       guard
-        let data = try? FileMetadataReader().readData(from: url, maximumByteCount: 1_024),
+        let data = try? FileMetadataReader().readData(
+          from: entry.resolvedURL, maximumByteCount: 1_024),
         let value = String(data: data, encoding: .utf8)?.trimmingCharacters(
           in: .whitespacesAndNewlines
         ),
         value == revision
       else { continue }
-      matches.append(url)
+      matches.append(entry.url)
     }
     return matches
   }

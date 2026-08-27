@@ -31,19 +31,20 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
       )
     }
 
-    let manifestURLs = entries.filter {
+    let manifestEntries = entries.filter {
       ($0.isRegularFile || $0.isSymbolicLink) && $0.url.path.contains("/manifests/")
-    }.map(\.url)
+    }
     let partialBlobURLs = entries.compactMap { entry -> URL? in
       guard entry.isRegularFile || entry.isSymbolicLink,
-        isPartialBlob(entry.url, root: source.rootURL)
+        isPartialBlob(entry.resolvedURL, root: source.rootURL)
       else { return nil }
-      return entry.url
+      return entry.resolvedURL
     }
     var parsedManifests: [ParsedManifest] = []
     var issues: [InventoryIssue] = []
 
-    for manifestURL in manifestURLs {
+    for entry in manifestEntries {
+      let manifestURL = entry.resolvedURL
       do {
         let data = try FileMetadataReader().readData(
           from: manifestURL, maximumByteCount: 10_000_000)

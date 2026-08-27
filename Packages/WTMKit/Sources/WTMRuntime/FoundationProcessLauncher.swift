@@ -45,12 +45,12 @@ public struct FoundationProcessLauncher: RuntimeProcessLaunching, Sendable {
     process.standardInput = FileHandle.nullDevice
 
     standardOutput.fileHandleForReading.readabilityHandler = { handle in
-      let data = handle.availableData
+      let data = (try? handle.read(upToCount: 64 * 1_024)) ?? Data()
       guard !data.isEmpty, let text = String(data: data, encoding: .utf8) else { return }
       outputHandler(.standardOutput, text)
     }
     standardError.fileHandleForReading.readabilityHandler = { handle in
-      let data = handle.availableData
+      let data = (try? handle.read(upToCount: 64 * 1_024)) ?? Data()
       guard !data.isEmpty, let text = String(data: data, encoding: .utf8) else { return }
       outputHandler(.standardError, text)
     }

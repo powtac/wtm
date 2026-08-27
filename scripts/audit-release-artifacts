@@ -63,6 +63,18 @@ for checksum_asset in "WTM-$version-arm64.dmg" "WTM-$version.spdx.json" "release
     exit 1
   }
 done
+expected_checksums="$(
+  cd "$release_directory"
+  /usr/bin/shasum -a 256 \
+    "WTM-$version-arm64.dmg" \
+    "WTM-$version.spdx.json" \
+    "release-metadata.json"
+)"
+actual_checksums="$(cd "$release_directory" && /usr/bin/sort < "$checksum_path")"
+[[ "$(/usr/bin/sort <<< "$expected_checksums")" == "$actual_checksums" ]] || {
+  echo "Checksum manifest does not match the release assets." >&2
+  exit 1
+}
 
 if find "$release_directory" -type f \( -name '*.p12' -o -name '*.keychain*' -o -name '*.mobileprovision' -o -name '.env' \) -print -quit | /usr/bin/grep -q .; then
   echo "Credential-bearing file type found in release assets." >&2
