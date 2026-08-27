@@ -208,6 +208,16 @@
         }
       }
     },
+    "app.subtitle" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Local Model Inventory"
+          }
+        }
+      }
+    },
     "artifact.shared" : {
       "localizations" : {
         "en" : {
@@ -1463,7 +1473,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Local Model Inventory"
+            "value" : "What The Model"
           }
         }
       }
@@ -1578,9 +1588,6 @@
       }
     },
     "Last checked %@" : {
-
-    },
-    "Local LLM Inventory for macOS" : {
 
     },
     "menu.incomplete" : {

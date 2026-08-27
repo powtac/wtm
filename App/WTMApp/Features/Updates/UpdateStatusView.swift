@@ -111,9 +111,9 @@ struct AboutView: View {
           .frame(width: 72, height: 72)
           .accessibilityLabel("What The Model application icon")
         VStack(alignment: .leading, spacing: 4) {
-          Text("What The Model")
+          Text("app.name")
             .font(.title2.weight(.semibold))
-          Text("Local LLM Inventory for macOS")
+          Text("app.subtitle")
             .foregroundStyle(.secondary)
           Text("Version \(checker.currentVersionText) (Build \(buildNumber))")
             .font(.caption)

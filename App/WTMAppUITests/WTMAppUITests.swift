@@ -27,7 +27,7 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(application.staticTexts["Choose Model Sources"].waitForExistence(timeout: 5))
 
     XCTAssertTrue(
-      application.staticTexts["Local LLM Inventory for macOS"].waitForExistence(timeout: 5),
+      application.staticTexts["Local Model Inventory"].waitForExistence(timeout: 5),
       "About window is missing"
     )
     XCTAssertTrue(
