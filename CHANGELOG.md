@@ -4,12 +4,28 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+### Documentation
+
+- Expanded the README with the current feature overview, direct `v0.4.0` download links,
+  Homebrew status, and links to the current adapter sources.
+
 ## [0.4.0] - 2026-08-27
 
 ### Added
 
 - Storage-only MLX-LM inventory with explicit source consent, conservative structural
   detection, partial-shard reporting, fixtures, and UI coverage.
+- Provider-neutral inventory refinements for physical drives, nested scan sources, incomplete
+  Ollama downloads, GGUF classification, and comparative storage display.
+- Localized app identity and UI catalog, glossary navigation, settings reset, and migration
+  of legacy source identities.
+
+### Changed
+
+- Streamed inventory reconciliation and scan memory telemetry reduce peak memory use while
+  keeping storage-share and model sorting behavior deterministic.
+- Release and Pages workflows now include exact-SHA validation, portable installer checks,
+  signed and notarized DMG publication, SBOM, checksums, and artifact attestation.
 
 ### Security
 
