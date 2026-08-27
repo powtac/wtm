@@ -69,7 +69,7 @@ final class WTMAppUITests: XCTestCase {
     let modelsURL = homeURL.appending(path: ".models", directoryHint: .isDirectory)
     try FileManager.default.createDirectory(at: modelsURL, withIntermediateDirectories: true)
     let modelURL = modelsURL.appending(path: "Fixture-Q4_K_M.gguf")
-    try Data("fixture".utf8).write(to: modelURL)
+    try modelFixtureData().write(to: modelURL)
     defer { try? FileManager.default.removeItem(at: homeURL) }
 
     let application = XCUIApplication()
@@ -166,7 +166,7 @@ final class WTMAppUITests: XCTestCase {
     let modelsURL = homeURL.appending(path: ".models", directoryHint: .isDirectory)
     try FileManager.default.createDirectory(at: modelsURL, withIntermediateDirectories: true)
     let modelURL = modelsURL.appending(path: "Runtime-Fixture-Q4_K_M.gguf")
-    try Data("fixture".utf8).write(to: modelURL)
+    try modelFixtureData().write(to: modelURL)
     defer { try? FileManager.default.removeItem(at: homeURL) }
 
     let application = XCUIApplication()
@@ -202,5 +202,25 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(application.buttons["Start and Verify"].exists)
     XCTAssertTrue(application.staticTexts["WTM can stop only this process instance."].exists)
     application.buttons["Cancel"].click()
+  }
+
+  private func modelFixtureData() -> Data {
+    var data = Data("GGUF".utf8)
+    appendLittleEndian(UInt32(3), to: &data)
+    appendLittleEndian(UInt64(1), to: &data)
+    appendLittleEndian(UInt64(0), to: &data)
+    return data
+  }
+
+  private func appendLittleEndian(_ value: UInt32, to data: inout Data) {
+    for shift in stride(from: 0, through: 24, by: 8) {
+      data.append(UInt8((value >> UInt32(shift)) & 0xff))
+    }
+  }
+
+  private func appendLittleEndian(_ value: UInt64, to data: inout Data) {
+    for shift in stride(from: 0, through: 56, by: 8) {
+      data.append(UInt8((value >> UInt64(shift)) & 0xff))
+    }
   }
 }
