@@ -9,84 +9,86 @@
 
 **Website:** [powtac.github.io/wtm](https://powtac.github.io/wtm/)
 
-What The Model is a native macOS inventory for locally stored LLMs. It explains which
+*What The Model* is **a native macOS inventory for locally stored LLMs**. It explains which
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
-
-The current build adds explicit runtime verification, a passive menu bar inventory,
-reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
-
-The [product glossary](docs/glossary.md) defines the app's UI sections and canonical
-inventory vocabulary. The same glossary is available on the [public website](https://powtac.github.io/wtm/glossary.html).
-Stable-release builds include a weekly privacy-
-preserving check against official GitHub Releases; WTM never auto-installs updates, opens
-a shell, automates Terminal, or downloads models.
 
 ## Installation
 
 ### Manual
 
-Download the latest [Apple Silicon release](https://github.com/powtac/wtm/releases/latest),
+Download the current [WTM 0.3.7 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.3.7/WTM-0.3.7-arm64.dmg),
 verify it as shown below, then open the `.dmg` and drag `WTM.app` to `Applications`. WTM
 requires macOS 15 or later on Apple Silicon.
 
 Verify the downloaded DMG before opening it:
 
 ```sh
-version=0.3.7
-curl -fLO "https://github.com/powtac/wtm/releases/download/v$version/WTM-$version-arm64.dmg"
-curl -fL "https://github.com/powtac/wtm/releases/download/v$version/WTM-$version.sha256" -o checksums.sha256
+curl -fLO "https://github.com/powtac/wtm/releases/download/v0.3.7/WTM-0.3.7-arm64.dmg"
+curl -fL "https://github.com/powtac/wtm/releases/download/v0.3.7/WTM-0.3.7.sha256" -o checksums.sha256
 shasum -a 256 --ignore-missing -c checksums.sha256
 ```
 
-The checksum manifest must be in the same directory as the downloaded DMG. Replace the
-example version with the version shown on the release page.
+The checksum manifest must be in the same directory as the downloaded DMG. The commands
+above are pinned to the current public `v0.3.7` release.
 
-### Homebrew Cask
+### Homebrew Cask — not yet released
 
-Homebrew Cask support is prepared in [`packaging/homebrew/Casks/wtm.rb`](packaging/homebrew/Casks/wtm.rb);
-the [Homebrew release guide](docs/homebrew.md) explains how to publish and update the tap.
-After the WTM tap is published, install WTM with:
+The Homebrew Cask definition is prepared in [`packaging/homebrew/Casks/wtm.rb`](packaging/homebrew/Casks/wtm.rb),
+but the `powtac/wtm` tap is not published yet. Homebrew installation is therefore not
+available; use the verified manual download above. The [Homebrew release guide](docs/homebrew.md)
+explains the publication and update process.
+
+When the tap is published, installation will be:
 
 ```sh
 brew tap powtac/wtm
 brew install --cask wtm
 ```
 
-Until that tap exists, use the verified manual download above. Brew releases are managed
-from the GitHub Release and pin the exact DMG checksum; WTM does not distribute a formula
-or install model runtimes.
+Homebrew releases will be managed from the GitHub Release and pin the exact DMG checksum;
+WTM does not distribute a formula or install model runtimes.
 
-## Current scope
+## ✨ Features
 
-- Ollama manifest and blob inventory
-- Hugging Face model-cache and incomplete-download inventory
-- Conservative GGUF and Safetensors discovery in user-selected folders
-- Structurally verified MLX-LM storage inventory from explicitly selected folders; no MLX
-  runtime or package installation
-- Explicit per-source consent before scanning
-- Search, provider/state filtering, local file details, and Finder reveal
-- A normalized in-memory inventory rebuilt from provider files on every launch
-- Multi-model cleanup preview with retained dependencies, conflicts, and conservative
-  reclaim estimates
-- macOS Trash for manual and Hugging Face files; separately confirmed Ollama API deletion
-- Open-file and loaded-model blocking, targeted post-action rescans, and a redacted local
-  audit that the user can clear
-- Separate integrity, compatibility, validation, and runtime evidence for each supported
-  model/runtime pair
-- Ollama loopback health and one-token inference verification without daemon ownership
-- Reviewed llama.cpp launch plans, identity-bound executable approval, in-app redacted logs,
-  and Stop limited to the exact WTM-owned process
-- Configurable, schema-validated runtime tool definitions with disabled imports and
-  privacy-redacted exports
-- Passive menu bar status and an independent Launch at Login setting
-- Reviewed OpenClaw and Unsloth client handoffs with visible executable and argument plans
-- Native About window and official GitHub release/update links with stable-only SemVer checks
+### 🎯 Core goals
+
+- 🔎 Provider-neutral inventory across Ollama, Hugging Face, GGUF, Safetensors, and MLX-LM
+- 💾 Honest storage attribution across internal and external local drives, including shared artifacts
+- 🧬 Clear model identity, ownership, configuration, runtime, and evidence relationships
+- 📊 Separate `Stored`, `Loaded`, `Usable`, and `Old` states instead of one misleading status
+- 🧭 Detection of complete, incomplete, orphaned, and damaged local model collections
+- 🖥️ Native macOS UX with safe, traceable, and preferably reversible actions
+
+### 🚀 App features
+
+- 🗂️ Explicit per-source consent, search, filtering, file details, and Finder reveal
+- 🧹 Cleanup previews with dependency retention, conflict detection, Trash, and targeted rescans
+- 🛡️ Redacted local audit, open-file blocking, and provider-aware deletion safeguards
+- 🧪 Separate integrity, compatibility, health, validation, and real-inference evidence
+- ⚡ Ollama loopback verification plus reviewed, identity-bound `llama.cpp` launch plans
+- 🧰 Schema-validated runtime tools with visible executable and argument plans
+- 🧩 Extendable adapters with separate storage, action, runtime, and client roles — see the
+  [technical adapter guide](docs/adapters.md) and [current adapter sources](Packages/WTMKit/Sources/)
+- 🔌 Reviewed OpenClaw and Unsloth client handoffs without silent configuration changes
+- 📍 Passive menu bar status and independent Launch at Login setting
+- 🪶 Low memory footprint for responsive inventory scans and everyday use
+- 🔄 Automatic weekly update checks with manual download and installation through GitHub Releases
+- 🔐 Signed, notarized, stapled releases with DMG verification, checksums, SBOM, and attestation
+- 🔒 Privacy-preserving release checks without inventory, model, path, hardware, or telemetry data
 
 See [Requirements (German, normative)](REQUIREMENTS.md) and the
 [architecture](docs/architecture.md) for the exact scope and security boundaries. The
 [ADR index](docs/decisions/README.md) records why durable constraints exist, and the
 [roadmap](docs/roadmap.md) records phase gates without weakening them into a generic MVP.
+
+## About WTM
+
+The current build adds explicit runtime verification, a passive menu bar inventory,
+reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
+
+The [product glossary](docs/glossary.md) defines the app's UI sections and canonical
+inventory vocabulary. The same glossary is available on the [public website](https://powtac.github.io/wtm/glossary.html).
 
 ## Build
 
@@ -138,16 +140,19 @@ Stable releases are created only by an exact `vMAJOR.MINOR.PATCH` tag through th
 `release` Environment. The workflow signs, notarizes, staples, mounts, copies, and starts
 the DMG payload before it publishes a GitHub Release. See
 [GitHub configuration](docs/github-configuration.md) for the required Environment secrets.
-WTM checks that same official stable release channel at most once per seven days. Downloads
-open the GitHub Release page; installation remains manual.
+WTM checks that same official stable release channel at most once per seven days. Stable-
+release builds include a weekly privacy-preserving check against official GitHub Releases;
+WTM never auto-installs updates, opens a shell, automates Terminal, or downloads models.
+Installation remains manual.
 
 ## Extend WTM
 
-Read the [public extension guide](https://powtac.github.io/wtm/extend.html) and the
-[technical adapter guide](docs/adapters.md) before proposing a provider or tool. Data-only
-definitions and compiled adapters have intentionally different capability and review
-requirements. The static website is versioned in [`website/`](website/) and deployed through
-GitHub Pages after every validated change on `main`.
+Read the [public extension guide](https://powtac.github.io/wtm/extend.html), the
+[technical adapter guide](docs/adapters.md), and the [current adapter sources](Packages/WTMKit/Sources/)
+before proposing a provider or tool. Data-only definitions and compiled adapters have
+intentionally different capability and review requirements. The static website is versioned
+in [`website/`](website/) and deployed through GitHub Pages after every validated change on
+`main`.
 
 ## License
 

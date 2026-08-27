@@ -4,6 +4,9 @@ WTM separates storage discovery, destructive actions, runtimes, and client hando
 single external product may eventually implement several roles, but each capability has
 its own protocol and release phase.
 
+The [current adapter implementations](../Packages/WTMKit/Sources/) are the source of truth
+for the adapters shipped by this checkout.
+
 ## Adapter types
 
 ### Storage provider adapter

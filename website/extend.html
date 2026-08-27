@@ -21,7 +21,7 @@
         <article><h3>Compiled adapter</h3><p>Add a parser, provider API, deletion semantic, runtime lifecycle, or client handoff. Requires Swift, fixtures, tests, and review.</p></article>
       </div></section>
 
-      <section><h2 id="adapter-types">Adapter types</h2>
+      <section><h2 id="adapter-types">Adapter types</h2><p>The <a href="https://github.com/powtac/wtm/tree/main/Packages/WTMKit/Sources">current adapter implementations</a> are the source of truth for the adapters shipped by this checkout.</p>
         <h3 id="storage-provider-adapter">StorageProviderAdapter</h3><p>Read-only discovery of provider identities, manifests, artifacts, configs, completeness, and evidence. It cannot delete or execute.</p>
         <h3 id="manual-folder-adapter">ManualFolderAdapter</h3><p>Conservative format recognition inside a user-enabled folder. It cannot invent provider ownership.</p>
         <h3 id="storage-action-adapter">StorageActionAdapter</h3><p>Provider-aware cleanup planning. A central executor revalidates scope and identity and owns Trash or provider mutation.</p>
