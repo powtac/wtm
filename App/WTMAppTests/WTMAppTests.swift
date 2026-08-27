@@ -29,6 +29,10 @@ func inventoryValuesUseProductStrings() {
 @Test("Inventory sidebar scopes do not duplicate all models")
 func inventorySidebarScopesDoNotDuplicateAllModels() {
   #expect(!InventorySection.allCases.contains { $0.rawValue == "providers" })
+  #expect(
+    InventorySection.allCases.map(\.rawValue)
+      == ["all", "old", "incomplete", "issues"]
+  )
 }
 
 @MainActor

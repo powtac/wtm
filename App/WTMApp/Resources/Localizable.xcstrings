@@ -2962,17 +2962,6 @@
         }
       }
     },
-    "sidebar.age-unknown" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Age Unknown"
-          }
-        }
-      }
-    },
     "sidebar.all-models" : {
       "extractionState" : "stale",
       "localizations" : {

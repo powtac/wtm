@@ -189,8 +189,6 @@ final class InventoryViewModel {
           installation.earliestChangeTimestamp.map {
             Date.now.timeIntervalSince($0.value) >= Double(oldModelThresholdDays) * 86_400
           } ?? false
-      case .ageUnknown:
-        matchesSection = installation.earliestChangeTimestamp == nil
       case .incomplete:
         matchesSection = installation.state == .incomplete
       case .issues:
@@ -1532,7 +1530,6 @@ enum DeletionUIError: String, Identifiable {
 enum InventorySection: String, CaseIterable, Identifiable {
   case all
   case old
-  case ageUnknown
   case incomplete
   case issues
 
@@ -1542,7 +1539,6 @@ enum InventorySection: String, CaseIterable, Identifiable {
     switch self {
     case .all: "sidebar.all-models"
     case .old: "sidebar.old"
-    case .ageUnknown: "sidebar.age-unknown"
     case .incomplete: "sidebar.incomplete"
     case .issues: "sidebar.issues"
     }
@@ -1552,7 +1548,6 @@ enum InventorySection: String, CaseIterable, Identifiable {
     switch self {
     case .all: "square.stack.3d.up"
     case .old: "clock.badge.exclamationmark"
-    case .ageUnknown: "clock.badge.questionmark"
     case .incomplete: "arrow.down.circle.dotted"
     case .issues: "exclamationmark.triangle"
     }
