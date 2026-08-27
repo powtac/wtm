@@ -127,10 +127,9 @@ protocol VolumeCataloging: Sendable {
 
 struct MacVolumeCatalog: VolumeCataloging {
   func mountedVolumes() -> [MountedVolumeInfo] {
-    let keys: Set<URLResourceKey> = [
+    let baseKeys: Set<URLResourceKey> = [
       .volumeNameKey,
       .volumeTotalCapacityKey,
-      .volumeAvailableCapacityForImportantUsageKey,
       .volumeLocalizedFormatDescriptionKey,
       .volumeIsReadOnlyKey,
       .volumeIdentifierKey,
@@ -138,23 +137,32 @@ struct MacVolumeCatalog: VolumeCataloging {
     ]
     return
       (FileManager.default.mountedVolumeURLs(
-        includingResourceValuesForKeys: Array(keys),
+        includingResourceValuesForKeys: Array(baseKeys),
         options: [.skipHiddenVolumes]
       ) ?? [])
       .compactMap { url in
-        guard let values = try? url.resourceValues(forKeys: keys) else { return nil }
+        guard let values = try? url.resourceValues(forKeys: baseKeys) else { return nil }
         let identifier =
           values.volumeUUIDString
           ?? values.volumeIdentifier.map { String(describing: $0) }
           ?? url.standardizedFileURL.path
+        let isReadOnly = values.volumeIsReadOnly ?? false
+        let availableByteCount: Int64?
+        if isReadOnly {
+          availableByteCount = nil
+        } else {
+          availableByteCount = try? url.resourceValues(
+            forKeys: [.volumeAvailableCapacityForImportantUsageKey]
+          ).volumeAvailableCapacityForImportantUsage
+        }
         return MountedVolumeInfo(
           id: identifier,
           name: values.volumeName ?? url.lastPathComponent,
           rootURL: url.standardizedFileURL,
           totalByteCount: values.volumeTotalCapacity.map(Int64.init),
-          availableByteCount: values.volumeAvailableCapacityForImportantUsage,
+          availableByteCount: availableByteCount,
           fileSystem: values.volumeLocalizedFormatDescription ?? String(localized: "value.unknown"),
-          isReadOnly: values.volumeIsReadOnly ?? false
+          isReadOnly: isReadOnly
         )
       }
       .sorted { left, right in
