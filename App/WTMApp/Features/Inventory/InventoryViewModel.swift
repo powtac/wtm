@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 import OSLog
 import Observation
@@ -14,6 +15,25 @@ struct ActiveScanState {
   var completedSourceCount: Int
   var totalSourceCount: Int
   var discoveredInstallationCount: Int
+}
+
+private func currentResidentMemoryByteCount() -> UInt64? {
+  var info = mach_task_basic_info()
+  var count = mach_msg_type_number_t(
+    MemoryLayout<mach_task_basic_info_data_t>.stride / MemoryLayout<natural_t>.stride
+  )
+  let result = withUnsafeMutablePointer(to: &info) { pointer in
+    pointer.withMemoryRebound(to: integer_t.self, capacity: Int(count)) { reboundPointer in
+      task_info(
+        mach_task_self_,
+        task_flavor_t(MACH_TASK_BASIC_INFO),
+        reboundPointer,
+        &count
+      )
+    }
+  }
+  guard result == KERN_SUCCESS else { return nil }
+  return UInt64(info.resident_size)
 }
 
 struct ScanCompletionSummary {
@@ -102,6 +122,8 @@ final class InventoryViewModel {
   private var didPrepareForLaunch = false
   private var sourceSettingsRevision: UInt64 = 0
   private var toolSettingsRevision: UInt64 = 0
+  private var scanPeakResidentByteCount: UInt64 = 0
+  private var scanBatchCount = 0
   private let logger = Logger(subsystem: "de.powtac.whatthemodel", category: "inventory")
 
   init(
@@ -1083,6 +1105,8 @@ final class InventoryViewModel {
     guard activeScanGenerationID == generationID else { return }
     switch event {
     case .started(let sourceCount, let startedAt):
+      scanPeakResidentByteCount = 0
+      scanBatchCount = 0
       activeScan = ActiveScanState(
         startedAt: startedAt,
         currentSource: nil,
@@ -1090,15 +1114,28 @@ final class InventoryViewModel {
         totalSourceCount: sourceCount,
         discoveredInstallationCount: 0
       )
-    case .sourceStarted(let source, _, _):
+      recordScanMemory(milestone: "started")
+    case .sourceStarted(let source, let index, let total):
       activeScan?.currentSource = source
+      logger.info(
+        "Inventory scan source started sourceID=\(source.id, privacy: .public) index=\(index, privacy: .public) total=\(total, privacy: .public)"
+      )
+      recordScanMemory(milestone: "source-started")
     case .batch(_, let newInstallations, let newIssues):
+      scanBatchCount += 1
       mergeInstallations(newInstallations)
       mergeIssues(newIssues)
       activeScan?.discoveredInstallationCount = installations.count
-    case .sourceFinished(_, let completed, let total):
+      if scanBatchCount.isMultiple(of: 100) {
+        recordScanMemory(milestone: "batch-\(scanBatchCount)")
+      }
+    case .sourceFinished(let sourceID, let completed, let total):
       activeScan?.completedSourceCount = completed
       activeScan?.totalSourceCount = total
+      logger.info(
+        "Inventory scan source finished sourceID=\(sourceID, privacy: .public) installations=\(self.installations.count, privacy: .public)"
+      )
+      recordScanMemory(milestone: "source-finished")
     case .finished(let scannedSourceIDs, let scannedAt):
       lastScanDate = scannedAt
       finishScan(
@@ -1107,8 +1144,9 @@ final class InventoryViewModel {
         scannedSourceCount: scannedSourceIDs.count,
         generationID: generationID
       )
+      recordScanMemory(milestone: "finished")
       logger.info(
-        "Inventory scan completed with \(self.installations.count, privacy: .public) installations"
+        "Inventory scan completed with \(self.installations.count, privacy: .public) installations; peakRSSMB=\(self.scanPeakResidentByteCount / 1_048_576, privacy: .public)"
       )
     }
   }
@@ -1131,6 +1169,14 @@ final class InventoryViewModel {
         issues.append(issue)
       }
     }
+  }
+
+  private func recordScanMemory(milestone: String) {
+    guard let residentByteCount = currentResidentMemoryByteCount() else { return }
+    scanPeakResidentByteCount = max(scanPeakResidentByteCount, residentByteCount)
+    logger.debug(
+      "Inventory scan memory milestone=\(milestone, privacy: .public) rssMB=\(residentByteCount / 1_048_576, privacy: .public) peakRSSMB=\(self.scanPeakResidentByteCount / 1_048_576, privacy: .public)"
+    )
   }
 
   private func finishScan(

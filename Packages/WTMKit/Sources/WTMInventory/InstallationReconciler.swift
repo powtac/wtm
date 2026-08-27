@@ -6,8 +6,21 @@ import WTMDomain
 struct InstallationReconciler: Sendable {
   func reconcile(_ installations: [ModelInstallation]) -> [ModelInstallation] {
     var canonical: [ModelInstallation] = []
+    var canonicalIDs: Set<ModelInstallation.ID> = []
+    _ = merge(installations, into: &canonical, canonicalIDs: &canonicalIDs)
+    return canonical
+  }
 
-    for installation in installations {
+  /// Merges a bounded batch in place and returns only newly accepted installations.
+  /// This avoids rebuilding the complete canonical array for every streamed batch.
+  func merge(
+    _ incoming: [ModelInstallation],
+    into canonical: inout [ModelInstallation],
+    canonicalIDs: inout Set<ModelInstallation.ID>
+  ) -> [ModelInstallation] {
+    var accepted: [ModelInstallation] = []
+
+    for installation in incoming {
       if let sameID = canonical.firstIndex(where: { $0.id == installation.id }) {
         canonical[sameID] = installation
         continue
@@ -17,13 +30,20 @@ struct InstallationReconciler: Sendable {
         continue
       }
 
-      canonical.removeAll { existing in
+      let shadowedIDs = canonical.filter { existing in
         shadows(existing, preferred: installation)
+      }.map(\.id)
+      if !shadowedIDs.isEmpty {
+        let shadowedIDSet = Set(shadowedIDs)
+        canonical.removeAll { shadowedIDSet.contains($0.id) }
+        canonicalIDs.subtract(shadowedIDSet)
       }
       canonical.append(installation)
+      canonicalIDs.insert(installation.id)
+      accepted.append(installation)
     }
 
-    return canonical
+    return accepted
   }
 
   private func shadows(

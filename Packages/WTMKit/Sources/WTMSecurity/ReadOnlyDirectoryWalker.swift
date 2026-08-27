@@ -132,37 +132,39 @@ public struct ReadOnlyDirectoryWalker: Sendable {
     }
 
     for case let url as URL in enumerator {
-      try Task.checkCancellation()
-      try policy.revalidateRoot()
-      let values: URLResourceValues
-      do {
-        values = try url.resourceValues(forKeys: Set(keys))
-      } catch {
-        continue
-      }
+      let shouldContinue = try autoreleasepool {
+        try Task.checkCancellation()
+        try policy.revalidateRoot()
+        let values: URLResourceValues
+        do {
+          values = try url.resourceValues(forKeys: Set(keys))
+        } catch {
+          return true
+        }
 
-      let isSymbolicLink = values.isSymbolicLink ?? false
-      if isSymbolicLink {
-        enumerator.skipDescendants()
-      }
+        let isSymbolicLink = values.isSymbolicLink ?? false
+        if isSymbolicLink {
+          enumerator.skipDescendants()
+        }
 
-      let resolvedURL: URL
-      do {
-        resolvedURL = try policy.validateAgainstCapturedRoot(url)
-      } catch {
-        continue
-      }
-      try policy.revalidateRoot()
+        let resolvedURL: URL
+        do {
+          resolvedURL = try policy.validateAgainstCapturedRoot(url)
+        } catch {
+          return true
+        }
+        try policy.revalidateRoot()
 
-      let shouldContinue = try visitor(
-        FileSystemEntry(
-          url: url,
-          resolvedURL: resolvedURL,
-          isDirectory: values.isDirectory ?? false,
-          isRegularFile: values.isRegularFile ?? false,
-          isSymbolicLink: isSymbolicLink
+        return try visitor(
+          FileSystemEntry(
+            url: url,
+            resolvedURL: resolvedURL,
+            isDirectory: values.isDirectory ?? false,
+            isRegularFile: values.isRegularFile ?? false,
+            isSymbolicLink: isSymbolicLink
+          )
         )
-      )
+      }
       if !shouldContinue { break }
     }
     try policy.revalidateRoot()

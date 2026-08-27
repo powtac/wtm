@@ -210,12 +210,17 @@ public actor InventoryCoordinator: InventoryScanning {
 
   public func scan(sources: [ScanSource]) async -> InventorySnapshot {
     var installations: [ModelInstallation] = []
+    var installationIDs: Set<ModelInstallation.ID> = []
     var issues: [InventoryIssue] = []
     var scannedSourceIDs: Set<ScanSource.ID> = []
 
     for source in orderedEnabledSources(sources) {
       let result = await scan(source: source)
-      installations = reconciler.reconcile(installations + result.installations)
+      _ = reconciler.merge(
+        result.installations,
+        into: &installations,
+        canonicalIDs: &installationIDs
+      )
       issues.append(contentsOf: result.issues)
       scannedSourceIDs.insert(source.id)
     }
@@ -235,6 +240,7 @@ public actor InventoryCoordinator: InventoryScanning {
     let startedAt = Date.now
     var scannedSourceIDs: Set<ScanSource.ID> = []
     var canonicalInstallations: [ModelInstallation] = []
+    var canonicalInstallationIDs: Set<ModelInstallation.ID> = []
     continuation.yield(.started(sourceCount: enabledSources.count, startedAt: startedAt))
 
     for (offset, source) in enabledSources.enumerated() {
@@ -252,14 +258,11 @@ public actor InventoryCoordinator: InventoryScanning {
           return
         }
 
-        let previousIDs = Set(canonicalInstallations.map(\.id))
-        canonicalInstallations = reconciler.reconcile(
-          canonicalInstallations + adapterBatch.installations
+        let acceptedInstallations = reconciler.merge(
+          adapterBatch.installations,
+          into: &canonicalInstallations,
+          canonicalIDs: &canonicalInstallationIDs
         )
-        let acceptedInstallations = canonicalInstallations.filter { installation in
-          !previousIDs.contains(installation.id)
-            && adapterBatch.installations.contains(where: { $0.id == installation.id })
-        }
         let batches = acceptedInstallations.chunked(maximumCount: installationBatchSize)
         if batches.isEmpty {
           continuation.yield(

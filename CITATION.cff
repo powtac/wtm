@@ -1,5 +1,6 @@
 cff-version: 1.2.0
 title: What The Model
+abstract: What The Model is a native macOS inventory for locally stored LLMs.
 message: If you use this software, cite it using this metadata.
 type: software
 authors:
