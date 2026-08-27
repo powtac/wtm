@@ -2,6 +2,32 @@
 
 All notable changes follow Keep a Changelog. The project uses Semantic Versioning.
 
+## Unreleased
+
+## [0.4.0] - 2026-08-27
+
+### Added
+
+- Storage-only MLX-LM inventory with explicit source consent, conservative structural
+  detection, partial-shard reporting, fixtures, and UI coverage.
+
+### Security
+
+- Bind approved source roots and their ancestors to captured no-follow filesystem identities
+  and revalidate them before scanning, cleanup planning, and mutation.
+- Stage user-controlled executables and protected scripts from verified file descriptors;
+  direct execution is restricted to root-owned files under an entirely root-owned,
+  non-writable ancestor chain.
+- Correlate llama.cpp loopback listeners with the exact WTM-owned process after health and
+  inference checks; provider-managed Ollama evidence remains explicitly unauthenticated.
+- Bound manual-folder traversal by entries, directories, per-directory metadata, and elapsed
+  time, with visible incomplete-scan reporting.
+
+### Fixed
+
+- Verify downloaded DMG files without requiring every asset listed in the release checksum
+  manifest.
+
 ## [0.3.7] - 2026-08-25
 
 ### Fixed
@@ -51,20 +77,7 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 - Made the reviewed client-broker process test cancellation-safe and increased its exit
   observation deadline for hosted macOS runners.
 
-## Unreleased
-
-### Added
-
-- Phase 6 storage-only MLX-LM inventory through a compiled read-only adapter, explicit
-  source consent, conservative structural evidence, partial-shard detection, and dedicated
-  fixtures and UI coverage.
-
-### Fixed
-
-- Verify only downloaded files from the multi-asset release checksum manifest in the
-  website's Terminal installer.
-
-### Earlier additions
+## Earlier development
 
 - A fixed `Settings…` footer below the collapsible inventory sidebar, backed by the native
   macOS Settings scene and covered by UI automation.
