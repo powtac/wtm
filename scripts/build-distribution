@@ -59,6 +59,8 @@ required_environment=(
 for variable_name in $required_environment; do
   [[ -n "${(P)variable_name:-}" ]] || { echo "Missing environment: $variable_name" >&2; exit 1; }
 done
+notary_password="$APPLE_APP_PASSWORD"
+unset APPLE_APP_PASSWORD
 
 version="$(sed -n 's/^MARKETING_VERSION = //p' "$base_configuration")"
 build_number="$(sed -n 's/^CURRENT_PROJECT_VERSION = //p' "$base_configuration")"
@@ -104,7 +106,7 @@ notarize() {
   xcrun notarytool submit "$artifact_path" \
     --apple-id "$APPLE_ID" \
     --team-id "$APPLE_TEAM_ID" \
-    --password "$APPLE_APP_PASSWORD" \
+    --password "$notary_password" \
     --wait \
     --output-format json > "$report_path"
   local notarization_status

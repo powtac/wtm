@@ -34,6 +34,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Validate immutable release input
         run: |
@@ -93,6 +94,16 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Revalidate release tag target before publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          remote_tag_sha="$(git ls-remote origin "refs/tags/$GITHUB_REF_NAME^{}" | awk 'NR == 1 { print $1 }')"
+          if [[ -z "$remote_tag_sha" ]]; then
+            remote_tag_sha="$(git ls-remote origin "refs/tags/$GITHUB_REF_NAME" | awk 'NR == 1 { print $1 }')"
+          fi
+          [[ "$remote_tag_sha" == "$GITHUB_SHA" ]]
+
       - name: Attest public release artifacts
         if: github.event.repository.visibility == 'public'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
@@ -103,7 +114,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/release-assets/* \
+          release_version="${GITHUB_REF_NAME#v}"
+          gh release create "$GITHUB_REF_NAME" \
+            "$RUNNER_TEMP/release-assets/WTM-${release_version}-arm64.dmg" \
+            "$RUNNER_TEMP/release-assets/WTM-${release_version}.spdx.json" \
+            "$RUNNER_TEMP/release-assets/WTM-${release_version}.sha256" \
+            "$RUNNER_TEMP/release-assets/release-metadata.json" \
             --draft \
             --verify-tag \
             --generate-notes \
@@ -112,7 +128,13 @@ jobs:
       - name: Publish release atomically
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release edit "$GITHUB_REF_NAME" --draft=false --latest
+        run: |
+          remote_tag_sha="$(git ls-remote origin "refs/tags/$GITHUB_REF_NAME^{}" | awk 'NR == 1 { print $1 }')"
+          if [[ -z "$remote_tag_sha" ]]; then
+            remote_tag_sha="$(git ls-remote origin "refs/tags/$GITHUB_REF_NAME" | awk 'NR == 1 { print $1 }')"
+          fi
+          [[ "$remote_tag_sha" == "$GITHUB_SHA" ]]
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest
 
       - name: Remove ephemeral signing keychain
         if: always()

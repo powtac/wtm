@@ -164,6 +164,29 @@ func ownedProcessLifecycle() async throws {
   #expect(await launcher.handle.wasTerminated())
 }
 
+@Test("Runtime log redaction covers invocation paths and environment values")
+func runtimeLogRedactsInvocationPaths() throws {
+  let executableURL = URL(filePath: "/usr/bin/true")
+  let identity = try ExecutableInspector().inspect(executableURL).identity
+  let invocation = RuntimeExecutableInvocation(
+    executableURL: executableURL,
+    arguments: ["--model", "/tmp/private-model.gguf"],
+    currentDirectoryURL: URL(filePath: "/tmp/private-working-directory"),
+    environment: ["HOME": "/Users/private-user"],
+    approvedIdentity: identity
+  )
+
+  let redacted = RuntimeLogRedactor(invocation: invocation).redact(
+    "exe=/usr/bin/true model=/tmp/private-model.gguf cwd=/tmp/private-working-directory "
+      + "home=/Users/private-user"
+  )
+
+  #expect(!redacted.contains("/usr/bin/true"))
+  #expect(!redacted.contains("/tmp/private-model.gguf"))
+  #expect(!redacted.contains("/tmp/private-working-directory"))
+  #expect(!redacted.contains("/Users/private-user"))
+}
+
 @Test("Healthy spoof listener cannot verify a WTM-owned runtime")
 func listenerMustBelongToOwnedProcess() async throws {
   let adapter = FakeRuntimeAdapter(

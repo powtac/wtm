@@ -44,7 +44,8 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
           var filesByDirectory: [URL: [FileSystemEntry]] = [:]
           for try await entry in ReadOnlyDirectoryWalker().entryStream(
             under: source.rootURL,
-            approvedBy: source
+            approvedBy: source,
+            budget: ReadOnlyDirectoryWalker.defaultBudget
           ) {
             guard !Task.isCancelled else {
               continuation.finish()
@@ -72,13 +73,21 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
             }
           }
         } catch {
+          let code: String
+          if let walkerError = error as? DirectoryWalkerError,
+            walkerError == .budgetExceeded
+          {
+            code = "MLX_SCAN_TRUNCATED"
+          } else {
+            code = "MLX_ENUMERATION_FAILED"
+          }
           continuation.yield(
             AdapterScanBatch(
               installations: [],
               issues: [
                 issue(
                   source: source,
-                  code: "MLX_ENUMERATION_FAILED",
+                  code: code,
                   severity: .error,
                   summary: "The selected MLX source could not be inventoried.",
                   url: source.rootURL

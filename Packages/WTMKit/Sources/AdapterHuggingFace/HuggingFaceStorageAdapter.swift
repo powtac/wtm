@@ -71,23 +71,31 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
             expectedRootIdentity: rootIdentity
           )
           try policy.revalidateRoot()
-          repositories = try FileManager.default.contentsOfDirectory(
-            at: source.rootURL,
-            includingPropertiesForKeys: [.isDirectoryKey],
-            options: [.skipsHiddenFiles]
-          ).filter { url in
-            url.lastPathComponent.hasPrefix("models--")
-              && ((try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false)
-          }
+          repositories = try ReadOnlyDirectoryWalker().entries(
+            under: source.rootURL,
+            approvedBy: source,
+            descendIntoSubdirectories: false
+          ).filter { entry in
+            let url = entry.url
+            return url.lastPathComponent.hasPrefix("models--") && entry.isDirectory
+          }.map(\.url)
           try policy.revalidateRoot()
         } catch {
+          let code: String
+          if let walkerError = error as? DirectoryWalkerError,
+            walkerError == .budgetExceeded
+          {
+            code = "HF_SCAN_TRUNCATED"
+          } else {
+            code = "HF_CACHE_ENUMERATION_FAILED"
+          }
           continuation.yield(
             AdapterScanBatch(
               installations: [],
               issues: [
                 issue(
                   source: source,
-                  code: "HF_CACHE_ENUMERATION_FAILED",
+                  code: code,
                   url: source.rootURL
                 )
               ]
@@ -113,11 +121,19 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
               AdapterScanBatch(installations: installations, issues: repositoryIssues)
             )
           } catch {
+            let code: String
+            if let walkerError = error as? DirectoryWalkerError,
+              walkerError == .budgetExceeded
+            {
+              code = "HF_SCAN_TRUNCATED"
+            } else {
+              code = "HF_REPOSITORY_INVALID"
+            }
             continuation.yield(
               AdapterScanBatch(
                 installations: [],
                 issues: [
-                  issue(source: source, code: "HF_REPOSITORY_INVALID", url: repositoryURL)
+                  issue(source: source, code: code, url: repositoryURL)
                 ]
               )
             )

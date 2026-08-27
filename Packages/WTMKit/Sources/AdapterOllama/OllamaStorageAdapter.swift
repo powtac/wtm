@@ -4,6 +4,8 @@ import WTMDomain
 import WTMSecurity
 
 public struct OllamaStorageAdapter: StorageProviderAdapter {
+  private static let maximumManifestDescriptorCount = 100_000
+
   public let id = ProviderID.ollama
   public let displayName = "Ollama"
 
@@ -14,10 +16,18 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     do {
       entries = try ReadOnlyDirectoryWalker().entries(under: source.rootURL, approvedBy: source)
     } catch {
+      let code: String
+      if let walkerError = error as? DirectoryWalkerError,
+        walkerError == .budgetExceeded
+      {
+        code = "OLLAMA_SCAN_TRUNCATED"
+      } else {
+        code = "OLLAMA_ENUMERATION_FAILED"
+      }
       return AdapterScanResult(
         source: source,
         installations: [],
-        issues: [issue(source: source, code: "OLLAMA_ENUMERATION_FAILED", url: source.rootURL)]
+        issues: [issue(source: source, code: code, url: source.rootURL)]
       )
     }
 
@@ -38,6 +48,10 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
         let data = try FileMetadataReader().readData(
           from: manifestURL, maximumByteCount: 10_000_000)
         let manifest = try JSONDecoder().decode(Manifest.self, from: data)
+        guard manifest.descriptors.count <= Self.maximumManifestDescriptorCount else {
+          issues.append(issue(source: source, code: "OLLAMA_MANIFEST_TOO_LARGE", url: manifestURL))
+          continue
+        }
         parsedManifests.append(
           ParsedManifest(
             url: manifestURL, manifest: manifest,

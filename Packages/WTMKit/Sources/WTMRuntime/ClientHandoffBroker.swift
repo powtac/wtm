@@ -95,7 +95,8 @@ public actor ClientHandoffBroker {
       maximumEntries: 100,
       maximumUTF8ByteCount: 32_768,
       redactor: RuntimeLogRedactor(
-        sensitiveValues: [installation.rootURL.path]
+        invocation: handoff.invocation,
+        additionalSensitiveValues: [installation.rootURL.path]
       )
     )
     let securedInvocation = RuntimeExecutableInvocation(

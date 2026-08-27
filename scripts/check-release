@@ -25,8 +25,12 @@ asset_fixture="$temporary_root/release-assets"
 mkdir "$asset_fixture"
 touch "$asset_fixture/WTM-$version-arm64.dmg"
 cp "$temporary_root/WTM-$version.spdx.json" "$asset_fixture/WTM-$version.spdx.json"
-echo "fixture  WTM-$version-arm64.dmg" > "$asset_fixture/WTM-$version.sha256"
-echo '{"schemaVersion":1}' > "$asset_fixture/release-metadata.json"
+echo "{\"schemaVersion\":1,\"version\":\"$version\"}" > "$asset_fixture/release-metadata.json"
+(
+  cd "$asset_fixture"
+  /usr/bin/shasum -a 256 "WTM-$version-arm64.dmg" "WTM-$version.spdx.json" "release-metadata.json" \
+    > "WTM-$version.sha256"
+)
 "$repository_root/scripts/audit-release-artifacts" "$asset_fixture" >/dev/null
 
 workflow="$repository_root/.github/workflows/release.yml"
@@ -34,11 +38,13 @@ workflow="$repository_root/.github/workflows/release.yml"
 for gate in \
   'environment: release' \
   'actions: read' \
+  'persist-credentials: false' \
   "github.event.repository.visibility == 'public'" \
   'verify-release-ci "$GITHUB_REPOSITORY" "$GITHUB_SHA"' \
   'build-distribution --preflight' \
   'build-distribution' \
   'audit-release-artifacts' \
+  'Revalidate release tag target before publication' \
   'actions/attest@' \
   'gh release create'
 do

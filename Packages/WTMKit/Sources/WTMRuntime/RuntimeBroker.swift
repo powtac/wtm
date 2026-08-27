@@ -91,7 +91,7 @@ public actor RuntimeBroker {
 
     let id = UUID()
     let logs = RuntimeLogBuffer(
-      redactor: RuntimeLogRedactor(sensitiveValues: Array(planSensitiveValues(plan)))
+      redactor: planRedactor(plan)
     )
     let process: (any RuntimeProcessHandle)?
     let ownership: RuntimeOwnership
@@ -338,8 +338,10 @@ public actor RuntimeBroker {
     )
   }
 
-  private func planSensitiveValues(_ plan: RuntimeTestPlan) -> Set<String> {
-    guard case .executable(let invocation) = plan.strategy else { return [] }
-    return Set(invocation.environment.values)
+  private func planRedactor(_ plan: RuntimeTestPlan) -> RuntimeLogRedactor {
+    guard case .executable(let invocation) = plan.strategy else {
+      return RuntimeLogRedactor()
+    }
+    return RuntimeLogRedactor(invocation: invocation)
   }
 }

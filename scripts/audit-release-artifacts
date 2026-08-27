@@ -8,9 +8,60 @@ fi
 
 release_directory="${1:A}"
 
-for required_pattern in 'WTM-*.dmg' 'WTM-*.spdx.json' 'WTM-*.sha256' 'release-metadata.json'; do
-  matches=("$release_directory"/$~required_pattern(N))
-  (( ${#matches} > 0 )) || { echo "Missing release asset: $required_pattern" >&2; exit 1; }
+metadata_path="$release_directory/release-metadata.json"
+[[ -f "$metadata_path" && ! -L "$metadata_path" ]] || {
+  echo "Missing release metadata." >&2
+  exit 1
+}
+version="$(/usr/bin/ruby -rjson -e 'puts JSON.parse(File.read(ARGV.fetch(0))).fetch("version")' "$metadata_path")"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+  echo "Release metadata has an invalid version." >&2
+  exit 1
+}
+
+expected_assets=(
+  "WTM-$version-arm64.dmg"
+  "WTM-$version.spdx.json"
+  "WTM-$version.sha256"
+  "release-metadata.json"
+)
+actual_assets=("$release_directory"/*(DN))
+(( ${#actual_assets} == ${#expected_assets} )) || {
+  echo "Release assets must contain exactly the four declared files." >&2
+  exit 1
+}
+for asset_name in "${expected_assets[@]}"; do
+  asset_path="$release_directory/$asset_name"
+  [[ -f "$asset_path" && ! -L "$asset_path" ]] || {
+    echo "Missing or invalid release asset: $asset_name" >&2
+    exit 1
+  }
+done
+for asset_path in "${actual_assets[@]}"; do
+  [[ -f "$asset_path" && ! -L "$asset_path" ]] || {
+    echo "Unexpected non-file release asset: ${asset_path:t}" >&2
+    exit 1
+  }
+  [[ " ${expected_assets[*]} " == *" ${asset_path:t} "* ]] || {
+    echo "Unexpected release asset: ${asset_path:t}" >&2
+    exit 1
+  }
+done
+[[ -z "$(find "$release_directory" -mindepth 2 -print -quit)" ]] || {
+  echo "Nested release assets are not allowed." >&2
+  exit 1
+}
+
+checksum_path="$release_directory/WTM-$version.sha256"
+[[ "$(wc -l < "$checksum_path" | tr -d ' ')" == 3 ]] || {
+  echo "Checksum manifest must contain exactly three artifact entries." >&2
+  exit 1
+}
+for checksum_asset in "WTM-$version-arm64.dmg" "WTM-$version.spdx.json" "release-metadata.json"; do
+  /usr/bin/grep -Fq "  $checksum_asset" "$checksum_path" || {
+    echo "Checksum manifest is missing: $checksum_asset" >&2
+    exit 1
+  }
 done
 
 if find "$release_directory" -type f \( -name '*.p12' -o -name '*.keychain*' -o -name '*.mobileprovision' -o -name '.env' \) -print -quit | /usr/bin/grep -q .; then
@@ -19,8 +70,8 @@ if find "$release_directory" -type f \( -name '*.p12' -o -name '*.keychain*' -o 
 fi
 
 secret_pattern='-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{30,}|hf_[A-Za-z0-9]{30,}'
-for candidate in "$release_directory"/*.json(N) "$release_directory"/*.sha256(N); do
-  if LC_ALL=C /usr/bin/grep -E -n -- "$secret_pattern" "$candidate"; then
+for candidate in "${actual_assets[@]}"; do
+  if LC_ALL=C /usr/bin/grep -aE -n -- "$secret_pattern" "$candidate"; then
     echo "Secret-like material found in $(basename "$candidate")." >&2
     exit 1
   fi

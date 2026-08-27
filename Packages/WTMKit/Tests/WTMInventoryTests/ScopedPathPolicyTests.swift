@@ -58,6 +58,38 @@ func replacedApprovedRootBlocksScanning() throws {
   }
 }
 
+@Test("Directory traversal stops at its shared safety budget")
+func directoryTraversalBudgetIsEnforced() throws {
+  let root = FileManager.default.temporaryDirectory.appending(
+    path: UUID().uuidString,
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: root) }
+  for index in 0..<3 {
+    try Data("entry".utf8).write(to: root.appending(path: "entry-\(index)"))
+  }
+
+  let identity = try SourceRootPolicy().capture(rootURL: root)
+  let source = ScanSource(
+    id: "budget",
+    displayName: "Budget",
+    providerID: .manual,
+    rootURL: root,
+    rootIdentity: identity,
+    accessState: .allowed,
+    isEnabled: true
+  )
+
+  #expect(throws: DirectoryWalkerError.budgetExceeded) {
+    try ReadOnlyDirectoryWalker().entries(
+      under: root,
+      approvedBy: source,
+      budget: DirectoryWalkerBudget(maximumEntryCount: 2, maximumDuration: .seconds(10))
+    )
+  }
+}
+
 @Test("Replacing an approved root ancestor invalidates a cleanup target")
 func replacedApprovedAncestorBlocksCleanup() throws {
   let fixture = FileManager.default.temporaryDirectory.appending(

@@ -1,4 +1,5 @@
 import Foundation
+import WTMDomain
 
 public enum RuntimeLogStream: String, Codable, CaseIterable, Sendable {
   case standardOutput
@@ -30,6 +31,32 @@ public struct RuntimeLogRedactor: Sendable {
 
   public init(sensitiveValues: [String] = []) {
     self.sensitiveValues = sensitiveValues.filter { $0.utf8.count >= 4 }
+  }
+
+  public init(
+    invocation: RuntimeExecutableInvocation,
+    additionalSensitiveValues: [String] = []
+  ) {
+    var invocationPaths = [
+      invocation.executableURL.path,
+      invocation.approvedIdentity.requestedURL.path,
+      invocation.approvedIdentity.canonicalURL.path,
+    ]
+    if let currentDirectoryPath = invocation.currentDirectoryURL?.path {
+      invocationPaths.append(currentDirectoryPath)
+    }
+    for identity in invocation.protectedResourceIdentities {
+      invocationPaths.append(identity.requestedURL.path)
+      invocationPaths.append(identity.canonicalURL.path)
+    }
+    let argumentPaths = invocation.arguments.filter { $0.hasPrefix("/") }
+    self.init(
+      sensitiveValues: Array(
+        Set(
+          invocationPaths + argumentPaths + invocation.environment.values
+            + additionalSensitiveValues)
+      )
+    )
   }
 
   public func redact(_ input: String) -> String {

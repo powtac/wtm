@@ -26,28 +26,53 @@ public struct FileSystemEntry: Hashable, Sendable {
 public enum DirectoryWalkerError: Error, Equatable, Sendable {
   case rootIsNotReadable
   case enumerationFailed
+  case budgetExceeded
+}
+
+public struct DirectoryWalkerBudget: Sendable {
+  public let maximumEntryCount: Int
+  public let maximumDuration: Duration
+
+  public init(
+    maximumEntryCount: Int = 250_000,
+    maximumDuration: Duration = .seconds(300)
+  ) {
+    self.maximumEntryCount = max(maximumEntryCount, 1)
+    self.maximumDuration = maximumDuration
+  }
 }
 
 /// Enumerates a configured root without following symbolic links outside that root.
 public struct ReadOnlyDirectoryWalker: Sendable {
+  public static let defaultBudget = DirectoryWalkerBudget()
+
   public init() {}
 
   public func entries(
     under rootURL: URL,
     approvedBy source: ScanSource,
-    descendIntoSubdirectories: Bool = true
+    descendIntoSubdirectories: Bool = true,
+    budget: DirectoryWalkerBudget = Self.defaultBudget
   ) throws
     -> [FileSystemEntry]
   {
     var entries: [FileSystemEntry] = []
+    var budgetExceeded = false
+    let clock = ContinuousClock()
+    let deadline = clock.now.advanced(by: budget.maximumDuration)
     try visitEntries(
       under: rootURL,
       approvedBy: source,
       descendIntoSubdirectories: descendIntoSubdirectories
     ) {
+      guard entries.count < budget.maximumEntryCount, clock.now < deadline else {
+        budgetExceeded = true
+        return false
+      }
       entries.append($0)
       return true
     }
+    if budgetExceeded { throw DirectoryWalkerError.budgetExceeded }
     return entries
   }
 
@@ -71,16 +96,24 @@ public struct ReadOnlyDirectoryWalker: Sendable {
   public func entryStream(
     under rootURL: URL,
     approvedBy source: ScanSource,
-    descendIntoSubdirectories: Bool = true
+    descendIntoSubdirectories: Bool = true,
+    budget: DirectoryWalkerBudget = Self.defaultBudget
   ) -> AsyncThrowingStream<FileSystemEntry, Error> {
     AsyncThrowingStream { continuation in
       let task = Task {
         do {
+          var entryCount = 0
+          let clock = ContinuousClock()
+          let deadline = clock.now.advanced(by: budget.maximumDuration)
           try visitEntries(
             under: rootURL,
             approvedBy: source,
             descendIntoSubdirectories: descendIntoSubdirectories
           ) { entry in
+            guard entryCount < budget.maximumEntryCount, clock.now < deadline else {
+              throw DirectoryWalkerError.budgetExceeded
+            }
+            entryCount += 1
             continuation.yield(entry)
             return true
           }
