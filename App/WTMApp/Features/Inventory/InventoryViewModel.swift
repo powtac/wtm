@@ -70,7 +70,7 @@ final class InventoryViewModel {
   var selectedSection = InventorySection.all
   var selectedInstallationIDs: Set<ModelInstallation.ID> = []
   var searchText = ""
-  var selectedProviderID: ProviderID?
+  var selectedSourceTypeID: ProviderID?
   var selectedFormat: ModelFormat?
   var selectedState: InstallationState?
   var selectedSourceID: ScanSource.ID?
@@ -160,7 +160,7 @@ final class InventoryViewModel {
     installations.filter { installation in
       let matchesSection: Bool
       switch selectedSection {
-      case .all, .providers:
+      case .all:
         matchesSection = true
       case .old:
         matchesSection =
@@ -172,11 +172,11 @@ final class InventoryViewModel {
       case .incomplete:
         matchesSection = installation.state == .incomplete
       case .issues:
-        matchesSection = installation.state == .issue
+        matchesSection = false
       }
 
       guard matchesSection else { return false }
-      guard selectedProviderID == nil || installation.providerID == selectedProviderID else {
+      guard selectedSourceTypeID == nil || installation.providerID == selectedSourceTypeID else {
         return false
       }
       guard selectedFormat == nil || installation.variant.format == selectedFormat else {
@@ -228,9 +228,10 @@ final class InventoryViewModel {
     InventoryStorageBreakdown(installations: installations)
   }
 
-  var filterProviderIDs: [ProviderID] {
+  var filterSourceTypeIDs: [ProviderID] {
     Array(Set(installations.map(\.providerID))).sorted { left, right in
-      left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
+      left.inventorySourceTypeName.localizedStandardCompare(right.inventorySourceTypeName)
+        == .orderedAscending
     }
   }
 
@@ -252,7 +253,9 @@ final class InventoryViewModel {
   }
 
   var availableStorageProviderIDs: [ProviderID] {
-    Array(registeredStorageProviderIDs.union(sources.map(\.providerID))).sorted { left, right in
+    Array(
+      registeredStorageProviderIDs.union(sources.map(\.providerID)).filter { $0 != .manual }
+    ).sorted { left, right in
       left.localizedName.localizedStandardCompare(right.localizedName) == .orderedAscending
     }
   }
@@ -264,7 +267,7 @@ final class InventoryViewModel {
   }
 
   var hasActiveInventoryFilter: Bool {
-    selectedProviderID != nil || selectedFormat != nil || selectedState != nil
+    selectedSourceTypeID != nil || selectedFormat != nil || selectedState != nil
       || selectedSourceID != nil
   }
 
@@ -275,7 +278,7 @@ final class InventoryViewModel {
   }
 
   func clearInventoryFilters() {
-    selectedProviderID = nil
+    selectedSourceTypeID = nil
     selectedFormat = nil
     selectedState = nil
     selectedSourceID = nil
@@ -1462,7 +1465,6 @@ enum DeletionUIError: String, Identifiable {
 
 enum InventorySection: String, CaseIterable, Identifiable {
   case all
-  case providers
   case old
   case ageUnknown
   case incomplete
@@ -1473,7 +1475,6 @@ enum InventorySection: String, CaseIterable, Identifiable {
   var localizedKey: LocalizedStringResource {
     switch self {
     case .all: "sidebar.all-models"
-    case .providers: "sidebar.providers"
     case .old: "sidebar.old"
     case .ageUnknown: "sidebar.age-unknown"
     case .incomplete: "sidebar.incomplete"
@@ -1484,7 +1485,6 @@ enum InventorySection: String, CaseIterable, Identifiable {
   var systemImage: String {
     switch self {
     case .all: "square.stack.3d.up"
-    case .providers: "shippingbox"
     case .old: "clock.badge.exclamationmark"
     case .ageUnknown: "clock.badge.questionmark"
     case .incomplete: "arrow.down.circle.dotted"

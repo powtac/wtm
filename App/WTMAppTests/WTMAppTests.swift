@@ -26,6 +26,25 @@ func inventoryValuesUseProductStrings() {
   #expect(InstallationState.incomplete.localizedName == "Incomplete")
 }
 
+@Test("Inventory sidebar scopes do not duplicate all models")
+func inventorySidebarScopesDoNotDuplicateAllModels() {
+  #expect(!InventorySection.allCases.contains { $0.rawValue == "providers" })
+}
+
+@MainActor
+@Test("Manual folders use source type semantics")
+func manualFoldersUseSourceTypeSemantics() {
+  let model = AppComposition.makeInventoryViewModel()
+
+  #expect(ProviderID.manual.inventorySourceTypeName == "Manual Folder")
+  #expect(!model.availableStorageProviderIDs.contains(.manual))
+}
+
+@Test("Installation issues are labeled as model issues")
+func installationIssuesAreLabeledAsModelIssues() {
+  #expect(InstallationState.issue.localizedName == "Model Issue")
+}
+
 @Test("The app declares no microphone or media permissions")
 func appDeclaresNoMicrophoneOrMediaPermissions() {
   let forbiddenUsageDescriptionKeys = [
@@ -721,10 +740,10 @@ func returningUserScansOnLaunch() async throws {
   #expect(model.scanSummary?.wasCancelled == false)
   #expect(model.scanSummary?.allocatedByteCount == 4_096)
   #expect(model.inventoryEmptyState == nil)
-  model.selectedProviderID = .huggingFace
+  model.selectedSourceTypeID = .huggingFace
   #expect(model.visibleInstallations.isEmpty)
   #expect(model.inventoryEmptyState == .noMatches)
-  model.selectedProviderID = nil
+  model.selectedSourceTypeID = nil
   model.selectedFormat = .safetensors
   #expect(model.visibleInstallations.isEmpty)
   model.selectedFormat = nil
@@ -743,7 +762,7 @@ func returningUserScansOnLaunch() async throws {
   #expect(model.visibleInstallations.isEmpty)
   #expect(model.inventoryEmptyState == .noMatches)
   model.searchText = "missing"
-  model.selectedProviderID = .huggingFace
+  model.selectedSourceTypeID = .huggingFace
   model.showAllModels()
   #expect(model.selectedSection == .all)
   #expect(model.searchText.isEmpty)

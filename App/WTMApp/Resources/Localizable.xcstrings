@@ -1012,6 +1012,17 @@
         }
       }
     },
+    "detail.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
+          }
+        }
+      }
+    },
     "detail.size" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1050,6 +1061,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Any Provider"
+          }
+        }
+      }
+    },
+    "filter.any-source-type" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Any Source Type"
           }
         }
       }
@@ -1103,6 +1124,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Provider"
+          }
+        }
+      }
+    },
+    "filter.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
           }
         }
       }
@@ -1212,7 +1244,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Issue"
+            "value" : "Model Issue"
           }
         }
       }
@@ -1301,6 +1333,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Provider"
+          }
+        }
+      }
+    },
+    "inventory.column.source-type" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
           }
         }
       }
@@ -2840,7 +2883,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mounted Volumes"
+            "value" : "Mounted Drives"
           }
         }
       }
@@ -3127,6 +3170,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Choose Model Sources"
+          }
+        }
+      }
+    },
+    "source.type.manual-folder" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manual Folder"
           }
         }
       }

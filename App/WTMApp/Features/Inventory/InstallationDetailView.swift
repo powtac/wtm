@@ -11,7 +11,7 @@ struct InstallationDetailView: View {
   var body: some View {
     if let installation {
       Form {
-        LabeledContent("detail.provider", value: installation.providerID.localizedName)
+        LabeledContent("detail.source-type", value: installation.inventorySourceTypeName)
         LabeledContent("detail.format", value: installation.variant.format.localizedName)
         LabeledContent(
           "detail.size",

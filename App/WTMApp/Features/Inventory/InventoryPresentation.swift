@@ -13,6 +13,10 @@ extension ProviderID {
     default: rawValue
     }
   }
+
+  var inventorySourceTypeName: String {
+    self == .manual ? String(localized: "source.type.manual-folder") : localizedName
+  }
 }
 
 extension ModelFormat {
@@ -89,7 +93,8 @@ extension InventoryIssue {
 
 extension ModelInstallation {
   var inventorySortName: String { identity.displayName }
-  var inventorySortProvider: String { providerID.localizedName }
+  var inventorySourceTypeName: String { providerID.inventorySourceTypeName }
+  var inventorySortSourceType: String { inventorySourceTypeName }
   var inventorySortFormat: String { variant.format.localizedName }
   var inventorySortState: String { state.localizedName }
   var inventorySortSize: Int64 { allocatedByteCount }
@@ -118,7 +123,7 @@ struct InventoryTableRow: Identifiable {
 
   var id: ModelInstallation.ID { installation.id }
   var sortName: String { installation.inventorySortName }
-  var sortProvider: String { installation.inventorySortProvider }
+  var sortSourceType: String { installation.inventorySortSourceType }
   var sortFormat: String {
     [installation.inventorySortFormat, installation.variant.quantization]
       .compactMap { $0 }
@@ -144,7 +149,7 @@ struct InventoryTableColumnWidths: Equatable {
   static let minimum: CGFloat = 24
 
   let name: CGFloat
-  let provider: CGFloat
+  let sourceType: CGFloat
   let format: CGFloat
   let state: CGFloat
   let size: CGFloat
@@ -170,7 +175,7 @@ func inventoryTableColumnWidths(
 
   return InventoryTableColumnWidths(
     name: width(for: rows.map(\.installation.identity.displayName)),
-    provider: width(for: rows.map(\.installation.providerID.localizedName)),
+    sourceType: width(for: rows.map(\.installation.inventorySourceTypeName)),
     format: width(for: rows.map { formatAndQuantizationText($0.installation) }),
     state: width(for: rows.map(\.installation.state.localizedName)),
     size: width(

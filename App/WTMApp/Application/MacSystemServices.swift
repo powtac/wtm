@@ -1,4 +1,5 @@
 import AppKit
+import DiskArbitration
 import Foundation
 import ServiceManagement
 import UniformTypeIdentifiers
@@ -140,6 +141,7 @@ struct MacVolumeCatalog: VolumeCataloging {
         includingResourceValuesForKeys: Array(baseKeys),
         options: [.skipHiddenVolumes]
       ) ?? [])
+      .filter(isPhysicalMountedDrive)
       .compactMap { url in
         guard let values = try? url.resourceValues(forKeys: baseKeys) else { return nil }
         let identifier =
@@ -168,6 +170,29 @@ struct MacVolumeCatalog: VolumeCataloging {
       .sorted { left, right in
         left.name.localizedStandardCompare(right.name) == .orderedAscending
       }
+  }
+
+  private func isPhysicalMountedDrive(_ url: URL) -> Bool {
+    let path = url.standardizedFileURL.path
+    guard path == "/" || (path.hasPrefix("/Volumes/") && path != "/Volumes/") else {
+      return false
+    }
+    guard
+      let session = DASessionCreate(kCFAllocatorDefault),
+      let disk = DADiskCreateFromVolumePath(kCFAllocatorDefault, session, url as CFURL),
+      let description = DADiskCopyDescription(disk) as NSDictionary?,
+      let isInternal = description[kDADiskDescriptionDeviceInternalKey] as? Bool,
+      let deviceProtocol = description[kDADiskDescriptionDeviceProtocolKey] as? String
+    else { return false }
+
+    if let isNetwork = description[kDADiskDescriptionVolumeNetworkKey] as? Bool, isNetwork {
+      return false
+    }
+    let normalizedProtocol = deviceProtocol.lowercased()
+    guard normalizedProtocol != "virtual interface", normalizedProtocol != "disk image" else {
+      return false
+    }
+    return path == "/" ? isInternal : !isInternal
   }
 }
 

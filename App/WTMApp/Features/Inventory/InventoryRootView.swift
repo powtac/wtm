@@ -192,12 +192,12 @@ struct InventoryRootView: View {
             max: .infinity
           )
           .customizationID("name")
-          TableColumn("inventory.column.provider", value: \.sortProvider) { row in
-            Text(row.installation.providerID.localizedName)
+          TableColumn("inventory.column.source-type", value: \.sortSourceType) { row in
+            Text(row.installation.inventorySourceTypeName)
           }
           .width(
             min: InventoryTableColumnWidths.minimum,
-            ideal: columnWidths.provider,
+            ideal: columnWidths.sourceType,
             max: .infinity
           )
           .customizationID("provider")
@@ -428,10 +428,10 @@ struct InventoryRootView: View {
         .accessibilityIdentifier("inventory-search-field")
 
       Menu {
-        Picker("filter.provider", selection: $model.selectedProviderID) {
-          Text("filter.any-provider").tag(nil as ProviderID?)
-          ForEach(model.filterProviderIDs, id: \.self) { providerID in
-            Text(providerID.localizedName).tag(providerID as ProviderID?)
+        Picker("filter.source-type", selection: $model.selectedSourceTypeID) {
+          Text("filter.any-source-type").tag(nil as ProviderID?)
+          ForEach(model.filterSourceTypeIDs, id: \.self) { sourceTypeID in
+            Text(sourceTypeID.inventorySourceTypeName).tag(sourceTypeID as ProviderID?)
           }
         }
         Picker("filter.format", selection: $model.selectedFormat) {

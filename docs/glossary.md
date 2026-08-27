@@ -26,13 +26,12 @@ download service, inference host, or client configuration manager.
 | UI label | Definition |
 | --- | --- |
 | `All Models` | Every discovered model installation in the current inventory, subject to search and filters. |
-| `Providers` | Provider-oriented sidebar label. In the current build it returns the same rows as `All Models`; use the `Provider` filter for an actual provider-specific view. |
 | `Old` | Installations whose earliest available change evidence is older than the configurable `Old after` threshold. |
 | `Age Unknown` | Installations with no usable earliest change timestamp. |
 | `Incomplete` | Installations for which the scanner found partial or incomplete model evidence. |
-| `Issues` | The latest scan's `InventoryIssue` records, such as source access, enumeration, or malformed metadata errors. It is not the same thing as rows whose installation state is `Issue`. |
+| `Issues` | The latest scan's `InventoryIssue` records, such as source access, enumeration, or malformed metadata errors. It is separate from installations whose state is `Model Issue`. |
 
-Search and the `Provider`, `Format`, `State`, and `Source` filters narrow the
+Search and the `Source Type`, `Format`, `State`, and `Source` filters narrow the
 selected inventory scope. `Show All Models` clears that view back to `All
 Models`; it does not run another scan.
 
@@ -42,10 +41,10 @@ Models`; it does not run another scan.
 | --- | --- |
 | Scan | A read-only inspection of explicitly enabled and authorized source roots. |
 | Inventory | The ephemeral, normalized result built from the latest scan. It is rebuilt from provider files and local APIs; model results are not persisted. |
-| Source | One user-approved scan root, such as a Hugging Face cache or a manually selected folder. A source has a provider role, path, volume identity, and access state. |
+| Source | One user-approved scan root, such as a Hugging Face cache or a manually selected folder. A source has a source type, optional provider role, path, volume identity, and access state. |
 | Source root | The exact directory boundary WTM may inspect for a source. WTM must not silently widen it to the home directory or a parent cache. |
 | Provider | A known storage convention and its read-only inventory adapter, for example Ollama, Hugging Face, or MLX. |
-| Manual folder | A generic source scanned for recognizable model files without claiming provider ownership. It is a source/adapter role, not a model provider. |
+| Manual folder | A generic source scanned for recognizable model files without claiming provider ownership. It is a source type and adapter role, not a model provider. |
 | Model identity | The logical model, independent of one local copy or file format; code type `ModelIdentity`. |
 | Model variant | One representation of an identity, including format and optional quantization; code type `ModelVariant`. |
 | Model installation | One detected identity/variant at one source and path; code type `ModelInstallation`. It means “found locally”, not “complete”, “compatible”, “loaded”, or “running”. |
@@ -142,16 +141,13 @@ synonym for either one.
 | `ClientAdapter` | A reviewed, short-lived handoff to a consuming application or endpoint. |
 | `Storage Provider` | The Settings role for registered storage discovery adapters. It is not a runtime or client. |
 
-## Current inconsistencies
+## Remaining inconsistencies
 
 These are real implementation/documentation mismatches found while creating
 this glossary. They are recorded here so users do not infer the wrong meaning.
 
 | Location | Inconsistency | Canonical direction |
 | --- | --- | --- |
-| Inventory sidebar | `Providers` currently behaves exactly like `All Models`; provider selection is implemented by a separate filter menu. | Either remove `Providers` from the sidebar or implement a real provider-grouped scope. Until then, call the menu control `Provider filter`. |
-| `Issues` sidebar | The view displays `InventoryIssue` scan records, while `InventorySection.issues` also names installation state `Issue`. | Reserve `Issues` for scan issues and rename the model state to `Model Issue`, or make the two views explicitly separate. |
-| Provider column/domain | `Manual Folder` is presented through `ProviderID.manual`, although it deliberately has no provider ownership. | Use `Source type` or `Storage role` for this column, with `Manual Folder` as a value. |
 | `Offline` | The same word is used for an installation state and a source access state. | Keep the labels but qualify them in help/docs as `Installation: Offline` versus `Source: Offline`. |
 | Format values | `Ollama` is exposed as a `ModelFormat`, although Ollama is primarily a storage/provider convention rather than a file format. | Prefer `Representation` or `Storage representation` for that field, or explain why provider-backed Ollama variants use the value. |
 | Runtime terminology | The detail pane says `Runtime Verification`, Settings says `Runtime Tools`, and the architecture says `RuntimeAdapter`. | Keep all three only when the role is explicit: verification = evidence, tool = executable definition, adapter = implementation. |

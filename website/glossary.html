@@ -35,11 +35,10 @@
           <thead><tr><th>Label</th><th>Definition</th></tr></thead>
           <tbody>
             <tr><th>All Models</th><td>All discovered model installations, narrowed by search and filters.</td></tr>
-            <tr><th>Providers</th><td>Provider-oriented label; in the current build it returns the same rows as All Models. Use the Provider filter for a real provider view.</td></tr>
             <tr><th>Old</th><td>Installations older than the configurable Old after threshold.</td></tr>
             <tr><th>Age Unknown</th><td>Installations without usable earliest-change evidence.</td></tr>
             <tr><th>Incomplete</th><td>Installations with partial or missing model evidence.</td></tr>
-            <tr><th>Issues</th><td>Latest scan issues such as stale access or malformed metadata; this is separate from a model installation whose state is Issue.</td></tr>
+            <tr><th>Issues</th><td>Latest scan issues such as stale access or malformed metadata; this is separate from a model installation whose state is Model Issue.</td></tr>
           </tbody>
         </table>
       </section>
@@ -88,12 +87,9 @@
       </section>
 
       <section>
-        <h2>Known terminology gaps</h2>
+        <h2>Remaining terminology gaps</h2>
         <p>The current build has a few naming mismatches. They are documented openly so the UI is not over-interpreted:</p>
         <ul>
-          <li><strong>Providers:</strong> the sidebar scope currently duplicates All Models; provider filtering is a separate menu.</li>
-          <li><strong>Issues:</strong> the sidebar lists scan issues, while <code>Issue</code> is also an installation state.</li>
-          <li><strong>Manual Folder:</strong> the domain stores it under <code>ProviderID.manual</code>, although it deliberately claims no provider ownership.</li>
           <li><strong>Offline:</strong> the same label can describe a source or an installation.</li>
           <li><strong>Run or handoff:</strong> the support matrix combines runtime execution and client handoff; these are separate capabilities.</li>
         </ul>
