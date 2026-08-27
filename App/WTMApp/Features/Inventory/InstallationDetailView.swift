@@ -4,6 +4,7 @@ import WTMDomain
 struct InstallationDetailView: View {
   @Bindable var model: InventoryViewModel
   let installation: ModelInstallation?
+  let sourceName: String?
   let revealAction: (URL) -> Void
   let deleteAction: () -> Void
   let canDelete: Bool
@@ -12,6 +13,9 @@ struct InstallationDetailView: View {
     if let installation {
       Form {
         LabeledContent("detail.source-type", value: installation.inventorySourceTypeName)
+        if let sourceName {
+          LabeledContent("detail.source", value: sourceName)
+        }
         LabeledContent("detail.format", value: installation.variant.format.localizedName)
         LabeledContent(
           "detail.size",

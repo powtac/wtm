@@ -2,6 +2,7 @@ import Foundation
 import WTMAdapterContracts
 import WTMDomain
 import WTMRuntime
+import WTMSecurity
 
 public struct UnslothClientAdapter: ClientAdapter {
   public let id = ClientAdapterID.unsloth
@@ -13,6 +14,7 @@ public struct UnslothClientAdapter: ClientAdapter {
   private let environment: [String: String]
   private let port: UInt16
   private let inspector: ExecutableInspector
+  private let ggufReader = GGUFHeaderReader()
 
   public init(
     pythonURL: URL?,
@@ -59,6 +61,9 @@ public struct UnslothClientAdapter: ClientAdapter {
     else {
       return .unavailable(reason: "Unsloth Studio does not support this installation.")
     }
+    guard installation.variant.format != .gguf || hasValidatedGGUFModel(installation) else {
+      return .unavailable(reason: "Unsloth Studio requires GGUF model tensors.")
+    }
     guard pythonURL != nil, scriptURL != nil else {
       return .unavailable(reason: "Unsloth Studio was not found.")
     }
@@ -72,6 +77,9 @@ public struct UnslothClientAdapter: ClientAdapter {
     guard installation.state == .stored,
       [.gguf, .safetensors, .mlx].contains(installation.variant.format)
     else {
+      throw ClientAdapterError.unsupportedInstallation
+    }
+    guard installation.variant.format != .gguf || hasValidatedGGUFModel(installation) else {
       throw ClientAdapterError.unsupportedInstallation
     }
     guard let pythonURL, let scriptURL else { throw ClientAdapterError.toolNotInstalled }
@@ -124,5 +132,13 @@ public struct UnslothClientAdapter: ClientAdapter {
     let path = firstLine.dropFirst(2).split(separator: " ").first.map(String.init)
     guard let path, path.hasPrefix("/") else { return nil }
     return URL(filePath: path)
+  }
+
+  private func hasValidatedGGUFModel(_ installation: ModelInstallation) -> Bool {
+    let candidates = installation.artifacts.filter {
+      $0.kind == .weights && $0.url.pathExtension.lowercased() == "gguf" && !$0.isPartial
+    }
+    guard candidates.count == 1, let candidate = candidates.first else { return false }
+    return (try? ggufReader.inspect(at: candidate.url).containsModelWeights) == true
   }
 }

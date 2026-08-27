@@ -3,6 +3,6 @@ title: What The Model
 message: If you use this software, cite it using this metadata.
 type: software
 authors:
-  - name: powtac
+  - name: Simon Brüchner
 repository-code: https://github.com/powtac/wtm
 license: Apache-2.0

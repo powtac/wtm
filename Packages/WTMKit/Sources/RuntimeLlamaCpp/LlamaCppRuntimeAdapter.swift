@@ -2,6 +2,7 @@ import Foundation
 import WTMAdapterContracts
 import WTMDomain
 import WTMRuntime
+import WTMSecurity
 
 public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
   public let id = RuntimeAdapterID.llamaCpp
@@ -14,6 +15,7 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
   private let invocationBuilder: ToolInvocationBuilder
   private let portAllocator: LoopbackPortAllocator
   private let transport: any LlamaCppRuntimeTransport
+  private let ggufReader = GGUFHeaderReader()
 
   public init(
     configuredDefinition: ToolDefinition? = nil,
@@ -44,6 +46,10 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       compatibilityValue = .unsupportedFormat
       validationValue = .blocked
       blockers.append("llama.cpp requires a GGUF model.")
+    } else if modelURL(for: installation) == nil {
+      compatibilityValue = .invalidModel
+      validationValue = .blocked
+      blockers.append("The GGUF file contains no validated model tensors.")
     } else if !supportsArchitecture(environment.architecture) {
       compatibilityValue = .unsupportedArchitecture
       validationValue = .blocked
@@ -196,9 +202,11 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
     let candidates = installation.artifacts.filter {
       $0.kind == .weights && $0.url.pathExtension.lowercased() == "gguf" && !$0.isPartial
     }.map(\.url)
-    if candidates.count == 1 { return candidates[0] }
-    if installation.rootURL.pathExtension.lowercased() == "gguf" { return installation.rootURL }
-    return nil
+    guard candidates.count == 1, let candidate = candidates.first else { return nil }
+    guard (try? ggufReader.inspect(at: candidate).containsModelWeights) == true else {
+      return nil
+    }
+    return candidate
   }
 
   private func endpoint(port: UInt16) throws -> URL {

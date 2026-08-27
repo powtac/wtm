@@ -44,7 +44,7 @@ let package = Package(
     ),
     .target(
       name: "RuntimeLlamaCpp",
-      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime", "WTMSecurity"]
     ),
     .target(
       name: "ClientOpenClaw",
@@ -52,7 +52,7 @@ let package = Package(
     ),
     .target(
       name: "ClientUnsloth",
-      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime", "WTMSecurity"]
     ),
     .target(name: "WTMPersistence", dependencies: ["WTMDomain", "WTMActions"]),
     .target(

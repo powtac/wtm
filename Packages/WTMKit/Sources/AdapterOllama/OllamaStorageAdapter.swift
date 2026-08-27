@@ -26,7 +26,7 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     }.map(\.url)
     let partialBlobURLs = entries.compactMap { entry -> URL? in
       guard entry.isRegularFile || entry.isSymbolicLink,
-        isPartialBlob(entry.url)
+        isPartialBlob(entry.url, root: source.rootURL)
       else { return nil }
       return entry.url
     }
@@ -143,7 +143,12 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     )
   }
 
-  private func isPartialBlob(_ url: URL) -> Bool {
+  private func isPartialBlob(_ url: URL, root: URL) -> Bool {
+    let blobsURL = root.appending(path: "blobs", directoryHint: .isDirectory)
+    guard
+      url.deletingLastPathComponent().resolvingSymlinksInPath().standardizedFileURL.path
+        == blobsURL.resolvingSymlinksInPath().standardizedFileURL.path
+    else { return false }
     let name = url.lastPathComponent
     guard name.hasPrefix("sha256-"), name.hasSuffix("-partial") else { return false }
     let digest = name.dropFirst("sha256-".count).dropLast("-partial".count)

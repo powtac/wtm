@@ -1088,6 +1088,17 @@
         }
       }
     },
+    "detail.source" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
+          }
+        }
+      }
+    },
     "filter.action" : {
       "extractionState" : "stale",
       "localizations" : {

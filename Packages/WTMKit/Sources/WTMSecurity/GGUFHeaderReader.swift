@@ -46,16 +46,15 @@ public struct GGUFHeaderReader: Sendable {
   }
 
   public func inspect(at url: URL) throws -> GGUFInspection {
-    let data: Data
+    let handle: FileHandle
     do {
-      let handle = try FileHandle(forReadingFrom: url)
-      defer { try? handle.close() }
-      data = try handle.read(upToCount: maximumReadByteCount) ?? Data()
+      handle = try FileHandle(forReadingFrom: url)
     } catch {
       throw GGUFHeaderReaderError.truncated
     }
+    defer { try? handle.close() }
 
-    var cursor = DataCursor(data: data)
+    var cursor = FileCursor(handle: handle, maximumReadByteCount: maximumReadByteCount)
     guard try cursor.readData(count: 4) == Data("GGUF".utf8) else {
       throw GGUFHeaderReaderError.invalidMagic
     }
@@ -138,16 +137,26 @@ private enum GGUFValueType: UInt32 {
   case float64 = 12
 }
 
-private struct DataCursor {
-  let data: Data
-  var offset = 0
+private struct FileCursor {
+  let handle: FileHandle
+  let maximumReadByteCount: Int
+  var bytesRead = 0
 
   mutating func readData(count: Int) throws -> Data {
-    guard count >= 0, offset <= data.count, count <= data.count - offset else {
-      throw GGUFHeaderReaderError.truncated
+    guard count >= 0, bytesRead <= maximumReadByteCount,
+      count <= maximumReadByteCount - bytesRead else {
+      throw GGUFHeaderReaderError.headerTooLarge
     }
-    defer { offset += count }
-    return data.subdata(in: offset..<(offset + count))
+
+    var result = Data()
+    result.reserveCapacity(count)
+    while result.count < count {
+      let chunk = try handle.read(upToCount: count - result.count) ?? Data()
+      guard !chunk.isEmpty else { throw GGUFHeaderReaderError.truncated }
+      result.append(chunk)
+    }
+    bytesRead += count
+    return result
   }
 
   mutating func readUInt32() throws -> UInt32 {

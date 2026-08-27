@@ -30,6 +30,7 @@ public enum RuntimeCompatibility: String, Codable, CaseIterable, Sendable {
   case runtimeNotInstalled
   case runtimeUnavailable
   case unsupportedFormat
+  case invalidModel
   case unsupportedArchitecture
   case insufficientMemory
   case compatible

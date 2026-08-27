@@ -24,7 +24,10 @@ private actor LlamaCppTransportStub: LlamaCppRuntimeTransport {
 }
 
 private func ggufInstallation() -> ModelInstallation {
-  let modelURL = URL(filePath: "/tmp/tiny.gguf")
+  let modelURL = FileManager.default.temporaryDirectory.appending(
+    path: "wtm-runtime-\(UUID().uuidString).gguf"
+  )
+  try! minimalGGUF().write(to: modelURL)
   let identity = ModelIdentity(id: "manual:tiny", displayName: "tiny")
   return ModelInstallation(
     id: "manual-source:tiny",
@@ -85,9 +88,10 @@ func llamaCppConventionPreservesOrigin() {
 @Test("llama.cpp plan binds one approved GGUF to numeric loopback")
 func llamaCppPlanUsesApprovedLoopbackArguments() async throws {
   let (definition, approval) = try enabledLlamaDefinition()
+  let model = ggufInstallation()
   let adapter = LlamaCppRuntimeAdapter(transport: LlamaCppTransportStub())
   let plan = try await adapter.makeTestPlan(
-    for: ggufInstallation(),
+    for: model,
     context: RuntimeLaunchContext(
       port: 20_001,
       toolDefinition: definition,
@@ -102,11 +106,9 @@ func llamaCppPlanUsesApprovedLoopbackArguments() async throws {
     Issue.record("Expected executable plan")
     return
   }
-  #expect(
-    invocation.arguments == [
-      "--model", "/tmp/tiny.gguf", "--host", "127.0.0.1", "--port", "20001",
-    ]
-  )
+  #expect(invocation.arguments == [
+    "--model", model.rootURL.path, "--host", "127.0.0.1", "--port", "20001",
+  ])
 }
 
 @Test("llama.cpp rejects a definition that can bind beyond loopback")
@@ -184,6 +186,42 @@ func llamaCppReadinessChecksArchitecture() async throws {
   #expect(readiness.validation.value == .blocked)
 }
 
+@Test("llama.cpp rejects a tensorless GGUF vocabulary file")
+func llamaCppRejectsVocabularyGGUF() async throws {
+  let modelURL = FileManager.default.temporaryDirectory.appending(
+    path: "wtm-runtime-vocab-\(UUID().uuidString).gguf"
+  )
+  defer { try? FileManager.default.removeItem(at: modelURL) }
+  try tensorlessGGUF().write(to: modelURL)
+
+  let identity = ModelIdentity(id: "manual:vocab", displayName: "vocab")
+  let installation = ModelInstallation(
+    id: "manual:vocab",
+    identity: identity,
+    variant: ModelVariant(id: "manual:vocab:gguf", identityID: identity.id, format: .gguf),
+    sourceID: "manual",
+    providerID: .manual,
+    rootURL: modelURL,
+    state: .stored,
+    artifacts: [
+      Artifact(
+        id: "vocab",
+        url: modelURL,
+        kind: .weights,
+        logicalByteCount: 24,
+        allocatedByteCount: 24
+      ),
+    ]
+  )
+  let readiness = await LlamaCppRuntimeAdapter().readiness(
+    for: installation,
+    environment: RuntimeEnvironment(architecture: "arm64")
+  )
+
+  #expect(readiness.compatibility.value == .invalidModel)
+  #expect(readiness.validation.value == .blocked)
+}
+
 @Test("llama.cpp inference result requires a completed model request")
 func llamaCppInferenceUsesMinimalCompletion() async {
   let transport = LlamaCppTransportStub(response: "O")
@@ -205,4 +243,32 @@ private func llamaTestEndpoint() -> URL {
   components.port = 20_001
   guard let url = components.url else { preconditionFailure("Valid test endpoint") }
   return url
+}
+
+private func minimalGGUF() -> Data {
+  var data = Data("GGUF".utf8)
+  appendLittleEndian(UInt32(3), to: &data)
+  appendLittleEndian(UInt64(1), to: &data)
+  appendLittleEndian(UInt64(0), to: &data)
+  return data
+}
+
+private func tensorlessGGUF() -> Data {
+  var data = Data("GGUF".utf8)
+  appendLittleEndian(UInt32(3), to: &data)
+  appendLittleEndian(UInt64(0), to: &data)
+  appendLittleEndian(UInt64(0), to: &data)
+  return data
+}
+
+private func appendLittleEndian(_ value: UInt32, to data: inout Data) {
+  for shift in stride(from: 0, through: 24, by: 8) {
+    data.append(UInt8((value >> UInt32(shift)) & 0xff))
+  }
+}
+
+private func appendLittleEndian(_ value: UInt64, to data: inout Data) {
+  for shift in stride(from: 0, through: 56, by: 8) {
+    data.append(UInt8((value >> UInt64(shift)) & 0xff))
+  }
 }

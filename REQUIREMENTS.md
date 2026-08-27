@@ -534,6 +534,41 @@ App-Updates betreffen ausschließlich WTM-Binaries. Provider- und Modelldownload
 - **FR-EXT-014 (P0):** Die Hilfe MUST klar unterscheiden: Datenkonfiguration in Settings, Datenmanifest per Import, neuer kompilierter Adapter per GitHub Pull Request und nicht unterstützte dynamische Code-Plugins.
 - **FR-EXT-015 (P0):** Die ein-/ausblendbare Hauptseitenleiste MUST `Settings…` als festen, visuell getrennten Footer unterhalb der scrollbaren Inventar-Scope-Liste zeigen. Diese Aktion öffnet das native Settings-Fenster, verändert weder Sidebar-Auswahl noch Inventarfilter und bleibt funktional gleichwertig zum App-Menübefehl sowie `Command-,`.
 
+### 9.15 Zukünftiger LLM-Ökosystem-Katalog — nach Phase 6
+
+Die folgende Liste ist eine priorisierte Research- und Integrations-Backlog, keine aktuelle Supportzusage. WTM bleibt providerneutral: Ein Produktname darf weder automatisch eine Quelle aktivieren noch eine Runtime- oder Clientfähigkeit vortäuschen.
+
+- **FR-FUT-001 (P1):** WTM MUST einen versionierten Integrationskatalog mit Name, Rolle, offizieller Projekt-URL, offizieller Dokumentations-URL, Plattformstatus, Capability, Erkennungskonvention und Evidenzstatus führen.
+- **FR-FUT-002 (P0):** Integrationen MUST nach `Storage Provider`, `Runtime/Server`, `Gateway/Proxy` und `Client/UI` getrennt modelliert werden. Eine Client- oder Gateway-Verbindung ist keine lokale Modellquelle.
+- **FR-FUT-003 (P0):** Neue Storage-Adapter MUST bekannte lokale Wurzeln, Index-/Manifeststrukturen, partielle Downloads, physische Shared-Artefakte und Versionsgrenzen explizit prüfen. Pfad- oder Endungsheuristiken allein bleiben `Unknown`.
+- **FR-FUT-004 (P0):** Neue Runtime-/Server-Adapter MUST Endpoint, Bind-Adresse, Modellauflistung, Healthcheck, Modellreferenz, Prozess-/Providerbesitz und Stop-Verhalten getrennt nachweisen. `OpenAI-compatible` ist ein Protokoll, keine Herstelleridentität.
+- **FR-FUT-005 (P1):** Vor einer Implementierung MUST der macOS-/Apple-Silicon-Status jedes Kandidaten anhand offizieller Dokumentation und eines lokalen Contract-Fixtures bestätigt werden. Linux-/NVIDIA-Schwerpunkte bleiben beobachtete, nicht lokale WTM-Unterstützung.
+- **FR-FUT-006 (P0):** Offizielle URLs im Katalog sind Referenzmetadaten; Scan, Diagnose und Inventar dürfen dadurch keine Netzwerkverbindung, Downloads oder Provideraktionen auslösen.
+- **FR-FUT-007 (P0):** Unbekannte, inkompatible oder veraltete Integrationen degradieren auf `read-only`, `Unknown` oder `Unsupported`; sie werden nicht stillschweigend als Standard erkannt.
+
+**Priorisierte Kandidaten:**
+
+| Rolle | Kandidat | Offizielles Projekt | Dokumentation | Einordnung |
+|---|---|---|---|---|
+| Storage / Desktop / Runtime | LM Studio | [lmstudio.ai](https://lmstudio.ai/) | [API und Server](https://lmstudio.ai/docs/developer/rest/quickstart) | Hohe Priorität; lokaler Model-Katalog plus lokaler Server, Default `localhost:1234`. |
+| Storage / Desktop / Runtime | GPT4All | [nomic.ai/gpt4all](https://www.nomic.ai/gpt4all) | [GPT4All Docs](https://docs.gpt4all.io/) | Hohe Priorität; lokaler Desktop-Store und `llama.cpp`-basierte Modelle. |
+| Storage / Desktop / Runtime | Jan | [jan.ai](https://jan.ai/) | [Jan Docs](https://www.jan.ai/docs) | Hohe Priorität; Desktop-Datenordner, Llama.cpp/MLX und OpenAI-kompatibler lokaler Server. |
+| Runtime / Server | LocalAI | [localai.io](https://localai.io/) | [LocalAI Docs](https://localai.io/docs/) | Hohe Priorität; lokaler Multi-backend-Server mit OpenAI-/Anthropic-kompatiblen APIs. |
+| Runtime / Server | llamafile | [mozilla-ai/llamafile](https://github.com/mozilla-ai/llamafile) | [Quickstart](https://github.com/mozilla-ai/llamafile/blob/main/docs/quickstart.md) | Mittlere Priorität; portable Einzeldatei, lokaler Server und GGUF-nahe Distribution. |
+| Runtime / Server | KoboldCpp | [LostRuins/koboldcpp](https://github.com/LostRuins/koboldcpp) | [KoboldCpp Wiki](https://github.com/LostRuins/koboldcpp/wiki) | Mittlere Priorität; GGUF-Runner/UI, eigene API und OpenAI-kompatibles `/v1`. |
+| Runtime / Server | TextGen / text-generation-webui | [oobabooga/textgen](https://github.com/oobabooga/textgen) | [OpenAI API](https://github.com/oobabooga/textgen/wiki/12-%E2%80%90-OpenAI-API) | Mittlere Priorität; lokale UI/API mit mehreren Backends und eigener `user_data/models`-Konvention. |
+| Runtime / Server | vLLM | [vllm.ai](https://vllm.ai/) | [vLLM Docs](https://docs.vllm.ai/) | Beobachten; hoher Serverstandard, aber primär GPU-/Serverbetrieb statt macOS-Default. |
+| Runtime / Server | SGLang | [sglang](https://github.com/sgl-project/sglang) | [SGLang Docs](https://docs.sglang.ai/) | Beobachten; produktionsorientierter, OpenAI-kompatibler GPU-Server. |
+| Runtime / Server | Text Generation Inference (TGI) | [huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference) | [TGI Docs](https://huggingface.co/docs/text-generation-inference/) | Nur beobachten; offizielle Doku führt TGI aktuell als Maintenance Mode. |
+| Gateway / Proxy | LiteLLM | [litellm.ai](https://www.litellm.ai/) | [LiteLLM Docs](https://docs.litellm.ai/) | Mittlere Priorität; Gateway/Router, kein Storage Provider und keine lokale Modellquelle. |
+| Client / UI | Open WebUI | [openwebui.com](https://openwebui.com/) | [Provider Docs](https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/) | Hohe Priorität als Client; verbindet Ollama und OpenAI-kompatible Server, verwaltet nicht deren Eigentum. |
+| Client / UI | AnythingLLM | [anythingllm.com](https://anythingllm.com/) | [AnythingLLM Docs](https://docs.anythingllm.com/) | Mittlere Priorität als Workspace-/RAG-Client mit LocalAI-, LM-Studio-, Ollama- und KoboldCpp-Anbindungen. |
+| Client / UI | Continue | [continue.dev](https://www.continue.dev/) | [Model providers](https://docs.continue.dev/customize/models) | Mittlere Priorität als Entwicklerclient; lokale Modelle werden über Provider-/Endpoint-Konfiguration referenziert. |
+
+- **FR-FUT-008 (P1):** Die erste zukünftige Implementierungswelle SHOULD LM Studio, GPT4All, Jan, LocalAI und Open WebUI abdecken; llamafile, KoboldCpp, TextGen und LiteLLM folgen als klar abgegrenzte Runtime-/Gateway-Kandidaten.
+- **FR-FUT-009 (P1):** vLLM und SGLang werden wegen ihrer Serverrelevanz beobachtet, aber erst nach nachgewiesener Apple-Silicon-Tauglichkeit als lokale WTM-Runtime priorisiert. TGI erhält wegen Maintenance Mode keinen neuen macOS-Supportpfad ohne neue offizielle Lagebewertung.
+- **FR-FUT-010 (P0):** Jeder zukünftige Adapter benötigt eigene Fixtures, Contract Tests, Capability-Matrix, Security Review und eine dokumentierte Rückfallklasse; eine Katalogaufnahme allein ist kein Implementierungs- oder Release-Gate.
+
 ## 10. Einheitliches Zustandsmodell
 
 Die UI zeigt keinen mehrdeutigen grünen Punkt. Ein Modell erhält eine kompakte Zusammenfassung plus Details:
@@ -1034,6 +1069,20 @@ Eine spätere Mac-App-Store-Ausgabe wäre ein separates, funktional reduziertes 
 - [Hugging Face Hub: Manage cache](https://huggingface.co/docs/huggingface_hub/guides/manage-cache)
 - [llama.cpp](https://github.com/ggml-org/llama.cpp)
 - [Unsloth](https://github.com/unslothai/unsloth)
+- [LM Studio](https://lmstudio.ai/)
+- [GPT4All](https://www.nomic.ai/gpt4all)
+- [Jan](https://jan.ai/)
+- [LocalAI](https://localai.io/)
+- [llamafile](https://github.com/mozilla-ai/llamafile)
+- [KoboldCpp](https://github.com/LostRuins/koboldcpp)
+- [TextGen](https://github.com/oobabooga/textgen)
+- [vLLM](https://vllm.ai/)
+- [SGLang](https://docs.sglang.ai/)
+- [Text Generation Inference](https://huggingface.co/docs/text-generation-inference/)
+- [LiteLLM](https://docs.litellm.ai/)
+- [Open WebUI](https://docs.openwebui.com/)
+- [AnythingLLM](https://docs.anythingllm.com/)
+- [Continue](https://docs.continue.dev/)
 
 ### Swift und Erweiterbarkeit
 

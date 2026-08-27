@@ -145,7 +145,9 @@ func huggingFaceRepositoryAliasesFailClosed() {
 
 @Test("Manual folders detect GGUF quantization")
 func manualFixtureIsInventoried() async throws {
-  let root = try #require(fixtureRoot("manual"))
+  let fixture = try TemporaryGGUFFixture(fileName: "tiny-Q4_K_M.gguf")
+  defer { fixture.remove() }
+  let root = fixture.root
   let source = allowedSource(id: "manual", provider: .manual, root: root)
 
   let result = await ManualFolderAdapter().scan(source: source)
@@ -157,7 +159,9 @@ func manualFixtureIsInventoried() async throws {
 
 @Test("Inventory coordinator performs a basic filesystem scan")
 func coordinatorScansBasicManualFolder() async throws {
-  let root = try #require(fixtureRoot("manual"))
+  let fixture = try TemporaryGGUFFixture(fileName: "tiny-Q4_K_M.gguf")
+  defer { fixture.remove() }
+  let root = fixture.root
   let source = allowedSource(id: "manual-coordinator", provider: .manual, root: root)
   let registry = try AdapterRegistry(adapters: [ManualFolderAdapter()])
 
@@ -172,6 +176,20 @@ func coordinatorScansBasicManualFolder() async throws {
   #expect(installation.variant.quantization == "Q4_K_M")
 }
 
+@Test("Manual folders classify tensorless GGUF files as tokenizer artifacts")
+func manualFixtureClassifiesVocabularyGGUF() async throws {
+  let fixture = try TemporaryGGUFFixture(fileName: "ggml-vocab-gemma-4.gguf", tensorCount: 0)
+  defer { fixture.remove() }
+  let result = await ManualFolderAdapter().scan(
+    source: allowedSource(id: "manual-vocab", provider: .manual, root: fixture.root)
+  )
+
+  let installation = try #require(result.installations.first)
+  #expect(installation.state == .incomplete)
+  #expect(installation.artifacts.first?.kind == .tokenizer)
+  #expect(installation.artifacts.first?.kind != .weights)
+}
+
 @Test("Manual scan stops visibly at its retained-entry budget")
 func manualScanBudgetIsVisible() async throws {
   let root = FileManager.default.temporaryDirectory.appending(
@@ -180,7 +198,7 @@ func manualScanBudgetIsVisible() async throws {
   defer { try? FileManager.default.removeItem(at: root) }
   try FileManager.default.createDirectory(at: root, withIntermediateDirectories: false)
   for index in 0..<4 {
-    try Data("gguf".utf8).write(to: root.appending(path: "model-\(index).gguf"))
+    try minimalGGUF(tensorCount: 1).write(to: root.appending(path: "model-\(index).gguf"))
   }
   let source = allowedSource(id: "manual-budget", provider: .manual, root: root)
   let adapter = ManualFolderAdapter(
@@ -409,5 +427,42 @@ private struct TemporaryMLXFixture {
 
   func remove() {
     try? FileManager.default.removeItem(at: root)
+  }
+}
+
+private struct TemporaryGGUFFixture {
+  let root: URL
+
+  init(fileName: String, tensorCount: UInt64 = 1) throws {
+    root = FileManager.default.temporaryDirectory.appending(
+      path: "wtm-gguf-\(UUID().uuidString)",
+      directoryHint: .isDirectory
+    )
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+    try minimalGGUF(tensorCount: tensorCount).write(to: root.appending(path: fileName))
+  }
+
+  func remove() {
+    try? FileManager.default.removeItem(at: root)
+  }
+}
+
+private func minimalGGUF(tensorCount: UInt64) -> Data {
+  var data = Data("GGUF".utf8)
+  appendLittleEndian(UInt32(3), to: &data)
+  appendLittleEndian(tensorCount, to: &data)
+  appendLittleEndian(UInt64(0), to: &data)
+  return data
+}
+
+private func appendLittleEndian(_ value: UInt32, to data: inout Data) {
+  for shift in stride(from: 0, through: 24, by: 8) {
+    data.append(UInt8((value >> UInt32(shift)) & 0xff))
+  }
+}
+
+private func appendLittleEndian(_ value: UInt64, to data: inout Data) {
+  for shift in stride(from: 0, through: 56, by: 8) {
+    data.append(UInt8((value >> UInt64(shift)) & 0xff))
   }
 }

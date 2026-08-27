@@ -78,6 +78,9 @@ struct InventoryRootView: View {
             InstallationDetailView(
               model: model,
               installation: model.selectedInstallation,
+              sourceName: model.selectedInstallation.flatMap { installation in
+                model.sources.first { $0.id == installation.sourceID }?.displayName
+              },
               revealAction: model.reveal,
               deleteAction: model.prepareDeletion,
               canDelete: model.canPrepareDeletion
