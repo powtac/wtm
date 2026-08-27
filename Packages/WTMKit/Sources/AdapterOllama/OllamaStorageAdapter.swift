@@ -24,6 +24,12 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     let manifestURLs = entries.filter {
       ($0.isRegularFile || $0.isSymbolicLink) && $0.url.path.contains("/manifests/")
     }.map(\.url)
+    let partialBlobURLs = entries.compactMap { entry -> URL? in
+      guard entry.isRegularFile || entry.isSymbolicLink,
+        isPartialBlob(entry.url)
+      else { return nil }
+      return entry.url
+    }
     var parsedManifests: [ParsedManifest] = []
     var issues: [InventoryIssue] = []
 
@@ -99,7 +105,50 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
       )
     }
 
-    return AdapterScanResult(source: source, installations: installations, issues: issues)
+    let partialInstallations = partialBlobURLs.compactMap { partialURL -> ModelInstallation? in
+      guard let artifact = artifact(for: partialURL, kind: .weights, isPartial: true) else {
+        issues.append(
+          issue(source: source, code: "OLLAMA_PARTIAL_BLOB_UNREADABLE", url: partialURL))
+        return nil
+      }
+
+      let digest = String(partialURL.lastPathComponent.dropLast("-partial".count))
+      let identityID = "ollama:incomplete:\(digest)"
+      let identity = ModelIdentity(
+        id: identityID,
+        displayName: "Ollama download in progress"
+      )
+      let variant = ModelVariant(
+        id: "\(identityID):partial",
+        identityID: identityID,
+        format: .ollama
+      )
+      return ModelInstallation(
+        id: "\(source.id):\(partialURL.path)",
+        identity: identity,
+        variant: variant,
+        sourceID: source.id,
+        providerID: id,
+        rootURL: partialURL,
+        state: .incomplete,
+        artifacts: [artifact],
+        timestamps: timestamps(for: partialURL)
+      )
+    }
+
+    return AdapterScanResult(
+      source: source,
+      installations: installations + partialInstallations,
+      issues: issues
+    )
+  }
+
+  private func isPartialBlob(_ url: URL) -> Bool {
+    let name = url.lastPathComponent
+    guard name.hasPrefix("sha256-"), name.hasSuffix("-partial") else { return false }
+    let digest = name.dropFirst("sha256-".count).dropLast("-partial".count)
+    return digest.count == 64
+      && digest.allSatisfy { $0.isHexDigit }
   }
 
   private func blobURL(for digest: String, source: ScanSource) -> URL? {
@@ -148,7 +197,8 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
   private func artifact(
     for url: URL,
     kind: ArtifactKind,
-    isShared: Bool = false
+    isShared: Bool = false,
+    isPartial: Bool = false
   ) -> Artifact? {
     guard let metadata = try? FileMetadataReader().metadata(for: url) else { return nil }
     return Artifact(
@@ -158,7 +208,8 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
       logicalByteCount: metadata.logicalByteCount,
       allocatedByteCount: metadata.allocatedByteCount,
       physicalIdentifier: metadata.physicalIdentifier,
-      isShared: isShared
+      isShared: isShared,
+      isPartial: isPartial
     )
   }
 

@@ -20,6 +20,30 @@ func ollamaFixtureIsInventoried() async throws {
   #expect(result.installations.first?.state == .stored)
 }
 
+@Test("Ollama exposes an active partial blob as incomplete")
+func ollamaPartialBlobIsInventoried() async throws {
+  let fileManager = FileManager.default
+  let root = fileManager.temporaryDirectory.appending(
+    path: "wtm-ollama-partial-\(UUID().uuidString)", directoryHint: .isDirectory)
+  defer { try? fileManager.removeItem(at: root) }
+  let partialURL = root.appending(
+    path: "blobs/sha256-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef-partial",
+    directoryHint: .notDirectory
+  )
+  try fileManager.createDirectory(
+    at: partialURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+  try Data(repeating: 0, count: 4_096).write(to: partialURL)
+
+  let result = await OllamaStorageAdapter().scan(
+    source: allowedSource(id: "ollama-partial", provider: .ollama, root: root)
+  )
+
+  let installation = try #require(result.installations.first)
+  #expect(installation.identity.displayName == "Ollama download in progress")
+  #expect(installation.state == .incomplete)
+  #expect(installation.artifacts.first?.isPartial == true)
+}
+
 @Test("Ollama rejects a digest that could escape the blob directory")
 func ollamaRejectsInvalidDigestPath() async throws {
   let fileManager = FileManager.default
