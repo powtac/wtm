@@ -1502,6 +1502,7 @@
       }
     },
     "issue.mlx" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1575,6 +1576,12 @@
           }
         }
       }
+    },
+    "Last checked %@" : {
+
+    },
+    "Local LLM Inventory for macOS" : {
+
     },
     "menu.incomplete" : {
       "extractionState" : "stale",
@@ -1709,6 +1716,7 @@
       }
     },
     "provider.mlx" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1728,6 +1736,12 @@
           }
         }
       }
+    },
+    "Published %@" : {
+
+    },
+    "Release notes" : {
+
     },
     "runtime.check.action" : {
       "extractionState" : "stale",
@@ -2837,6 +2851,9 @@
         }
       }
     },
+    "Source: %@" : {
+
+    },
     "source.access.allowed" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2915,6 +2932,7 @@
       }
     },
     "source.add-mlx-folder.action" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3442,6 +3460,19 @@
         }
       }
     },
+    "Version %@" : {
+
+    },
+    "Version %@ (Build %@)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Version %1$@ (Build %2$@)"
+          }
+        }
+      }
+    },
     "volume.add.action" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3485,6 +3516,9 @@
           }
         }
       }
+    },
+    "What The Model" : {
+
     }
   },
   "version" : "1.0"
