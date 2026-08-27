@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The What The Model glossary explains its UI sections, inventory terms, storage measurements, evidence states, and adapter roles.">
+    <title>WTM Glossary — What The Model</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>What The Model</span></a><nav aria-label="Primary navigation"><a href="index.html">Product</a><a aria-current="page" href="glossary.html">Glossary</a><a href="extend.html">Extend WTM</a><a href="https://github.com/powtac/wtm">GitHub</a></nav></header>
+    <main id="main" class="article">
+      <p class="eyebrow">Product language</p>
+      <h1>Understand the words in WTM.</h1>
+      <p class="lead">This glossary defines the app’s UI sections and the difference between a model, its files, a scan source, a runtime, and a client handoff.</p>
+
+      <section>
+        <h2>App map</h2>
+        <table>
+          <thead><tr><th>UI part</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><th>Inventory window</th><td>The main three-column window: inventory sidebar, model table, and detail pane.</td></tr>
+            <tr><th>Inventory sidebar</th><td>Scope selections such as All Models, Old, Incomplete, and Issues. Settings is a separate footer action.</td></tr>
+            <tr><th>Model table</th><td>The latest ephemeral scan result. Rows are model installations, not necessarily runnable models.</td></tr>
+            <tr><th>Detail pane</th><td>Facts and actions for the selected installation: artifacts, configurations, runtime verification, clients, and cleanup review.</td></tr>
+            <tr><th>Settings</th><td>The native preferences window with General, Sources, Integrations, Security, and Advanced panes.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Sidebar scopes</h2>
+        <table>
+          <thead><tr><th>Label</th><th>Definition</th></tr></thead>
+          <tbody>
+            <tr><th>All Models</th><td>All discovered model installations, narrowed by search and filters.</td></tr>
+            <tr><th>Providers</th><td>Provider-oriented label; in the current build it returns the same rows as All Models. Use the Provider filter for a real provider view.</td></tr>
+            <tr><th>Old</th><td>Installations older than the configurable Old after threshold.</td></tr>
+            <tr><th>Age Unknown</th><td>Installations without usable earliest-change evidence.</td></tr>
+            <tr><th>Incomplete</th><td>Installations with partial or missing model evidence.</td></tr>
+            <tr><th>Issues</th><td>Latest scan issues such as stale access or malformed metadata; this is separate from a model installation whose state is Issue.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Inventory terms</h2>
+        <div class="cards compact">
+          <article><h3>Scan source</h3><p>One explicitly enabled and authorized directory boundary. WTM reads that source only.</p></article>
+          <article><h3>Model identity</h3><p>The logical model, independent of one local copy or file format.</p></article>
+          <article><h3>Model variant</h3><p>One representation of an identity, including format and optional quantization.</p></article>
+          <article><h3>Model installation</h3><p>One identity/variant found at one source and path. It does not claim complete, compatible, loaded, or running.</p></article>
+          <article><h3>Artifact</h3><p>A physical file or provider object such as weights, a manifest, configuration, tokenizer, or metadata.</p></article>
+          <article><h3>Manual folder</h3><p>A generic source where WTM recognizes formats without claiming provider ownership.</p></article>
+        </div>
+      </section>
+
+      <section>
+        <h2>Storage and evidence</h2>
+        <table>
+          <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+          <tbody>
+            <tr><th>Allocated Size</th><td>Physical disk allocation attributed to an installation. It is the default size column and default sort key; largest appears first.</td></tr>
+            <tr><th>Exact Bytes</th><td>The exact allocated byte count in the detail pane.</td></tr>
+            <tr><th>Share</th><td>Exclusively attributable bytes as a percentage of the active scanned inventory.</td></tr>
+            <tr><th>Shared</th><td>Physical storage referenced by more than one installation.</td></tr>
+            <tr><th>Unknown</th><td>Storage whose ownership cannot be established safely.</td></tr>
+            <tr><th>Stored</th><td>Model data is present on local storage. It is not a runtime or inference claim.</td></tr>
+            <tr><th>Runtime Verification</th><td>Separate observations for integrity, compatibility, validation, runtime state, and ownership.</td></tr>
+            <tr><th>Loaded / Running</th><td>Loaded describes runtime memory; Running describes a concrete runtime instance. Neither means merely stored.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Adapters and integrations</h2>
+        <table>
+          <thead><tr><th>Role</th><th>What it does</th></tr></thead>
+          <tbody>
+            <tr><th>Storage provider adapter</th><td>Read-only discovery of provider identities, artifacts, configurations, completeness, and evidence.</td></tr>
+            <tr><th>Storage action adapter</th><td>Provider-aware cleanup planning; the central executor owns revalidation, Trash, and audit.</td></tr>
+            <tr><th>Runtime adapter</th><td>Compatibility, immutable test-plan construction, health checks, and minimal inference contracts.</td></tr>
+            <tr><th>Runtime Tool</th><td>A configured executable definition used by a runtime adapter.</td></tr>
+            <tr><th>Client adapter</th><td>A reviewed handoff to a consuming application such as OpenClaw or Unsloth Studio.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Known terminology gaps</h2>
+        <p>The current build has a few naming mismatches. They are documented openly so the UI is not over-interpreted:</p>
+        <ul>
+          <li><strong>Providers:</strong> the sidebar scope currently duplicates All Models; provider filtering is a separate menu.</li>
+          <li><strong>Issues:</strong> the sidebar lists scan issues, while <code>Issue</code> is also an installation state.</li>
+          <li><strong>Manual Folder:</strong> the domain stores it under <code>ProviderID.manual</code>, although it deliberately claims no provider ownership.</li>
+          <li><strong>Offline:</strong> the same label can describe a source or an installation.</li>
+          <li><strong>Run or handoff:</strong> the support matrix combines runtime execution and client handoff; these are separate capabilities.</li>
+        </ul>
+        <p>For the complete mapping and proposed canonical fixes, see the <a href="https://github.com/powtac/wtm/blob/main/docs/glossary.md">repository glossary</a>.</p>
+      </section>
+    </main>
+    <footer><span>What The Model · Apache-2.0</span><nav aria-label="Footer navigation"><a href="index.html">Product</a><a href="glossary.html">Glossary</a><a href="extend.html">Contributing</a><a href="https://github.com/powtac/wtm/blob/main/SECURITY.md">Security</a></nav></footer>
+  </body>
+</html>

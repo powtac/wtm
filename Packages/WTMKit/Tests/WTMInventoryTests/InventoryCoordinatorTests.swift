@@ -164,16 +164,104 @@ func providerSourcesHaveDeterministicPriority() async throws {
   #expect(startedSourceIDs == ["hugging-face", "manual"])
 }
 
+@Test("Nested sources are scanned once per provider")
+func nestedSourcesAreFilteredPerProvider() {
+  let rootURL = URL(filePath: "/tmp/wtm-home")
+  let nestedURL = rootURL.appending(path: ".models", directoryHint: .isDirectory)
+  let sources = [
+    ScanSource(
+      id: "nested",
+      displayName: "Nested",
+      providerID: .manual,
+      rootURL: nestedURL,
+      accessState: .allowed,
+      isEnabled: true
+    ),
+    ScanSource(
+      id: "root",
+      displayName: "Root",
+      providerID: .manual,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    ),
+  ]
+
+  #expect(ScanSourcePathFilter().filter(sources).map(\.id) == ["root"])
+}
+
+@Test("Provider-specific sources remain separate when paths overlap")
+func overlappingProviderSourcesRemainSeparate() {
+  let rootURL = URL(filePath: "/tmp/wtm-home")
+  let sources = [
+    ScanSource(
+      id: "manual",
+      displayName: "Manual",
+      providerID: .manual,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    ),
+    ScanSource(
+      id: "mlx",
+      displayName: "MLX",
+      providerID: .mlx,
+      rootURL: rootURL,
+      accessState: .allowed,
+      isEnabled: true
+    ),
+  ]
+
+  #expect(ScanSourcePathFilter().filter(sources).map(\.id) == ["manual", "mlx"])
+}
+
+@Test("Coordinator skips nested same-provider sources")
+func coordinatorSkipsNestedSources() async throws {
+  let rootURL = FileManager.default.temporaryDirectory.appending(
+    path: "wtm-scan-filter-\(UUID().uuidString)",
+    directoryHint: .isDirectory
+  )
+  let nestedURL = rootURL.appending(path: ".models", directoryHint: .isDirectory)
+  try FileManager.default.createDirectory(at: nestedURL, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+
+  let sources = [
+    allowedSource(id: "nested", providerID: FixtureAdapter.providerID, rootURL: nestedURL),
+    allowedSource(id: "root", providerID: FixtureAdapter.providerID, rootURL: rootURL),
+  ]
+  let coordinator = InventoryCoordinator(
+    registry: try AdapterRegistry(adapters: [FixtureAdapter()])
+  )
+  var startedSourceIDs: [String] = []
+
+  for await event in coordinator.scanEvents(sources: sources) {
+    if case .sourceStarted(let source, _, _) = event {
+      startedSourceIDs.append(source.id)
+    }
+  }
+
+  #expect(startedSourceIDs == ["root"])
+}
+
 @Test("Scan events preserve source order and bound installation batches")
 func scanEventsAreOrderedAndBounded() async throws {
   let registry = try AdapterRegistry(adapters: [FixtureAdapter(installationCount: 3)])
   let coordinator = InventoryCoordinator(registry: registry, installationBatchSize: 2)
-  let sources = ["first", "second"].map { id in
-    allowedSource(
-      id: id,
-      providerID: FixtureAdapter.providerID
-    )
+  let rootURL = FileManager.default.temporaryDirectory.appending(
+    path: "wtm-scan-order-\(UUID().uuidString)",
+    directoryHint: .isDirectory
+  )
+  try FileManager.default.createDirectory(at: rootURL, withIntermediateDirectories: true)
+  defer { try? FileManager.default.removeItem(at: rootURL) }
+  let firstRoot = rootURL.appending(path: "first", directoryHint: .isDirectory)
+  let secondRoot = rootURL.appending(path: "second", directoryHint: .isDirectory)
+  for root in [firstRoot, secondRoot] {
+    try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
   }
+  let sources = [
+    allowedSource(id: "first", providerID: FixtureAdapter.providerID, rootURL: firstRoot),
+    allowedSource(id: "second", providerID: FixtureAdapter.providerID, rootURL: secondRoot),
+  ]
 
   var startedSourceIDs: [String] = []
   var batchSizes: [Int] = []
@@ -379,8 +467,11 @@ private func duplicateFixtureInstallation(
   )
 }
 
-private func allowedSource(id: String, providerID: ProviderID) -> ScanSource {
-  let rootURL = FileManager.default.temporaryDirectory
+private func allowedSource(
+  id: String,
+  providerID: ProviderID,
+  rootURL: URL = FileManager.default.temporaryDirectory
+) -> ScanSource {
   guard let identity = try? SourceRootPolicy().capture(rootURL: rootURL) else {
     preconditionFailure("Fixture source must be approvable")
   }

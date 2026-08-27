@@ -15,6 +15,9 @@ download is incomplete, and which provider metadata belongs to each installation
 
 The current build adds explicit runtime verification, a passive menu bar inventory,
 reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
+
+The [product glossary](docs/glossary.md) defines the app's UI sections and canonical
+inventory vocabulary. The same glossary is available on the [public website](https://powtac.github.io/wtm/glossary.html).
 Stable-release builds include a weekly privacy-
 preserving check against official GitHub Releases; WTM never auto-installs updates, opens
 a shell, automates Terminal, or downloads models.

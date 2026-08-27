@@ -911,8 +911,8 @@ final class InventoryViewModel {
     }
 
     refreshSourceAccess()
-    let enabledSources = sources.filter { source in
-      source.isEnabled && (sourceIDs == nil || sourceIDs?.contains(source.id) == true)
+    let enabledSources = ScanSourcePathFilter().filter(sources).filter { source in
+      sourceIDs == nil || sourceIDs?.contains(source.id) == true
     }
     guard !enabledSources.isEmpty else { return }
 
