@@ -27,7 +27,11 @@ private func ggufInstallation() -> ModelInstallation {
   let modelURL = FileManager.default.temporaryDirectory.appending(
     path: "wtm-runtime-\(UUID().uuidString).gguf"
   )
-  try! minimalGGUF().write(to: modelURL)
+  do {
+    try minimalGGUF().write(to: modelURL)
+  } catch {
+    preconditionFailure("Failed to create test GGUF: \(error)")
+  }
   let identity = ModelIdentity(id: "manual:tiny", displayName: "tiny")
   return ModelInstallation(
     id: "manual-source:tiny",
@@ -106,9 +110,10 @@ func llamaCppPlanUsesApprovedLoopbackArguments() async throws {
     Issue.record("Expected executable plan")
     return
   }
-  #expect(invocation.arguments == [
-    "--model", model.rootURL.path, "--host", "127.0.0.1", "--port", "20001",
-  ])
+  #expect(
+    invocation.arguments == [
+      "--model", model.rootURL.path, "--host", "127.0.0.1", "--port", "20001",
+    ])
 }
 
 @Test("llama.cpp rejects a definition that can bind beyond loopback")
@@ -210,7 +215,7 @@ func llamaCppRejectsVocabularyGGUF() async throws {
         kind: .weights,
         logicalByteCount: 24,
         allocatedByteCount: 24
-      ),
+      )
     ]
   )
   let readiness = await LlamaCppRuntimeAdapter().readiness(

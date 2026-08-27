@@ -16,7 +16,13 @@ private func installation(
 ) -> ModelInstallation {
   let modelURL = URL(filePath: "/tmp/wtm-client-\(UUID().uuidString).gguf")
   let isGGUF = format == .gguf
-  if isGGUF { try! minimalGGUF().write(to: modelURL) }
+  if isGGUF {
+    do {
+      try minimalGGUF().write(to: modelURL)
+    } catch {
+      preconditionFailure("Failed to create test GGUF: \(error)")
+    }
+  }
   return ModelInstallation(
     id: "installation",
     identity: ModelIdentity(id: "model", displayName: "gpt-oss"),
@@ -29,15 +35,16 @@ private func installation(
     providerID: providerID,
     rootURL: isGGUF ? modelURL : URL(filePath: "/models/gpt-oss", directoryHint: .isDirectory),
     state: .stored,
-    artifacts: isGGUF ? [
-      Artifact(
-        id: "gguf",
-        url: modelURL,
-        kind: .weights,
-        logicalByteCount: 1_000,
-        allocatedByteCount: 1_024
-      ),
-    ] : []
+    artifacts: isGGUF
+      ? [
+        Artifact(
+          id: "gguf",
+          url: modelURL,
+          kind: .weights,
+          logicalByteCount: 1_000,
+          allocatedByteCount: 1_024
+        )
+      ] : []
   )
 }
 
@@ -225,7 +232,7 @@ func unslothRejectsVocabularyGGUF() throws {
         kind: .weights,
         logicalByteCount: 24,
         allocatedByteCount: 24
-      ),
+      )
     ]
   )
   let adapter = UnslothClientAdapter(

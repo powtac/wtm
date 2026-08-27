@@ -144,7 +144,8 @@ private struct FileCursor {
 
   mutating func readData(count: Int) throws -> Data {
     guard count >= 0, bytesRead <= maximumReadByteCount,
-      count <= maximumReadByteCount - bytesRead else {
+      count <= maximumReadByteCount - bytesRead
+    else {
       throw GGUFHeaderReaderError.headerTooLarge
     }
 
