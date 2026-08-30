@@ -1,0 +1,52 @@
+require "fileutils"
+
+REPOSITORY_ROOT = File.expand_path("..", __dir__)
+
+def run_repository_script(name, *arguments)
+  script = File.join(REPOSITORY_ROOT, "scripts", name)
+  sh(
+    "/usr/bin/env",
+    "-u", "BUNDLE_BIN_PATH",
+    "-u", "BUNDLE_GEMFILE",
+    "-u", "BUNDLE_PATH",
+    "-u", "GEM_HOME",
+    "-u", "GEM_PATH",
+    "-u", "RUBYLIB",
+    "-u", "RUBYOPT",
+    script,
+    *arguments
+  )
+end
+
+default_platform(:mac)
+
+platform :mac do
+  desc "Check that the macOS distribution toolchain is available"
+  lane :preflight do
+    run_repository_script("build-distribution", "--preflight")
+  end
+
+  desc "Validate release scripts and workflow gates without signing or notarizing"
+  lane :validate do
+    run_repository_script("check-release")
+  end
+
+  desc "Build, sign, notarize, staple, and verify WTM release artifacts"
+  lane :build do |options|
+    output = File.expand_path(options[:output] || "build/release-assets", REPOSITORY_ROOT)
+
+    if File.exist?(output) && (!File.directory?(output) || !Dir.empty?(output))
+      UI.user_error!("Output directory must be empty: #{output}")
+    end
+
+    FileUtils.mkdir_p(output)
+    run_repository_script("build-distribution", output)
+    run_repository_script("audit-release-artifacts", output)
+  end
+
+  desc "Run validation and create locally verified release artifacts"
+  lane :release do |options|
+    validate
+    build(output: options[:output])
+  end
+end

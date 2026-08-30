@@ -1,0 +1,5 @@
+app_identifier(ENV.fetch("WTM_BUNDLE_IDENTIFIER", "de.powtac.whatthemodel"))
+
+if ENV["APPLE_TEAM_ID"] && !ENV["APPLE_TEAM_ID"].empty?
+  team_id(ENV["APPLE_TEAM_ID"])
+end

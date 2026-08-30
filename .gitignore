@@ -2,8 +2,11 @@
 
 .DS_Store
 DerivedData/
+build/
+.bundle/
 Config/Local.xcconfig
 .env.local
 Packages/WTMKit/.build/
 xcuserdata/
 *.xcuserstate
+fastlane/report.xml

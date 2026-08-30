@@ -111,6 +111,18 @@ release builds include a weekly privacy-preserving check against official GitHub
 WTM never auto-installs updates, opens a shell, automates Terminal, or downloads models.
 Installation remains manual.
 
+For local release preparation, Fastlane wraps the existing release gates:
+
+```sh
+bundle install
+bundle exec fastlane mac preflight
+bundle exec fastlane mac validate
+bundle exec fastlane mac build output:/absolute/path/to/empty/release-assets
+```
+
+The build lane requires the same signing and notarization environment as
+`scripts/build-distribution`; it does not publish a GitHub Release.
+
 ## Extend WTM
 
 Read the [public extension guide](https://powtac.github.io/wtm/extend.html), the
