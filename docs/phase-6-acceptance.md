@@ -17,7 +17,7 @@ shipped.
 | Explicit consent | Settings and first-run source setup expose `Add MLX Folder…`; no default broad MLX scan root is silently added |
 | Fixtures | CC0 placeholder MLX fixtures and license records cover complete, false-positive, partial/missing-shard, and out-of-root-symlink cases |
 | Real source | Opt-in test against `/Users/powtac/.cache/huggingface/hub` produced a non-empty MLX inventory on 2026-08-26 |
-| Automated verification | `./scripts/test` passed 93 package tests plus app/architecture/release/website gates; `./scripts/test-ui` passed 4 tests; the build-run entrypoint launched and verified WTM |
+| Automated verification | `./scripts/test` passed 114 package tests plus app/architecture/release/website gates; `./scripts/test-ui` passed 4 tests; the build-run entrypoint launched and verified WTM |
 | Manual UI | `Settings > Sources` exposes `Add MLX Folder…`; Integrations lists MLX as `Built-in · Read-only` |
 
 ## Verification commands
