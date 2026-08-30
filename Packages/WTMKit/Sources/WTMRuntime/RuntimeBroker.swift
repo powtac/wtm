@@ -1,6 +1,7 @@
 import Foundation
 import WTMAdapterContracts
 import WTMDomain
+import WTMSecurity
 
 public enum RuntimeBrokerError: Error, Equatable, Sendable {
   case expiredPlan
@@ -8,6 +9,7 @@ public enum RuntimeBrokerError: Error, Equatable, Sendable {
   case installationMismatch
   case invalidEndpoint
   case executableIdentityChanged
+  case protectedPathIdentityChanged
   case endpointOwnershipMismatch
   case processExited(Int32)
   case healthCheckTimedOut
@@ -106,6 +108,13 @@ public actor RuntimeBroker {
       let inspection = try inspector.inspect(invocation.executableURL)
       guard inspection.identity == invocation.approvedIdentity else {
         throw RuntimeBrokerError.executableIdentityChanged
+      }
+      for identity in invocation.protectedPathIdentities {
+        do {
+          try FileMetadataReader().validate(identity)
+        } catch {
+          throw RuntimeBrokerError.protectedPathIdentityChanged
+        }
       }
       process = try launcher.launch(invocation) { stream, text in
         logs.append(text, stream: stream)

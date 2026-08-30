@@ -92,6 +92,26 @@ Regression coverage exercises source-root replacement, executable drift, unsafe 
 ancestors, spoof listener rejection, unauthenticated Ollama rejection, and visible manual-scan
 truncation. The Swift package suite passes after remediation.
 
+## 2026-08-30 residual remediation
+
+The follow-up review addressed the three residual topics identified after the earlier five
+findings were closed:
+
+- Release credential exposure is fixed. Certificate conversion consumes
+  `CERTIFICATE_PASSWORD` through OpenSSL's environment input; `security import` no longer
+  receives `-P`. Notarization uses an App Store Connect API key file and identifiers, so no
+  Apple password is placed in process arguments. The private key is temporary and mode `600`.
+- Descendant scan-path pathname TOCTOU is fixed. The directory walker captures each resolved
+  file identity; metadata, JSON, GGUF, and bounded content reads require that identity, use
+  `O_NOFOLLOW` where content is opened, and recheck identity after the read.
+- Model-path identity TOCTOU is fixed for Unsloth and llama.cpp. Handoff/runtime plans capture
+  the model identity; the broker and launcher revalidate immediately before launch. Regular
+  model files are copied from a verified descriptor into the private staging directory before
+  the child receives the rewritten argument.
+
+Regression coverage includes changed Unsloth and llama.cpp model paths. The package suite
+passes with 114 tests.
+
 ## Controls verified
 
 - Production process launch does not invoke a shell; executable URL and arguments remain
@@ -117,11 +137,12 @@ truncation. The Swift package suite passes after remediation.
 
 ## Release gate
 
-The security-review activity is documented, but the public-release security gate remains
-partial until:
+The 2026-08-30 source remediation and sealed follow-up scan
+(`2bfc03ad-5bac-44b3-98b4-3d0da4756431`) resolve the three residual topics. The public-release
+security gate remains partial until:
 
-1. A new scan covers the final release-candidate revision.
-2. The history/secret/PII, fixture-license, and trademark audits are recorded separately.
+1. The history/secret/PII, fixture-license, and trademark audits are recorded separately.
 
-The canonical findings, coverage, SARIF export, and deterministic report remain associated
-with Codex Security scan `4a7a6a61-f171-4b33-802a-6c6659fe6f53`.
+The canonical findings, coverage, SARIF export, and deterministic report for the follow-up are
+sealed under Codex Security scan `2bfc03ad-5bac-44b3-98b4-3d0da4756431`. The earlier five-finding
+review remains associated with scan `4a7a6a61-f171-4b33-802a-6c6659fe6f53`.

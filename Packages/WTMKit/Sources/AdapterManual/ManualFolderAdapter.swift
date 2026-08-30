@@ -181,10 +181,15 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
   private func installation(forGGUF entry: FileSystemEntry, source: ScanSource)
     -> ModelInstallation?
   {
-    guard let inspection = try? ggufReader.inspect(at: entry.resolvedURL) else { return nil }
+    guard
+      let inspection = try? ggufReader.inspect(
+        at: entry.resolvedURL,
+        expectedIdentity: entry.resolvedIdentity
+      )
+    else { return nil }
     let containsModelWeights = inspection.containsModelWeights
     let artifactKind: ArtifactKind = containsModelWeights ? .weights : .tokenizer
-    guard let artifact = artifact(for: entry.url, kind: artifactKind) else { return nil }
+    guard let artifact = artifact(for: entry, kind: artifactKind) else { return nil }
     let name = entry.url.deletingPathExtension().lastPathComponent
     let identityID = "manual:\(name.lowercased())"
     let variantID = "\(identityID):gguf"
@@ -204,7 +209,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       rootURL: entry.url,
       state: containsModelWeights ? .stored : .incomplete,
       artifacts: [artifact],
-      timestamps: timestamps(for: entry.url),
+      timestamps: timestamps(for: entry),
       modelCard: inspection.huggingFaceRepositoryID.flatMap(modelCard)
     )
   }
@@ -226,7 +231,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
   ) -> ModelInstallation? {
     let relatedFiles = allFiles.filter { $0.url.deletingLastPathComponent() == directory }
     let artifacts = relatedFiles.compactMap { entry in
-      artifact(for: entry.url, kind: artifactKind(for: entry.url))
+      artifact(for: entry, kind: artifactKind(for: entry.url))
     }
     guard !artifacts.isEmpty else { return nil }
 
@@ -254,7 +259,7 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
     _ entry: FileSystemEntry,
     source: ScanSource
   ) -> ModelInstallation? {
-    guard let artifact = artifact(for: entry.url, kind: .weights, isPartial: true) else {
+    guard let artifact = artifact(for: entry, kind: .weights, isPartial: true) else {
       return nil
     }
     let name = entry.url.deletingPathExtension().lastPathComponent
@@ -271,19 +276,24 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
       rootURL: entry.url,
       state: .incomplete,
       artifacts: [artifact],
-      timestamps: timestamps(for: entry.url)
+      timestamps: timestamps(for: entry)
     )
   }
 
   private func artifact(
-    for url: URL,
+    for entry: FileSystemEntry,
     kind: ArtifactKind,
     isPartial: Bool = false
   ) -> Artifact? {
-    guard let metadata = try? FileMetadataReader().metadata(for: url) else { return nil }
+    guard
+      let metadata = try? FileMetadataReader().metadata(
+        for: entry.resolvedURL,
+        expectedIdentity: entry.resolvedIdentity
+      )
+    else { return nil }
     return Artifact(
-      id: "manual:\(url.path)",
-      url: url,
+      id: "manual:\(entry.url.path)",
+      url: entry.url,
       kind: kind,
       logicalByteCount: metadata.logicalByteCount,
       allocatedByteCount: metadata.allocatedByteCount,
@@ -306,14 +316,24 @@ public struct ManualFolderAdapter: StorageProviderAdapter {
     return String(name[range]).uppercased()
   }
 
-  private func timestamps(for url: URL) -> [ObservedTimestamp] {
-    guard let metadata = try? FileMetadataReader().metadata(for: url) else { return [] }
+  private func timestamps(for entry: FileSystemEntry) -> [ObservedTimestamp] {
+    guard
+      let metadata = try? FileMetadataReader().metadata(
+        for: entry.resolvedURL,
+        expectedIdentity: entry.resolvedIdentity
+      )
+    else { return [] }
     return timestamps(from: [metadata])
   }
 
   private func timestamps(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
     timestamps(
-      from: entries.compactMap { try? FileMetadataReader().metadata(for: $0.resolvedURL) }
+      from: entries.compactMap {
+        try? FileMetadataReader().metadata(
+          for: $0.resolvedURL,
+          expectedIdentity: $0.resolvedIdentity
+        )
+      }
     )
   }
 

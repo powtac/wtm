@@ -354,6 +354,11 @@ struct InventoryRootView: View {
               .lineLimit(1)
               .truncationMode(.middle)
           }
+          if let help = issue.localizedHelp {
+            Text(help)
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
         }
         .accessibilityElement(children: .combine)
       }

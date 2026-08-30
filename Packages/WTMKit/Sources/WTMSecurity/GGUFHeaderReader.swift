@@ -1,4 +1,5 @@
 import Foundation
+import WTMDomain
 
 public struct GGUFInspection: Hashable, Sendable {
   public let version: UInt32
@@ -45,10 +46,16 @@ public struct GGUFHeaderReader: Sendable {
     self.maximumReadByteCount = max(maximumReadByteCount, 24)
   }
 
-  public func inspect(at url: URL) throws -> GGUFInspection {
+  public func inspect(
+    at url: URL,
+    expectedIdentity: DeletionFileIdentity? = nil
+  ) throws -> GGUFInspection {
     let handle: FileHandle
     do {
-      handle = try FileHandle(forReadingFrom: url)
+      handle = try FileMetadataReader().openReadOnlyHandle(
+        from: url,
+        expectedIdentity: expectedIdentity
+      )
     } catch {
       throw GGUFHeaderReaderError.truncated
     }

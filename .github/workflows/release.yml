@@ -62,26 +62,35 @@ jobs:
         run: |
           keychain="$RUNNER_TEMP/wtm-signing.keychain-db"
           certificate="$RUNNER_TEMP/developer-id-application.p12"
+          unlocked_certificate="$RUNNER_TEMP/developer-id-application.pem"
           keychain_password="$(openssl rand -hex 32)"
           printf '%s' "$CERTIFICATE_BASE64" | /usr/bin/base64 -D > "$certificate"
           /usr/bin/security create-keychain -p "$keychain_password" "$keychain"
           /usr/bin/security set-keychain-settings -lut 21600 "$keychain"
           /usr/bin/security unlock-keychain -p "$keychain_password" "$keychain"
-          /usr/bin/security import "$certificate" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12
+          /usr/bin/openssl pkcs12 -in "$certificate" -passin env:CERTIFICATE_PASSWORD -nodes \
+            -out "$unlocked_certificate"
+          /usr/bin/security import "$unlocked_certificate" -k "$keychain" -f pemseq \
+            -T /usr/bin/codesign
           /usr/bin/security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain"
           /usr/bin/security list-keychains -d user -s "$keychain"
           identity="$(/usr/bin/security find-identity -v -p codesigning "$keychain" | sed -n 's/.*"\(Developer ID Application:.*\)"/\1/p' | head -1)"
           [[ -n "$identity" ]]
           echo "WTM_SIGNING_IDENTITY=$identity" >> "$GITHUB_ENV"
           rm -f "$certificate"
+          rm -f "$unlocked_certificate"
 
       - name: Build notarized distribution
         env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          NOTARY_KEY_PATH: ${{ runner.temp }}/app-store-connect-key.p8
+          NOTARY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          NOTARY_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
           WTM_RELEASE_TAG: ${{ github.ref_name }}
         run: |
+          printf '%s' "$NOTARY_KEY_BASE64" | /usr/bin/base64 -D > "$NOTARY_KEY_PATH"
+          chmod 600 "$NOTARY_KEY_PATH"
           mkdir "$RUNNER_TEMP/release-assets"
           ./scripts/build-distribution "$RUNNER_TEMP/release-assets"
           ./scripts/audit-release-artifacts "$RUNNER_TEMP/release-assets"
@@ -142,3 +151,5 @@ jobs:
           keychain="$RUNNER_TEMP/wtm-signing.keychain-db"
           /usr/bin/security delete-keychain "$keychain" 2>/dev/null || true
           rm -f "$RUNNER_TEMP/developer-id-application.p12"
+          rm -f "$RUNNER_TEMP/developer-id-application.pem"
+          rm -f "$RUNNER_TEMP/app-store-connect-key.p8"

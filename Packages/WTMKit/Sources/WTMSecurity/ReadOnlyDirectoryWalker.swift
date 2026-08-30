@@ -4,6 +4,7 @@ import WTMDomain
 public struct FileSystemEntry: Hashable, Sendable {
   public let url: URL
   public let resolvedURL: URL
+  public let resolvedIdentity: DeletionFileIdentity
   public let isDirectory: Bool
   public let isRegularFile: Bool
   public let isSymbolicLink: Bool
@@ -11,12 +12,14 @@ public struct FileSystemEntry: Hashable, Sendable {
   public init(
     url: URL,
     resolvedURL: URL,
+    resolvedIdentity: DeletionFileIdentity,
     isDirectory: Bool,
     isRegularFile: Bool,
     isSymbolicLink: Bool
   ) {
     self.url = url
     self.resolvedURL = resolvedURL
+    self.resolvedIdentity = resolvedIdentity
     self.isDirectory = isDirectory
     self.isRegularFile = isRegularFile
     self.isSymbolicLink = isSymbolicLink
@@ -188,10 +191,18 @@ public struct ReadOnlyDirectoryWalker: Sendable {
         }
         try policy.revalidateRoot()
 
+        let resolvedIdentity: DeletionFileIdentity
+        do {
+          resolvedIdentity = try FileMetadataReader().identity(for: resolvedURL)
+        } catch {
+          return true
+        }
+
         return try visitor(
           FileSystemEntry(
             url: url,
             resolvedURL: resolvedURL,
+            resolvedIdentity: resolvedIdentity,
             isDirectory: values.isDirectory ?? false,
             isRegularFile: values.isRegularFile ?? false,
             isSymbolicLink: isSymbolicLink

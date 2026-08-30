@@ -112,7 +112,10 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
 
     let parsedConfiguration: ParsedConfiguration
     do {
-      parsedConfiguration = try parseConfiguration(at: configEntry.resolvedURL)
+      parsedConfiguration = try parseConfiguration(
+        at: configEntry.resolvedURL,
+        expectedIdentity: configEntry.resolvedIdentity
+      )
     } catch {
       return (
         nil,
@@ -182,7 +185,11 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
     let sortedEntries = entries.sorted { $0.url.path < $1.url.path }
     let physicalCounts = Dictionary(
       grouping: sortedEntries.compactMap { entry -> (String, FileMetadata)? in
-        guard let metadata = try? FileMetadataReader().metadata(for: entry.resolvedURL),
+        guard
+          let metadata = try? FileMetadataReader().metadata(
+            for: entry.resolvedURL,
+            expectedIdentity: entry.resolvedIdentity
+          ),
           let identifier = metadata.physicalIdentifier
         else { return nil }
         return (identifier, metadata)
@@ -190,7 +197,12 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
       by: \.0
     ).mapValues(\.count)
     let artifacts = sortedEntries.compactMap { entry -> Artifact? in
-      guard let metadata = try? FileMetadataReader().metadata(for: entry.resolvedURL) else {
+      guard
+        let metadata = try? FileMetadataReader().metadata(
+          for: entry.resolvedURL,
+          expectedIdentity: entry.resolvedIdentity
+        )
+      else {
         return nil
       }
       return Artifact(
@@ -243,10 +255,14 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
     )
   }
 
-  private func parseConfiguration(at url: URL) throws -> ParsedConfiguration {
+  private func parseConfiguration(
+    at url: URL,
+    expectedIdentity: DeletionFileIdentity
+  ) throws -> ParsedConfiguration {
     let data = try FileMetadataReader().readData(
       from: url,
-      maximumByteCount: Self.maximumConfigurationByteCount + 1
+      maximumByteCount: Self.maximumConfigurationByteCount + 1,
+      expectedIdentity: expectedIdentity
     )
     guard data.count <= Self.maximumConfigurationByteCount,
       let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -284,7 +300,8 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
       }),
       let data = try? FileMetadataReader().readData(
         from: index.resolvedURL,
-        maximumByteCount: Self.maximumConfigurationByteCount + 1
+        maximumByteCount: Self.maximumConfigurationByteCount + 1,
+        expectedIdentity: index.resolvedIdentity
       ),
       data.count <= Self.maximumConfigurationByteCount,
       let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -321,7 +338,10 @@ public struct MLXStorageAdapter: StorageProviderAdapter {
 
   private func timestamps(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
     let metadata = entries.compactMap {
-      try? FileMetadataReader().metadata(for: $0.resolvedURL)
+      try? FileMetadataReader().metadata(
+        for: $0.resolvedURL,
+        expectedIdentity: $0.resolvedIdentity
+      )
     }
     var result: [ObservedTimestamp] = []
     if let creationDate = metadata.compactMap(\.creationDate).min() {

@@ -234,7 +234,10 @@ public struct HuggingFaceStorageActionAdapter: StorageActionAdapter {
     for entry in entries where entry.isRegularFile {
       guard
         let data = try? FileMetadataReader().readData(
-          from: entry.resolvedURL, maximumByteCount: 1_024),
+          from: entry.resolvedURL,
+          maximumByteCount: 1_024,
+          expectedIdentity: entry.resolvedIdentity
+        ),
         let value = String(data: data, encoding: .utf8)?.trimmingCharacters(
           in: .whitespacesAndNewlines
         ),

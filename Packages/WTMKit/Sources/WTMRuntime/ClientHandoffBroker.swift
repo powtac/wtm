@@ -1,5 +1,6 @@
 import Foundation
 import WTMDomain
+import WTMSecurity
 
 public enum ClientHandoffBrokerError: Error, Equatable, Sendable {
   case expiredPlan
@@ -90,6 +91,13 @@ public actor ClientHandoffBroker {
         throw ClientHandoffBrokerError.protectedResourceChanged
       }
     }
+    for identity in handoff.invocation.protectedPathIdentities {
+      do {
+        try FileMetadataReader().validate(identity)
+      } catch {
+        throw ClientHandoffBrokerError.protectedResourceChanged
+      }
+    }
 
     let logs = RuntimeLogBuffer(
       maximumEntries: 100,
@@ -105,7 +113,8 @@ public actor ClientHandoffBroker {
       currentDirectoryURL: handoff.invocation.currentDirectoryURL,
       environment: handoff.invocation.environment,
       approvedIdentity: handoff.invocation.approvedIdentity,
-      protectedResourceIdentities: handoff.protectedResourceIdentities
+      protectedResourceIdentities: handoff.protectedResourceIdentities,
+      protectedPathIdentities: handoff.invocation.protectedPathIdentities
     )
     let process = try launcher.launch(securedInvocation) { stream, text in
       logs.append(text, stream: stream)

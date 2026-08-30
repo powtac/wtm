@@ -26,17 +26,19 @@ and store only these Environment secrets:
 
 - `DEVELOPER_ID_APPLICATION_P12_BASE64`
 - `DEVELOPER_ID_APPLICATION_P12_PASSWORD`
-- `APPLE_ID`
 - `APPLE_TEAM_ID`
-- `APPLE_APP_PASSWORD`
+- `APP_STORE_CONNECT_API_KEY_BASE64`
+- `APP_STORE_CONNECT_API_KEY_ID`
+- `APP_STORE_CONNECT_API_ISSUER_ID`
 
 The release job is hard-disabled unless repository visibility is `public`. `release.yml`
 accepts only a stable SemVer tag matching the Xcode project version. Before importing any
 credential, it requires successful `Build and test` and `Secret scan` jobs from the `main`
 CI push run for the exact tag commit; it does not rerun the full suite. It uses an ephemeral
-keychain and publishes a draft only after signing, notarization, DMG, SBOM, checksum,
-secret-pattern, and start-smoke gates pass. Artifact attestation is enabled only after the
-repository is public.
+keychain and publishes a draft only after signing, API-key notarization, DMG, SBOM, checksum,
+secret-pattern, and start-smoke gates pass. The App Store Connect private key is materialized
+only in `$RUNNER_TEMP` with mode `600`; its ID and issuer are non-secret identifiers.
+Artifact attestation is enabled only after the repository is public.
 
 ## Public launch
 

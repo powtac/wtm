@@ -22,6 +22,38 @@ public struct RuntimeArgumentValues: Hashable, Codable, Sendable {
   }
 }
 
+/// Captured identity for a non-executable path passed to an external runtime.
+public struct RuntimePathIdentity: Hashable, Codable, Sendable {
+  public let requestedURL: URL
+  public let canonicalURL: URL
+  public let deviceID: UInt64
+  public let fileID: UInt64
+  public let mode: UInt32
+  public let byteCount: Int64
+  public let modificationSeconds: Int64
+  public let modificationNanoseconds: Int64
+
+  public init(
+    requestedURL: URL,
+    canonicalURL: URL,
+    deviceID: UInt64,
+    fileID: UInt64,
+    mode: UInt32,
+    byteCount: Int64,
+    modificationSeconds: Int64,
+    modificationNanoseconds: Int64
+  ) {
+    self.requestedURL = requestedURL
+    self.canonicalURL = canonicalURL
+    self.deviceID = deviceID
+    self.fileID = fileID
+    self.mode = mode
+    self.byteCount = byteCount
+    self.modificationSeconds = modificationSeconds
+    self.modificationNanoseconds = modificationNanoseconds
+  }
+}
+
 public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
   public let executableURL: URL
   public let arguments: [String]
@@ -29,6 +61,7 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
   public let environment: [String: String]
   public let approvedIdentity: ExecutableIdentity
   public let protectedResourceIdentities: [ExecutableIdentity]
+  public let protectedPathIdentities: [RuntimePathIdentity]
 
   public init(
     executableURL: URL,
@@ -36,7 +69,8 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
     currentDirectoryURL: URL? = nil,
     environment: [String: String] = [:],
     approvedIdentity: ExecutableIdentity,
-    protectedResourceIdentities: [ExecutableIdentity] = []
+    protectedResourceIdentities: [ExecutableIdentity] = [],
+    protectedPathIdentities: [RuntimePathIdentity] = []
   ) {
     self.executableURL = executableURL
     self.arguments = arguments
@@ -44,6 +78,7 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
     self.environment = environment
     self.approvedIdentity = approvedIdentity
     self.protectedResourceIdentities = protectedResourceIdentities
+    self.protectedPathIdentities = protectedPathIdentities
   }
 }
 

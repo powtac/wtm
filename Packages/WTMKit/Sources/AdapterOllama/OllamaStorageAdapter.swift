@@ -34,11 +34,11 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     let manifestEntries = entries.filter {
       ($0.isRegularFile || $0.isSymbolicLink) && $0.url.path.contains("/manifests/")
     }
-    let partialBlobURLs = entries.compactMap { entry -> URL? in
+    let partialBlobEntries = entries.filter { entry in
       guard entry.isRegularFile || entry.isSymbolicLink,
         isPartialBlob(entry.resolvedURL, root: source.rootURL)
-      else { return nil }
-      return entry.resolvedURL
+      else { return false }
+      return true
     }
     var parsedManifests: [ParsedManifest] = []
     var issues: [InventoryIssue] = []
@@ -47,7 +47,10 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
       let manifestURL = entry.resolvedURL
       do {
         let data = try FileMetadataReader().readData(
-          from: manifestURL, maximumByteCount: 10_000_000)
+          from: manifestURL,
+          maximumByteCount: 10_000_000,
+          expectedIdentity: entry.resolvedIdentity
+        )
         let manifest = try JSONDecoder().decode(Manifest.self, from: data)
         guard manifest.descriptors.count <= Self.maximumManifestDescriptorCount else {
           issues.append(issue(source: source, code: "OLLAMA_MANIFEST_TOO_LARGE", url: manifestURL))
@@ -55,7 +58,8 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
         }
         parsedManifests.append(
           ParsedManifest(
-            url: manifestURL, manifest: manifest,
+            entry: entry,
+            manifest: manifest,
             location: location(for: manifestURL, root: source.rootURL))
         )
       } catch {
@@ -75,7 +79,11 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
       }
 
       var artifacts: [Artifact] = []
-      if let manifestArtifact = artifact(for: parsed.url, kind: .manifest) {
+      if let manifestArtifact = artifact(
+        for: parsed.entry.resolvedURL,
+        expectedIdentity: parsed.entry.resolvedIdentity,
+        kind: .manifest
+      ) {
         artifacts.append(manifestArtifact)
       }
 
@@ -88,9 +96,10 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
           )
           continue
         }
-        guard
+        guard let blobEntry = entries.first(where: { $0.resolvedURL == blobURL }),
           let blobArtifact = artifact(
-            for: blobURL,
+            for: blobEntry.resolvedURL,
+            expectedIdentity: blobEntry.resolvedIdentity,
             kind: .weights,
             isShared: (digestUseCounts[descriptor.digest] ?? 0) > 1
           )
@@ -115,13 +124,25 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
         rootURL: parsed.url,
         state: isIncomplete ? .incomplete : .stored,
         artifacts: artifacts,
-        timestamps: timestamps(for: parsed.url),
+        configurationURLs: [],
+        timestamps: timestamps(
+          for: parsed.entry.resolvedURL,
+          expectedIdentity: parsed.entry.resolvedIdentity
+        ),
         modelCard: modelCard(for: location)
       )
     }
 
-    let partialInstallations = partialBlobURLs.compactMap { partialURL -> ModelInstallation? in
-      guard let artifact = artifact(for: partialURL, kind: .weights, isPartial: true) else {
+    let partialInstallations = partialBlobEntries.compactMap { entry -> ModelInstallation? in
+      let partialURL = entry.resolvedURL
+      guard
+        let artifact = artifact(
+          for: partialURL,
+          expectedIdentity: entry.resolvedIdentity,
+          kind: .weights,
+          isPartial: true
+        )
+      else {
         issues.append(
           issue(source: source, code: "OLLAMA_PARTIAL_BLOB_UNREADABLE", url: partialURL))
         return nil
@@ -147,7 +168,8 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
         rootURL: partialURL,
         state: .incomplete,
         artifacts: [artifact],
-        timestamps: timestamps(for: partialURL)
+        configurationURLs: [],
+        timestamps: timestamps(for: partialURL, expectedIdentity: entry.resolvedIdentity)
       )
     }
 
@@ -216,11 +238,17 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
 
   private func artifact(
     for url: URL,
+    expectedIdentity: DeletionFileIdentity? = nil,
     kind: ArtifactKind,
     isShared: Bool = false,
     isPartial: Bool = false
   ) -> Artifact? {
-    guard let metadata = try? FileMetadataReader().metadata(for: url) else { return nil }
+    guard
+      let metadata = try? FileMetadataReader().metadata(
+        for: url,
+        expectedIdentity: expectedIdentity
+      )
+    else { return nil }
     return Artifact(
       id: "ollama:\(url.path)",
       url: url,
@@ -233,8 +261,16 @@ public struct OllamaStorageAdapter: StorageProviderAdapter {
     )
   }
 
-  private func timestamps(for url: URL) -> [ObservedTimestamp] {
-    guard let metadata = try? FileMetadataReader().metadata(for: url) else { return [] }
+  private func timestamps(
+    for url: URL,
+    expectedIdentity: DeletionFileIdentity? = nil
+  ) -> [ObservedTimestamp] {
+    guard
+      let metadata = try? FileMetadataReader().metadata(
+        for: url,
+        expectedIdentity: expectedIdentity
+      )
+    else { return [] }
     var timestamps: [ObservedTimestamp] = []
     if let creationDate = metadata.creationDate {
       timestamps.append(
@@ -282,9 +318,11 @@ private struct Descriptor: Decodable {
 }
 
 private struct ParsedManifest {
-  let url: URL
+  let entry: FileSystemEntry
   let manifest: Manifest
   let location: ManifestLocation?
+
+  var url: URL { entry.url }
 }
 
 private struct ManifestLocation {

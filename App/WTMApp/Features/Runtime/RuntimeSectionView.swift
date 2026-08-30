@@ -10,8 +10,12 @@ struct RuntimeSectionView: View {
     let runtimeIDs = model.runtimeOptions(for: installation)
     Section("runtime.section") {
       if runtimeIDs.isEmpty {
-        Text("runtime.unsupported")
-          .foregroundStyle(.secondary)
+        Text(
+          installation.variant.format == .mlx
+            ? "runtime.mlx.unavailable"
+            : "runtime.unsupported"
+        )
+        .foregroundStyle(.secondary)
       } else {
         ForEach(runtimeIDs, id: \.self) { runtimeID in
           runtimeRow(runtimeID)

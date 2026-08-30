@@ -9,6 +9,13 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 - Expanded the README with the current feature overview, direct `v0.4.0` download links,
   Homebrew status, and links to the current adapter sources.
 
+### Security
+
+- Removed release credential values from process arguments by using an App Store Connect API
+  key and environment-fed certificate conversion.
+- Bound inventory reads and external model handoffs to captured filesystem identities, with
+  no-follow descriptor reads and private staging for regular model files.
+
 ## [0.4.0] - 2026-08-27
 
 ### Added

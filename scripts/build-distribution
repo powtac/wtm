@@ -23,6 +23,7 @@ preflight_release_tools() {
     /usr/bin/hdiutil
     /usr/bin/head
     /usr/bin/osascript
+    /usr/bin/openssl
     /usr/bin/ruby
     /usr/bin/shasum
     /usr/bin/tr
@@ -53,14 +54,17 @@ load_local_environment "$repository_root"
 required_environment=(
   WTM_SIGNING_IDENTITY
   APPLE_TEAM_ID
-  APPLE_ID
-  APPLE_APP_PASSWORD
+  NOTARY_KEY_PATH
+  NOTARY_KEY_ID
+  NOTARY_ISSUER_ID
 )
 for variable_name in $required_environment; do
   [[ -n "${(P)variable_name:-}" ]] || { echo "Missing environment: $variable_name" >&2; exit 1; }
 done
-notary_password="$APPLE_APP_PASSWORD"
-unset APPLE_APP_PASSWORD
+[[ -f "$NOTARY_KEY_PATH" && ! -L "$NOTARY_KEY_PATH" ]] || {
+  echo "Notarization API key is missing or is a symbolic link." >&2
+  exit 1
+}
 
 version="$(sed -n 's/^MARKETING_VERSION = //p' "$base_configuration")"
 build_number="$(sed -n 's/^CURRENT_PROJECT_VERSION = //p' "$base_configuration")"
@@ -104,9 +108,9 @@ notarize() {
   local artifact_path="$1"
   local report_path="$2"
   xcrun notarytool submit "$artifact_path" \
-    --apple-id "$APPLE_ID" \
-    --team-id "$APPLE_TEAM_ID" \
-    --password "$notary_password" \
+    --key "$NOTARY_KEY_PATH" \
+    --key-id "$NOTARY_KEY_ID" \
+    --issuer "$NOTARY_ISSUER_ID" \
     --wait \
     --output-format json > "$report_path"
   local notarization_status

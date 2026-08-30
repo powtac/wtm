@@ -1,5 +1,6 @@
 import Foundation
 import WTMDomain
+import WTMSecurity
 
 public enum ToolInvocationBuilderError: Error, Equatable, Sendable {
   case definitionDisabled
@@ -39,7 +40,8 @@ public struct ToolInvocationBuilder: Sendable {
     definition: ToolDefinition,
     values: RuntimeArgumentValues,
     modelFormat: ModelFormat,
-    approval: ToolExecutionApproval
+    approval: ToolExecutionApproval,
+    protectedPathIdentities: [RuntimePathIdentity] = []
   ) throws -> RuntimeExecutableInvocation {
     try validator.validate(definition, forExecution: true)
     guard definition.isEnabled else {
@@ -68,7 +70,8 @@ public struct ToolInvocationBuilder: Sendable {
       arguments: arguments,
       currentDirectoryURL: definition.currentDirectoryURL,
       environment: definition.environment,
-      approvedIdentity: inspection.identity
+      approvedIdentity: inspection.identity,
+      protectedPathIdentities: protectedPathIdentities
     )
   }
 

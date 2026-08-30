@@ -23,8 +23,9 @@ the assumed Finder object on a fresh hosted runner.
   and `Secret scan` jobs must both be successful. Missing, skipped, pending, cancelled, or
   SHA-mismatched evidence fails closed; the release does not rerun the full CI suite.
 - Developer ID and App Store Connect credentials exist only as Environment secrets. The
-  certificate is imported into an ephemeral runner keychain and the keychain is deleted in
-  an unconditional cleanup step.
+  certificate is imported into an ephemeral runner keychain; notarization uses an App Store
+  Connect API key file rather than password arguments. The keychain and private key file are
+  deleted in unconditional cleanup steps.
 - The pipeline archives an Apple-Silicon Release build, notarizes and staples the app,
   creates a versioned native DMG, signs/notarizes/staples that DMG, and then repeats
   `codesign`, `stapler`, `spctl`, mount, copy, and process-start checks against the payload.
@@ -65,7 +66,7 @@ the assumed Finder object on a fresh hosted runner.
 
 - A failed build can leave logs or a workflow artifact, but cannot publish a non-draft
   release or update `latest`.
-- GitHub Environment setup and five Apple secrets are required after public launch and
+- GitHub Environment setup and six Apple secrets are required after public launch and
   before a release tag can succeed. Private repositories, forks, and other repositories
   cannot enter the release job. GitHub Free does not expose protected Environment secrets
   to this repository while it is private.

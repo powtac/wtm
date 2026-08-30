@@ -54,8 +54,8 @@ if /usr/bin/grep -Eq '\./scripts/test(-ui)?([[:space:]]|$)' "$workflow"; then
   echo "Release workflow must reuse exact-SHA CI evidence instead of rerunning full tests." >&2
   exit 1
 fi
-for gate in 'notarytool' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts' '.DS_Store'; do
-  /usr/bin/grep -Fq "$gate" "$repository_root/scripts/build-distribution" || {
+for gate in 'notarytool' '--key "$NOTARY_KEY_PATH"' '--key-id "$NOTARY_KEY_ID"' '--issuer "$NOTARY_ISSUER_ID"' 'stapler validate' 'codesign --verify' 'spctl --assess' 'audit-release-artifacts' '.DS_Store'; do
+  /usr/bin/grep -Fq -- "$gate" "$repository_root/scripts/build-distribution" || {
     echo "Missing distribution gate: $gate" >&2
     exit 1
   }

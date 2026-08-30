@@ -179,7 +179,10 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
 
     var physicalCounts: [String: Int] = [:]
     for entry in snapshotFiles {
-      if let metadata = try? FileMetadataReader().metadata(for: entry.resolvedURL),
+      if let metadata = try? FileMetadataReader().metadata(
+        for: entry.resolvedURL,
+        expectedIdentity: entry.resolvedIdentity
+      ),
         let identifier = metadata.physicalIdentifier
       {
         physicalCounts[identifier, default: 0] += 1
@@ -225,7 +228,12 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
     source: ScanSource
   ) -> ModelInstallation? {
     let artifacts = files.compactMap { entry -> Artifact? in
-      guard let metadata = try? FileMetadataReader().metadata(for: entry.resolvedURL) else {
+      guard
+        let metadata = try? FileMetadataReader().metadata(
+          for: entry.resolvedURL,
+          expectedIdentity: entry.resolvedIdentity
+        )
+      else {
         return nil
       }
       return Artifact(
@@ -275,7 +283,12 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
   ) -> ModelInstallation? {
     guard let firstPartialEntry = partialEntries.first else { return nil }
     let artifacts = partialEntries.compactMap { entry -> Artifact? in
-      guard let metadata = try? FileMetadataReader().metadata(for: entry.resolvedURL) else {
+      guard
+        let metadata = try? FileMetadataReader().metadata(
+          for: entry.resolvedURL,
+          expectedIdentity: entry.resolvedIdentity
+        )
+      else {
         return nil
       }
       return Artifact(
@@ -373,7 +386,10 @@ public struct HuggingFaceStorageAdapter: StorageProviderAdapter {
 
   private func timestamps(in entries: [FileSystemEntry]) -> [ObservedTimestamp] {
     let metadata = entries.compactMap { entry in
-      try? FileMetadataReader().metadata(for: entry.resolvedURL)
+      try? FileMetadataReader().metadata(
+        for: entry.resolvedURL,
+        expectedIdentity: entry.resolvedIdentity
+      )
     }
     var timestamps: [ObservedTimestamp] = []
     if let oldestCreation = metadata.compactMap(\.creationDate).min() {

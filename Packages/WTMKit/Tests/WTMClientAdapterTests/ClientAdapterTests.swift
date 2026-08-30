@@ -211,6 +211,27 @@ func unslothBuildsRestrictedStudioPlan() throws {
   #expect(plan.endpoint.absoluteString == "http://127.0.0.1:8888")
 }
 
+@Test("Unsloth handoff rejects a changed model path")
+func unslothRejectsChangedModelPath() async throws {
+  let model = installation(providerID: .manual, format: .gguf)
+  defer { try? FileManager.default.removeItem(at: model.rootURL) }
+  let adapter = UnslothClientAdapter(
+    pythonURL: URL(filePath: "/usr/bin/true"),
+    scriptURL: URL(filePath: "/usr/bin/true"),
+    environment: [:]
+  )
+  let plan = try adapter.makeHandoffPlan(
+    for: model,
+    context: ClientHandoffContext(now: .now)
+  )
+  try Data("changed model".utf8).write(to: model.rootURL)
+
+  let broker = ClientHandoffBroker(launcher: ExitingProcessLauncher())
+  await #expect(throws: ClientHandoffBrokerError.protectedResourceChanged) {
+    _ = try await broker.start(plan: plan, installation: model)
+  }
+}
+
 @Test("Unsloth rejects a tensorless GGUF vocabulary file")
 func unslothRejectsVocabularyGGUF() throws {
   let modelURL = URL(filePath: "/tmp/wtm-vocab-\(UUID().uuidString).gguf")

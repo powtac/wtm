@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import SwiftUI
 import WTMDomain
 import WTMInventory
 
@@ -87,6 +88,17 @@ extension InventoryIssue {
       String(localized: "issue.source-settings")
     default:
       String(localized: "issue.generic")
+    }
+  }
+
+  var localizedHelp: LocalizedStringKey? {
+    switch code {
+    case "MLX_CONFIGURATION_INVALID", "MLX_STRUCTURE_UNCONFIRMED":
+      "issue.mlx.not-recognized.help"
+    case "MLX_WEIGHTS_INCOMPLETE", "MLX_TOKENIZER_MISSING":
+      "issue.mlx.incomplete.help"
+    default:
+      nil
     }
   }
 }

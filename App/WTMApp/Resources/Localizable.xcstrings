@@ -1760,6 +1760,26 @@
         }
       }
     },
+    "issue.mlx.incomplete.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An MLX-LM model was found, but its local files are incomplete or unresolved. Missing weights, shards, tokenizer files, or configuration metadata prevent confirmation. WTM keeps the result as incomplete and does not claim it is runnable."
+          }
+        }
+      }
+    },
+    "issue.mlx.not-recognized.help" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WTM found no confirmed MLX-LM model in this folder. WTM requires recognizable MLX-LM quantization metadata, local weight files or shards, and the expected tokenizer and configuration files. A .mlx folder name, generic Safetensors files, or an installed Python package alone is not sufficient."
+          }
+        }
+      }
+    },
     "issue.ollama" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2461,6 +2481,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No installed runtime adapter supports this model format."
+          }
+        }
+      }
+    },
+    "runtime.mlx.unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The MLX-LM files are recognized and inventoried. MLX runtime execution is not currently available in WTM, so the model cannot be tested or started from the app."
           }
         }
       }

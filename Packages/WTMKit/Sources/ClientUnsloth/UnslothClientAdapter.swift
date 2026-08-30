@@ -83,6 +83,12 @@ public struct UnslothClientAdapter: ClientAdapter {
       throw ClientAdapterError.unsupportedInstallation
     }
     guard let pythonURL, let scriptURL else { throw ClientAdapterError.toolNotInstalled }
+    let modelIdentity: RuntimePathIdentity
+    do {
+      modelIdentity = try FileMetadataReader().runtimePathIdentity(for: installation.rootURL)
+    } catch {
+      throw ClientAdapterError.unsupportedInstallation
+    }
     let python: ExecutableInspection
     let script: ExecutableInspection
     do {
@@ -104,7 +110,8 @@ public struct UnslothClientAdapter: ClientAdapter {
       ],
       environment: environment,
       approvedIdentity: python.identity,
-      protectedResourceIdentities: [script.identity]
+      protectedResourceIdentities: [script.identity],
+      protectedPathIdentities: [modelIdentity]
     )
     return ClientHandoffPlan(
       adapterID: id,

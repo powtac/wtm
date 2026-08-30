@@ -114,6 +114,7 @@ func llamaCppPlanUsesApprovedLoopbackArguments() async throws {
     invocation.arguments == [
       "--model", model.rootURL.path, "--host", "127.0.0.1", "--port", "20001",
     ])
+  #expect(invocation.protectedPathIdentities.count == 1)
 }
 
 @Test("llama.cpp rejects a definition that can bind beyond loopback")

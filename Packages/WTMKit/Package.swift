@@ -35,7 +35,7 @@ let package = Package(
     ),
     .target(
       name: "WTMRuntime",
-      dependencies: ["WTMDomain", "WTMAdapterContracts"],
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"],
       linkerSettings: [.linkedFramework("Security")]
     ),
     .target(

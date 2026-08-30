@@ -126,6 +126,12 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
     guard let modelURL = modelURL(for: installation) else {
       throw RuntimeAdapterError.invalidToolDefinition
     }
+    let modelIdentity: RuntimePathIdentity
+    do {
+      modelIdentity = try FileMetadataReader().runtimePathIdentity(for: modelURL)
+    } catch {
+      throw RuntimeAdapterError.invalidToolDefinition
+    }
     let port = try context.port ?? portAllocator.availablePort()
     let endpoint = try endpoint(port: port)
     let invocation = try invocationBuilder.makeInvocation(
@@ -138,7 +144,8 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
         configPath: installation.configurationURLs.first?.path
       ),
       modelFormat: installation.variant.format,
-      approval: approval
+      approval: approval,
+      protectedPathIdentities: [modelIdentity]
     )
     guard hasSingleArgument(invocation.arguments, name: "--host", value: "127.0.0.1"),
       hasSingleArgument(invocation.arguments, name: "--port", value: String(port)),

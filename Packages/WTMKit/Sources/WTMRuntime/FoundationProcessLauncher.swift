@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import WTMDomain
+import WTMSecurity
 
 public typealias RuntimeProcessOutputHandler = @Sendable (RuntimeLogStream, String) -> Void
 
@@ -22,6 +23,7 @@ public enum RuntimeProcessLaunchError: Error, Equatable, Sendable {
   case launchFailed(String)
   case approvedIdentityChanged
   case protectedResourceNotReferenced
+  case protectedPathIdentityChanged
   case stagingFailed(String)
 }
 
@@ -129,6 +131,13 @@ final class StagedInvocation: @unchecked Sendable {
     directoryURL = FileManager.default.temporaryDirectory
       .appending(path: "wtm-exec-\(UUID().uuidString)", directoryHint: .isDirectory)
     do {
+      for identity in invocation.protectedPathIdentities {
+        do {
+          try FileMetadataReader().validate(identity)
+        } catch {
+          throw RuntimeProcessLaunchError.protectedPathIdentityChanged
+        }
+      }
       try FileManager.default.createDirectory(
         at: directoryURL,
         withIntermediateDirectories: false,
@@ -153,6 +162,24 @@ final class StagedInvocation: @unchecked Sendable {
           identity,
           in: directoryURL,
           name: name,
+          mode: 0o400
+        )
+        for argumentIndex in argumentIndices {
+          rewritten[argumentIndex] = stagedURL.path
+        }
+      }
+      for (index, identity) in invocation.protectedPathIdentities.enumerated() {
+        guard identity.mode & UInt32(S_IFMT) == UInt32(S_IFREG) else { continue }
+        let candidates = Set([identity.requestedURL.path, identity.canonicalURL.path])
+        let argumentIndices = rewritten.indices.filter { candidates.contains(rewritten[$0]) }
+        guard !argumentIndices.isEmpty else {
+          throw RuntimeProcessLaunchError.protectedResourceNotReferenced
+        }
+        let suffix = identity.canonicalURL.pathExtension
+        let name = suffix.isEmpty ? "path-\(index)" : "path-\(index).\(suffix)"
+        let stagedURL = try Self.copyVerified(
+          identity,
+          to: directoryURL.appending(path: name, directoryHint: .notDirectory),
           mode: 0o400
         )
         for argumentIndex in argumentIndices {
@@ -206,6 +233,55 @@ final class StagedInvocation: @unchecked Sendable {
       if count == 0 { break }
       guard count > 0 else {
         throw RuntimeProcessLaunchError.stagingFailed("Could not read approved file.")
+      }
+      var offset = 0
+      while offset < count {
+        let written = buffer.withUnsafeBytes { bytes in
+          guard let baseAddress = bytes.baseAddress else { return -1 }
+          return write(targetFD, baseAddress.advanced(by: offset), count - offset)
+        }
+        guard written > 0 else {
+          throw RuntimeProcessLaunchError.stagingFailed("Could not write staged file.")
+        }
+        offset += written
+      }
+    }
+    guard fsync(targetFD) == 0 else {
+      throw RuntimeProcessLaunchError.stagingFailed("Could not sync staged file.")
+    }
+    return destination
+  }
+
+  private static func copyVerified(
+    _ identity: RuntimePathIdentity,
+    to destination: URL,
+    mode: mode_t
+  ) throws -> URL {
+    let sourceFD = open(identity.canonicalURL.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
+    guard sourceFD >= 0 else { throw RuntimeProcessLaunchError.protectedPathIdentityChanged }
+    defer { close(sourceFD) }
+    var information = stat()
+    guard fstat(sourceFD, &information) == 0,
+      UInt64(information.st_dev) == identity.deviceID,
+      UInt64(information.st_ino) == identity.fileID,
+      UInt32(information.st_mode) == identity.mode,
+      Int64(information.st_size) == identity.byteCount,
+      Int64(information.st_mtimespec.tv_sec) == identity.modificationSeconds,
+      Int64(information.st_mtimespec.tv_nsec) == identity.modificationNanoseconds
+    else { throw RuntimeProcessLaunchError.protectedPathIdentityChanged }
+
+    let targetFD = open(
+      destination.path, O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC, mode)
+    guard targetFD >= 0 else {
+      throw RuntimeProcessLaunchError.stagingFailed("Could not create private staged file.")
+    }
+    defer { close(targetFD) }
+    var buffer = [UInt8](repeating: 0, count: 64 * 1_024)
+    while true {
+      let count = read(sourceFD, &buffer, buffer.count)
+      if count == 0 { break }
+      guard count > 0 else {
+        throw RuntimeProcessLaunchError.stagingFailed("Could not read protected file.")
       }
       var offset = 0
       while offset < count {
