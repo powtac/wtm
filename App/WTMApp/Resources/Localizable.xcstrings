@@ -78,6 +78,7 @@
       }
     },
     "accessibility.inventory.filters.active" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -98,6 +99,7 @@
       }
     },
     "accessibility.inventory.filters.none" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -127,12 +129,42 @@
         }
       }
     },
+    "accessibility.inventory.reveal.model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveal model folder in Finder"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.reveal.model.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the selected model's folder in Finder."
+          }
+        }
+      }
+    },
     "accessibility.inventory.search.hint" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Search model names, formats, and paths."
+          }
+        }
+      }
+    },
+    "accessibility.runtime.checking" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking runtime status"
           }
         }
       }
@@ -187,36 +219,6 @@
         }
       }
     },
-    "accessibility.runtime.checking" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checking runtime status"
-          }
-        }
-      }
-    },
-    "accessibility.inventory.reveal.model" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reveal model folder in Finder"
-          }
-        }
-      }
-    },
-    "accessibility.inventory.reveal.model.hint" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Open the selected model's folder in Finder."
-          }
-        }
-      }
-    },
     "action.cancel" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -238,6 +240,15 @@
           }
         }
       }
+    },
+    "Actions" : {
+
+    },
+    "Actions for %@" : {
+
+    },
+    "Add %@ as a model source" : {
+
     },
     "age.day" : {
       "extractionState" : "stale",
@@ -431,6 +442,9 @@
           }
         }
       }
+    },
+    "Check %@ readiness" : {
+
     },
     "client.error.launch-failed" : {
       "extractionState" : "stale",
@@ -1217,17 +1231,6 @@
         }
       }
     },
-    "detail.source-type" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Source Type"
-          }
-        }
-      }
-    },
     "detail.source" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1239,8 +1242,18 @@
         }
       }
     },
-    "filter.action" : {
+    "detail.source-type" : {
       "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source Type"
+          }
+        }
+      }
+    },
+    "filter.action" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1761,6 +1774,7 @@
       }
     },
     "issue.mlx.incomplete.help" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1771,6 +1785,7 @@
       }
     },
     "issue.mlx.not-recognized.help" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1958,6 +1973,9 @@
         }
       }
     },
+    "Prepare handoff to %@" : {
+
+    },
     "provider.hugging-face" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2003,6 +2021,9 @@
       }
     },
     "Published %@" : {
+
+    },
+    "Reveal %@ in Finder" : {
 
     },
     "runtime.check.action" : {
@@ -2199,6 +2220,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Estimated Memory"
+          }
+        }
+      }
+    },
+    "runtime.mlx.unavailable" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The MLX-LM files are recognized and inventoried. MLX runtime execution is not currently available in WTM, so the model cannot be tested or started from the app."
           }
         }
       }
@@ -2476,21 +2508,12 @@
       }
     },
     "runtime.unsupported" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "No installed runtime adapter supports this model format."
-          }
-        }
-      }
-    },
-    "runtime.mlx.unavailable" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The MLX-LM files are recognized and inventoried. MLX runtime execution is not currently available in WTM, so the model cannot be tested or started from the app."
           }
         }
       }
@@ -2644,6 +2667,7 @@
       }
     },
     "settings.age.presets" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2676,6 +2700,7 @@
       }
     },
     "settings.audit.clear-confirmation.message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2939,7 +2964,6 @@
       }
     },
     "settings.menu-bar.section" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2971,6 +2995,7 @@
       }
     },
     "settings.reset.confirmation.message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3345,6 +3370,7 @@
       }
     },
     "source.revoke.confirmation.message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -3458,6 +3484,9 @@
           }
         }
       }
+    },
+    "Test %@ with this model" : {
+
     },
     "timestamp.file-creation" : {
       "extractionState" : "stale",
@@ -3764,6 +3793,9 @@
           }
         }
       }
+    },
+    "Try %@ with this model anyway" : {
+
     },
     "update.check.action" : {
       "extractionState" : "stale",

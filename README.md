@@ -12,7 +12,8 @@
 *What The Model* is **a native macOS inventory for locally stored LLMs**. It explains which
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
-Download: [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0-arm64.dmg)
+
+**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0-arm64.dmg)
 
 ## ✨ Features
 
