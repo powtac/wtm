@@ -23,7 +23,9 @@ struct InventoryRootView: View {
             Label(String(localized: section.localizedKey), systemImage: section.systemImage)
               .tag(section)
               .accessibilityIdentifier("sidebar-section-\(section.rawValue)")
+              .accessibilityHint(Text("accessibility.inventory.navigation.hint"))
           }
+          .accessibilityLabel(Text("accessibility.inventory.navigation.label"))
           .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: 0) {
               Divider()
@@ -38,6 +40,7 @@ struct InventoryRootView: View {
               .padding(.horizontal, 12)
               .padding(.vertical, 10)
               .accessibilityIdentifier("sidebar-settings-button")
+              .accessibilityHint(Text("accessibility.settings.hint"))
               Text("Version \(appVersionText)")
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
@@ -401,6 +404,7 @@ struct InventoryRootView: View {
           || model.sources.allSatisfy { !$0.isEnabled }
       )
       .accessibilityIdentifier("inventory-scan-button")
+      .accessibilityHint(Text("accessibility.scan.hint"))
 
       if model.isScanning {
         Button(role: .cancel) {
@@ -408,6 +412,7 @@ struct InventoryRootView: View {
         } label: {
           Label("scan.cancel.action", systemImage: "stop.circle")
         }
+        .accessibilityHint(Text("accessibility.scan.cancel.hint"))
       }
 
       Spacer()
@@ -416,6 +421,7 @@ struct InventoryRootView: View {
         .frame(minWidth: 180, idealWidth: 240, maxWidth: 280)
         .layoutPriority(1)
         .accessibilityIdentifier("inventory-search-field")
+        .accessibilityHint(Text("accessibility.inventory.search.hint"))
 
       Menu {
         Picker("filter.source-type", selection: $model.selectedSourceTypeID) {
@@ -457,6 +463,14 @@ struct InventoryRootView: View {
       }
       .disabled(model.installations.isEmpty)
       .accessibilityIdentifier("inventory-filter-menu")
+      .accessibilityLabel(Text("filter.action"))
+      .accessibilityValue(
+        Text(
+          model.hasActiveInventoryFilter
+            ? "accessibility.inventory.filters.active" : "accessibility.inventory.filters.none"
+        )
+      )
+      .accessibilityHint(Text("accessibility.inventory.filters.hint"))
     }
     .padding(.horizontal, 14)
     .padding(.vertical, 8)
@@ -596,6 +610,7 @@ struct InventoryRootView: View {
     .padding(.horizontal, 14)
     .padding(.vertical, 9)
     .accessibilityElement(children: .combine)
+    .accessibilityAddTraits(.updatesFrequently)
   }
 
   private func scanCompletionStatus(_ summary: ScanCompletionSummary) -> some View {
@@ -625,6 +640,7 @@ struct InventoryRootView: View {
     .padding(.horizontal, 14)
     .padding(.vertical, 8)
     .accessibilityElement(children: .combine)
+    .accessibilityAddTraits(.isHeader)
   }
 
 }

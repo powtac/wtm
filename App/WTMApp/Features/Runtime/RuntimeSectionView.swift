@@ -30,6 +30,7 @@ struct RuntimeSectionView: View {
         if model.isCheckingRuntime || model.isPreparingRuntime || model.isRunningRuntimeAction {
           ProgressView()
             .controlSize(.small)
+            .accessibilityLabel(Text("accessibility.runtime.checking"))
         }
       }
 
@@ -68,6 +69,7 @@ struct RuntimeSectionView: View {
           model.checkRuntimeReadiness(runtimeID, for: installation)
         }
         .accessibilityIdentifier("runtime-check-\(runtimeID.rawValue)")
+        .accessibilityLabel(Text("Check \(runtimeID.localizedName) readiness"))
         if let readiness = model.readiness(for: installation, runtimeID: runtimeID) {
           if readiness.compatibility.value == .compatible {
             Button("runtime.test.action") {
@@ -76,12 +78,14 @@ struct RuntimeSectionView: View {
             .buttonStyle(.borderedProminent)
             .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
             .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
+            .accessibilityLabel(Text("Test \(runtimeID.localizedName) with this model"))
           } else {
             Button("runtime.try-anyway.action") {
               model.prepareRuntimeTest(runtimeID, for: installation)
             }
             .disabled(model.isPreparingRuntime || model.isRunningRuntimeAction)
             .accessibilityIdentifier("runtime-test-\(runtimeID.rawValue)")
+            .accessibilityLabel(Text("Try \(runtimeID.localizedName) with this model anyway"))
           }
         }
       }

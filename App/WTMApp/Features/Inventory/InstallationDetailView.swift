@@ -54,6 +54,7 @@ struct InstallationDetailView: View {
                   .foregroundStyle(.orange)
               }
             }
+            .accessibilityElement(children: .combine)
           }
         } header: {
           Text(artifactSectionTitle(count: installation.artifacts.count))
@@ -70,6 +71,9 @@ struct InstallationDetailView: View {
                   revealAction(url)
                 }
                 .labelStyle(.iconOnly)
+                .accessibilityLabel(
+                  Text("Reveal \(url.lastPathComponent) in Finder")
+                )
               }
             }
           }
@@ -78,6 +82,8 @@ struct InstallationDetailView: View {
         Button("inventory.reveal.action", systemImage: "folder") {
           revealAction(installation.rootURL)
         }
+        .accessibilityLabel(Text("accessibility.inventory.reveal.model"))
+        .accessibilityHint(Text("accessibility.inventory.reveal.model.hint"))
 
         if let modelCardURL = validatedModelCardURL(installation.modelCard) {
           Link("detail.model-card.action", destination: modelCardURL)

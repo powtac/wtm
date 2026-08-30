@@ -36,6 +36,8 @@ private struct ClientAdapterRowView: View {
           model.prepareClientHandoff(clientID, for: installation)
         }
         .disabled(!availability.isAvailable)
+        .accessibilityLabel(Text("Prepare handoff to \(clientID.displayName)"))
+        .accessibilityValue(Text(availability.summary))
       }
       Text(availability.summary)
         .font(.caption)

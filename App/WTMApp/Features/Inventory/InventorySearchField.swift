@@ -11,6 +11,10 @@ struct InventorySearchField: NSViewRepresentable {
   func makeNSView(context: Context) -> NSSearchField {
     let searchField = NSSearchField()
     searchField.placeholderString = String(localized: "inventory.search.prompt")
+    searchField.setAccessibilityLabel(String(localized: "inventory.search.prompt"))
+    searchField.setAccessibilityHelp(
+      String(localized: "accessibility.inventory.search.hint")
+    )
     searchField.sendsSearchStringImmediately = true
     searchField.delegate = context.coordinator
     return searchField

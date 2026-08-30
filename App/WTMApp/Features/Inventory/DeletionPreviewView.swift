@@ -16,6 +16,8 @@ struct DeletionPreviewView: View {
           LabeledContent(model.displayName) {
             Text(model.providerID.localizedName)
           }
+          .accessibilityElement(children: .combine)
+          .accessibilityIdentifier("deletion-preview-model-\(model.displayName)")
         }
       }
 

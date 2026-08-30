@@ -8,6 +8,7 @@ struct SourceSetupView: View {
       VStack(alignment: .leading, spacing: 6) {
         Text("source.setup.title")
           .font(.title2.bold())
+          .accessibilityAddTraits(.isHeader)
         Text("source.setup.description")
         Label("source.setup.no-media-access", systemImage: "mic.slash")
           .font(.callout)
@@ -31,9 +32,18 @@ struct SourceSetupView: View {
             }
           }
           .accessibilityIdentifier("source-toggle-\(source.id)")
+          .accessibilityLabel(Text(source.displayName))
+          .accessibilityValue(
+            Text(
+              verbatim:
+                "\(source.accessState.localizedName), \(source.isEnabled ? "Enabled" : "Disabled")"
+            )
+          )
+          .accessibilityHint(Text("accessibility.source.toggle.hint"))
         }
       }
       .frame(minHeight: 180)
+      .accessibilityLabel(Text("accessibility.source.list.label"))
 
       HStack {
         Button("source.add-folder.action") {
@@ -48,6 +58,7 @@ struct SourceSetupView: View {
         }
         .buttonStyle(.borderedProminent)
         .disabled(model.sources.allSatisfy { !$0.isEnabled })
+        .accessibilityHint(Text("accessibility.scan.hint"))
       }
     }
     .padding(28)

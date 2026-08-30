@@ -58,6 +58,10 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(application.buttons["Start Scan"].exists)
     XCTAssertTrue(application.buttons["Add MLX Folder…"].exists)
     XCTAssertFalse(application.buttons["Start Scan"].isEnabled)
+
+    let sourceToggle = application.descendants(matching: .any)["source-toggle-default:models"]
+    XCTAssertTrue(sourceToggle.exists)
+    XCTAssertFalse(sourceToggle.label.isEmpty, "Source toggle needs a VoiceOver label")
   }
 
   @MainActor
@@ -139,7 +143,10 @@ final class WTMAppUITests: XCTestCase {
     review.click()
 
     XCTAssertTrue(application.staticTexts["Planned Operations"].waitForExistence(timeout: 5))
-    XCTAssertTrue(application.staticTexts["Fixture-Q4_K_M.gguf"].exists)
+    let deletionModel =
+      application.descendants(matching: .any)["deletion-preview-model-Fixture-Q4_K_M.gguf"]
+    XCTAssertTrue(deletionModel.waitForExistence(timeout: 5))
+    XCTAssertTrue(deletionModel.label.contains("Fixture-Q4_K_M.gguf"))
     XCTAssertTrue(application.buttons["Move to Trash"].exists)
     XCTAssertTrue(FileManager.default.fileExists(atPath: modelURL.path))
     application.buttons["Cancel"].click()

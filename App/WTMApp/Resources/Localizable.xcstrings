@@ -77,6 +77,146 @@
         }
       }
     },
+    "accessibility.inventory.filters.active" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active filters"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.filters.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose source, format, state, or folder filters."
+          }
+        }
+      }
+    },
+    "accessibility.inventory.filters.none" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No filters"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.navigation.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose an inventory view."
+          }
+        }
+      }
+    },
+    "accessibility.inventory.navigation.label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inventory views"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.search.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search model names, formats, and paths."
+          }
+        }
+      }
+    },
+    "accessibility.scan.cancel.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stop the current scan."
+          }
+        }
+      }
+    },
+    "accessibility.scan.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan all enabled model sources."
+          }
+        }
+      }
+    },
+    "accessibility.settings.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open WTM settings."
+          }
+        }
+      }
+    },
+    "accessibility.source.list.label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model sources"
+          }
+        }
+      }
+    },
+    "accessibility.source.toggle.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable or disable this source for scans."
+          }
+        }
+      }
+    },
+    "accessibility.runtime.checking" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checking runtime status"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.reveal.model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reveal model folder in Finder"
+          }
+        }
+      }
+    },
+    "accessibility.inventory.reveal.model.hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open the selected model's folder in Finder."
+          }
+        }
+      }
+    },
     "action.cancel" : {
       "extractionState" : "stale",
       "localizations" : {
