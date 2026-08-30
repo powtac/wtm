@@ -5,9 +5,7 @@ struct SettingsRootView: View {
   @Bindable var model: InventoryViewModel
   let updateChecker: UpdateChecker
   @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
-  @State private var pendingRevocationSourceID: ScanSource.ID?
-  @State private var isAuditClearConfirmationPresented = false
-  @State private var isResetConfirmationPresented = false
+  @State private var confirmation: SettingsConfirmation?
 
   var body: some View {
     TabView {
@@ -19,53 +17,16 @@ struct SettingsRootView: View {
         .tabItem { Label("settings.integrations", systemImage: "puzzlepiece.extension") }
       securitySettings
         .tabItem { Label("settings.security", systemImage: "lock.shield") }
-      advancedSettings
-        .tabItem { Label("settings.advanced", systemImage: "slider.horizontal.3") }
     }
-    .padding()
+    .scenePadding()
     .confirmationDialog(
-      "source.revoke.confirmation.title",
-      isPresented: Binding(
-        get: { pendingRevocationSourceID != nil },
-        set: { if !$0 { pendingRevocationSourceID = nil } }
-      ),
+      confirmationTitle,
+      isPresented: confirmationIsPresented,
       titleVisibility: .visible
     ) {
-      Button("source.revoke.confirmation.action", role: .destructive) {
-        if let sourceID = pendingRevocationSourceID {
-          model.revokeSource(sourceID)
-        }
-        pendingRevocationSourceID = nil
-      }
-      Button("action.cancel", role: .cancel) {
-        pendingRevocationSourceID = nil
-      }
+      confirmationActions
     } message: {
-      Text("source.revoke.confirmation.message")
-    }
-    .confirmationDialog(
-      "settings.audit.clear-confirmation.title",
-      isPresented: $isAuditClearConfirmationPresented,
-      titleVisibility: .visible
-    ) {
-      Button("settings.audit.clear", role: .destructive) {
-        model.clearActionAudit()
-      }
-      Button("action.cancel", role: .cancel) {}
-    } message: {
-      Text("settings.audit.clear-confirmation.message")
-    }
-    .confirmationDialog(
-      "settings.reset.confirmation.title",
-      isPresented: $isResetConfirmationPresented,
-      titleVisibility: .visible
-    ) {
-      Button("settings.reset.action", role: .destructive) {
-        resetToDefaults()
-      }
-      Button("action.cancel", role: .cancel) {}
-    } message: {
-      Text("settings.reset.confirmation.message")
+      Text(confirmationMessage)
     }
     .sheet(isPresented: toolImportIsPresented) {
       if let preview = model.toolImportPreview {
@@ -100,15 +61,39 @@ struct SettingsRootView: View {
         )
       }
 
+      Section("settings.age.section") {
+        LabeledContent("settings.old-after") {
+          HStack(spacing: 8) {
+            TextField("settings.days", value: oldModelThresholdBinding, format: .number)
+              .frame(width: 64)
+              .multilineTextAlignment(.trailing)
+            Text("settings.days")
+              .fixedSize()
+            Stepper("settings.old-after", value: oldModelThresholdBinding, in: 1...3_650)
+              .labelsHidden()
+              .accessibilityLabel(Text("settings.old-after"))
+          }
+        }
+
+        LabeledContent("settings.age.presets") {
+          HStack(spacing: 6) {
+            ForEach([30, 90, 180], id: \.self) { days in
+              Button("\(days)") {
+                model.setOldModelThresholdDays(days)
+              }
+              .buttonStyle(.bordered)
+              .accessibilityLabel("\(days) \(String(localized: "settings.days"))")
+            }
+          }
+        }
+      }
+
       Section("settings.updates.section") {
         UpdateStatusView(checker: updateChecker)
       }
 
-      Section("settings.menu-bar.section") {
+      Section {
         Toggle("settings.menu-bar.enabled", isOn: $isMenuBarEnabled)
-        Text("settings.menu-bar.description")
-          .font(.caption)
-          .foregroundStyle(.secondary)
         Toggle(
           "settings.login-item.enabled",
           isOn: Binding(
@@ -116,35 +101,30 @@ struct SettingsRootView: View {
             set: { model.setLaunchAtLogin($0) }
           )
         )
-        Text("settings.login-item.description")
-          .font(.caption)
+      } header: {
+        Text("settings.menu-bar.section")
+      } footer: {
+        VStack(alignment: .leading, spacing: 4) {
+          Text("settings.menu-bar.description")
+          Text("settings.login-item.description")
+        }
+      }
+
+      Section("settings.inventory.section") {
+        Text("settings.inventory.ephemeral")
           .foregroundStyle(.secondary)
       }
 
-      Section("settings.age.section") {
-        LabeledContent("settings.old-after") {
-          TextField("settings.days", value: oldModelThresholdBinding, format: .number)
-            .frame(width: 64)
-            .multilineTextAlignment(.trailing)
-          Text("settings.days")
-          Stepper("settings.old-after", value: oldModelThresholdBinding, in: 1...3_650)
-            .labelsHidden()
-            .accessibilityLabel(Text("settings.old-after"))
+      Section("settings.defaults.section") {
+        Text("settings.defaults.description")
+          .foregroundStyle(.secondary)
+        Button("settings.reset.action", role: .destructive) {
+          confirmation = .resetDefaults
         }
-
-        HStack {
-          Text("settings.age.presets")
-          Spacer()
-          ForEach([30, 90, 180], id: \.self) { days in
-            Button("\(days)") {
-              model.setOldModelThresholdDays(days)
-            }
-            .buttonStyle(.bordered)
-            .accessibilityLabel("\(days) \(String(localized: "settings.days"))")
-          }
-        }
+        .disabled(model.isPreparingDeletion || model.isDeleting)
       }
     }
+    .formStyle(.grouped)
   }
 
   private var sourceSettings: some View {
@@ -159,17 +139,25 @@ struct SettingsRootView: View {
             )
           )
         }
-        Button("source.add-folder.action") {
-          model.addManualFolder()
-        }
-        Button("source.add-mlx-folder.action") {
-          model.addMLXFolder()
+
+        HStack {
+          Button("source.add-folder.action", systemImage: "folder.badge.plus") {
+            model.addManualFolder()
+          }
+          Button("source.add-mlx-folder.action", systemImage: "folder.badge.plus") {
+            model.addMLXFolder()
+          }
         }
       }
 
       Section("settings.volumes.section") {
         ForEach(model.mountedVolumes) { volume in
-          HStack(alignment: .top) {
+          LabeledContent {
+            Button("volume.add.action") {
+              model.addManualFolder(startingAt: volume.rootURL)
+            }
+            .accessibilityLabel(Text("Add \(volume.name) as a model source"))
+          } label: {
             VStack(alignment: .leading, spacing: 2) {
               Text(volume.name)
               Text(volume.rootURL.path)
@@ -189,17 +177,15 @@ struct SettingsRootView: View {
               .font(.caption)
               .foregroundStyle(.secondary)
             }
-            Spacer()
-            Button("volume.add.action") {
-              model.addManualFolder(startingAt: volume.rootURL)
-            }
           }
         }
+
         Button("volume.refresh.action", systemImage: "arrow.clockwise") {
           model.refreshMountedVolumes()
         }
       }
     }
+    .formStyle(.grouped)
   }
 
   private var integrationSettings: some View {
@@ -211,73 +197,7 @@ struct SettingsRootView: View {
         }
 
         ForEach(model.toolDefinitions, id: \.id) { (definition: ToolDefinition) in
-          VStack(alignment: .leading, spacing: 8) {
-            Toggle(
-              definition.displayName,
-              isOn: Binding(
-                get: { definition.isEnabled },
-                set: { model.setToolEnabled(definition.id, enabled: $0) }
-              )
-            )
-            Text(definition.executableURL.path)
-              .font(.caption.monospaced())
-              .foregroundStyle(.secondary)
-              .lineLimit(1)
-              .truncationMode(.middle)
-
-            HStack {
-              Text(
-                model.isToolApproved(definition)
-                  ? String(localized: "tool.approved") : String(localized: "tool.not-approved")
-              )
-              .font(.caption)
-              .foregroundStyle(
-                model.isToolApproved(definition) ? Color.secondary : Color.orange
-              )
-              Spacer()
-              Button("tool.choose.action") {
-                if let runtimeID = definition.runtimeAdapterID {
-                  model.chooseRuntimeExecutable(runtimeID)
-                }
-              }
-              .disabled(definition.runtimeAdapterID == nil)
-              Button("tool.validate.action") {
-                model.validateTool(definition.id)
-              }
-              Button("inventory.reveal.action", systemImage: "folder") {
-                model.revealTool(definition.id)
-              }
-              .labelStyle(.iconOnly)
-              Button("tool.export.action") {
-                model.exportToolDefinition(definition.id)
-              }
-              Button("tool.reset.action") {
-                if let runtimeID = definition.runtimeAdapterID {
-                  model.resetRuntimeTool(runtimeID)
-                }
-              }
-              .disabled(definition.runtimeAdapterID == nil)
-            }
-
-            if let validation = definition.lastValidation {
-              HStack(spacing: 6) {
-                Text(validation.signingStatus.rawValue.capitalized)
-                if let identifier = validation.signingIdentifier {
-                  Text("·")
-                  Text(identifier)
-                }
-                if let version = validation.version {
-                  Text("·")
-                  Text(version)
-                }
-              }
-              .font(.caption)
-              .foregroundStyle(.secondary)
-            }
-            LabeledContent("tool.origin", value: definition.origin.displayName)
-              .font(.caption)
-              .foregroundStyle(.secondary)
-          }
+          runtimeToolRow(definition)
         }
 
         ForEach(model.missingRuntimeToolTemplates) { template in
@@ -290,6 +210,7 @@ struct SettingsRootView: View {
             )
           }
         }
+
         Button("tool.import.action", systemImage: "square.and.arrow.down") {
           model.importToolDefinition()
         }
@@ -321,6 +242,90 @@ struct SettingsRootView: View {
           .foregroundStyle(.secondary)
         adapterGuideLink(anchor: "client-adapter")
       }
+
+      Section("settings.extension.section") {
+        Text("settings.extension.description")
+          .foregroundStyle(.secondary)
+        adapterGuideLink(anchor: "choose")
+      }
+    }
+    .formStyle(.grouped)
+  }
+
+  private func runtimeToolRow(_ definition: ToolDefinition) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack {
+        Toggle(
+          definition.displayName,
+          isOn: Binding(
+            get: { definition.isEnabled },
+            set: { model.setToolEnabled(definition.id, enabled: $0) }
+          )
+        )
+        Spacer(minLength: 8)
+        Menu {
+          Button("tool.choose.action", systemImage: "folder") {
+            if let runtimeID = definition.runtimeAdapterID {
+              model.chooseRuntimeExecutable(runtimeID)
+            }
+          }
+          .disabled(definition.runtimeAdapterID == nil)
+          Button("tool.validate.action", systemImage: "checkmark.shield") {
+            model.validateTool(definition.id)
+          }
+          Button("inventory.reveal.action", systemImage: "arrow.turn.down.right") {
+            model.revealTool(definition.id)
+          }
+          Button("tool.export.action", systemImage: "square.and.arrow.up") {
+            model.exportToolDefinition(definition.id)
+          }
+          Button("tool.reset.action", systemImage: "arrow.counterclockwise") {
+            if let runtimeID = definition.runtimeAdapterID {
+              model.resetRuntimeTool(runtimeID)
+            }
+          }
+          .disabled(definition.runtimeAdapterID == nil)
+        } label: {
+          Image(systemName: "ellipsis.circle")
+            .accessibilityLabel(Text("Actions"))
+        }
+        .menuStyle(.borderlessButton)
+        .accessibilityLabel(Text("Actions for \(definition.displayName)"))
+      }
+
+      Text(definition.executableURL.path)
+        .font(.caption.monospaced())
+        .foregroundStyle(.secondary)
+        .lineLimit(1)
+        .truncationMode(.middle)
+
+      HStack(spacing: 6) {
+        Text(
+          model.isToolApproved(definition)
+            ? String(localized: "tool.approved") : String(localized: "tool.not-approved")
+        )
+        .font(.caption)
+        .foregroundStyle(model.isToolApproved(definition) ? Color.secondary : Color.orange)
+
+        if let validation = definition.lastValidation {
+          Text("·")
+          Text(validation.signingStatus.rawValue.capitalized)
+          if let identifier = validation.signingIdentifier {
+            Text("·")
+            Text(identifier)
+          }
+          if let version = validation.version {
+            Text("·")
+            Text(version)
+          }
+        }
+      }
+      .font(.caption)
+      .foregroundStyle(.secondary)
+
+      LabeledContent("tool.origin", value: definition.origin.displayName)
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
   }
 
@@ -328,20 +333,21 @@ struct SettingsRootView: View {
     Form {
       Section("settings.security.section") {
         Text("settings.security.description")
+          .foregroundStyle(.secondary)
         ForEach(model.sources) { source in
           VStack(alignment: .leading, spacing: 6) {
-            HStack {
+            LabeledContent {
+              Text(source.accessState.localizedName)
+                .foregroundStyle(
+                  source.accessState == .allowed ? Color.secondary : Color.orange
+                )
+            } label: {
               VStack(alignment: .leading, spacing: 2) {
                 Text(source.displayName)
                 Text(source.rootURL.path)
                   .font(.caption)
                   .foregroundStyle(.secondary)
               }
-              Spacer()
-              Text(source.accessState.localizedName)
-                .foregroundStyle(
-                  source.accessState == .allowed ? Color.secondary : Color.orange
-                )
             }
             HStack {
               Button("source.grant-again.action") {
@@ -349,7 +355,7 @@ struct SettingsRootView: View {
               }
               Spacer()
               Button("source.revoke.action", role: .destructive) {
-                pendingRevocationSourceID = source.id
+                confirmation = .revokeSource(source.id)
               }
             }
           }
@@ -377,7 +383,7 @@ struct SettingsRootView: View {
             }
           }
           Button("settings.audit.clear", role: .destructive) {
-            isAuditClearConfirmationPresented = true
+            confirmation = .clearAudit
           }
         }
         Text("settings.audit.privacy")
@@ -385,29 +391,7 @@ struct SettingsRootView: View {
           .foregroundStyle(.secondary)
       }
     }
-  }
-
-  private var advancedSettings: some View {
-    Form {
-      Section("settings.inventory.section") {
-        Text("settings.inventory.ephemeral")
-          .foregroundStyle(.secondary)
-      }
-      Section("settings.extension.section") {
-        Text("settings.extension.description")
-          .foregroundStyle(.secondary)
-        adapterGuideLink(anchor: "choose")
-      }
-
-      Section("settings.defaults.section") {
-        Text("settings.defaults.description")
-          .foregroundStyle(.secondary)
-        Button("settings.reset.action", role: .destructive) {
-          isResetConfirmationPresented = true
-        }
-        .disabled(model.isPreparingDeletion || model.isDeleting)
-      }
-    }
+    .formStyle(.grouped)
   }
 
   private func resetToDefaults() {
@@ -435,6 +419,65 @@ struct SettingsRootView: View {
     )
   }
 
+  private var confirmationIsPresented: Binding<Bool> {
+    Binding(
+      get: { confirmation != nil },
+      set: { if !$0 { confirmation = nil } }
+    )
+  }
+
+  private var confirmationTitle: LocalizedStringKey {
+    switch confirmation {
+    case .revokeSource: return "source.revoke.confirmation.title"
+    case .clearAudit: return "settings.audit.clear-confirmation.title"
+    case .resetDefaults: return "settings.reset.confirmation.title"
+    case nil: return "action.cancel"
+    }
+  }
+
+  private var confirmationMessage: LocalizedStringKey {
+    switch confirmation {
+    case .revokeSource: return "source.revoke.confirmation.message"
+    case .clearAudit: return "settings.audit.clear-confirmation.message"
+    case .resetDefaults: return "settings.reset.confirmation.message"
+    case nil: return "action.cancel"
+    }
+  }
+
+  @ViewBuilder
+  private var confirmationActions: some View {
+    switch confirmation {
+    case .revokeSource(let sourceID):
+      Button("source.revoke.confirmation.action", role: .destructive) {
+        model.revokeSource(sourceID)
+        confirmation = nil
+      }
+      Button("action.cancel", role: .cancel) {
+        confirmation = nil
+      }
+    case .clearAudit:
+      Button("settings.audit.clear", role: .destructive) {
+        model.clearActionAudit()
+        confirmation = nil
+      }
+      Button("action.cancel", role: .cancel) {
+        confirmation = nil
+      }
+    case .resetDefaults:
+      Button("settings.reset.action", role: .destructive) {
+        resetToDefaults()
+        confirmation = nil
+      }
+      Button("action.cancel", role: .cancel) {
+        confirmation = nil
+      }
+    case nil:
+      Button("action.cancel", role: .cancel) {
+        confirmation = nil
+      }
+    }
+  }
+
   private var toolImportIsPresented: Binding<Bool> {
     Binding(
       get: { model.toolImportPreview != nil },
@@ -455,4 +498,10 @@ struct SettingsRootView: View {
       set: { if !$0 { model.dismissLaunchAtLoginError() } }
     )
   }
+}
+
+private enum SettingsConfirmation: Equatable {
+  case revokeSource(ScanSource.ID)
+  case clearAudit
+  case resetDefaults
 }

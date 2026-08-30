@@ -56,7 +56,7 @@ struct WTMApp: App {
 
     Settings {
       SettingsRootView(model: model, updateChecker: updateChecker)
-        .frame(width: 620, height: 440)
+        .frame(minWidth: 680, idealWidth: 760, minHeight: 520, idealHeight: 600)
     }
 
     Window("app.about.window", id: "about") {
