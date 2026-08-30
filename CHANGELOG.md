@@ -4,6 +4,14 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [0.4.1] - 2026-08-30
+
+### Fixed
+
+- Localized the Settings tool-actions accessibility label so the CI localization quality gate
+  no longer rejects the literal `Actions` string.
+- Stabilized macOS UI-test launch state and inventory context-menu assertions.
+
 ### Documentation
 
 - Expanded the README with the current feature overview, direct `v0.4.0` download links,
