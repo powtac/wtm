@@ -219,6 +219,16 @@
         }
       }
     },
+    "accessibility.tool.actions" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actions"
+          }
+        }
+      }
+    },
     "action.cancel" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -240,9 +250,6 @@
           }
         }
       }
-    },
-    "Actions" : {
-
     },
     "Actions for %@" : {
 

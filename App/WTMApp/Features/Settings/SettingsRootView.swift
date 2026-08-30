@@ -287,7 +287,7 @@ struct SettingsRootView: View {
           .disabled(definition.runtimeAdapterID == nil)
         } label: {
           Image(systemName: "ellipsis.circle")
-            .accessibilityLabel(Text("Actions"))
+            .accessibilityLabel(Text("accessibility.tool.actions"))
         }
         .menuStyle(.borderlessButton)
         .accessibilityLabel(Text("Actions for \(definition.displayName)"))

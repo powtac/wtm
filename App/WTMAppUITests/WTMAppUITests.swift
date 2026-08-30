@@ -6,6 +6,7 @@ final class WTMAppUITests: XCTestCase {
   private func launch(_ application: XCUIApplication) {
     application.launchEnvironment["WTM_UI_TEST_MODE"] = "1"
     application.launchEnvironment["WTM_DISABLE_AUTOMATIC_UPDATE_CHECK"] = "1"
+    application.launchArguments += ["-ApplePersistenceIgnoreState", "YES"]
     application.launch()
 
     // A previous crashed local run can leave macOS' recovery alert in front of the app.
@@ -100,9 +101,9 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(copyMenu.waitForExistence(timeout: 5))
     copyMenu.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).hover()
     XCTAssertTrue(application.menuItems["Model Name"].waitForExistence(timeout: 5))
-    let providerModelCopy = application.menuItems["Provider / Model Name"]
+    XCTAssertTrue(application.menuItems["Absolute Model Path"].waitForExistence(timeout: 5))
+    let providerModelCopy = application.menuItems["Provider / Model Name"].firstMatch
     XCTAssertTrue(providerModelCopy.waitForExistence(timeout: 5))
-    XCTAssertTrue(application.menuItems["Absolute Model Path"].exists)
     providerModelCopy.click()
     XCTAssertEqual(NSPasteboard.general.string(forType: .string), "manual/Fixture-Q4_K_M")
     XCTAssertTrue(
@@ -144,9 +145,9 @@ final class WTMAppUITests: XCTestCase {
 
     XCTAssertTrue(application.staticTexts["Planned Operations"].waitForExistence(timeout: 5))
     let deletionModel =
-      application.descendants(matching: .any)["deletion-preview-model-Fixture-Q4_K_M.gguf"]
+      application.descendants(matching: .any)["deletion-preview-model-Fixture-Q4_K_M"]
     XCTAssertTrue(deletionModel.waitForExistence(timeout: 5))
-    XCTAssertTrue(deletionModel.label.contains("Fixture-Q4_K_M.gguf"))
+    XCTAssertTrue(deletionModel.label.contains("Fixture-Q4_K_M"))
     XCTAssertTrue(application.buttons["Move to Trash"].exists)
     XCTAssertTrue(FileManager.default.fileExists(atPath: modelURL.path))
     application.buttons["Cancel"].click()
