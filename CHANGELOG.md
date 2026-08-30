@@ -4,6 +4,13 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [0.4.2] - 2026-08-30
+
+### Fixed
+
+- Corrected the release workflow's notarization secret references so configured environment
+  credentials are passed to the distribution build.
+
 ## [0.4.1] - 2026-08-30
 
 ### Fixed
