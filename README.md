@@ -13,7 +13,7 @@
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg)
+**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg)
 
 ## ✨ Features
 
@@ -143,25 +143,25 @@ Apache License 2.0. Test fixtures are generated placeholders and contain no mode
 
 ### Manual
 
-Download the current [WTM 0.4.2 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg),
+Download the current [WTM 0.4.3 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg),
 verify it as shown below, then open the `.dmg` and drag `WTM.app` to `Applications`. WTM
 requires macOS 15 or later on Apple Silicon.
 
 Verify the downloaded DMG before opening it:
 
 ```sh
-curl -fLO "https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg"
-curl -fL "https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2.sha256" -o checksums.sha256
+curl -fLO "https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg"
+curl -fL "https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3.sha256" -o checksums.sha256
 shasum -a 256 --ignore-missing -c checksums.sha256
 ```
 
 The checksum manifest must be in the same directory as the downloaded DMG. The commands
-above are pinned to the current public `v0.4.2` release.
+above are pinned to the current public `v0.4.3` release.
 
 ### Homebrew Cask
 
 The official [Homebrew tap](https://github.com/powtac/homebrew-wtm) is published and pins
-WTM 0.4.2 to the verified DMG checksum. Install with:
+WTM 0.4.3 to the verified DMG checksum. Install with:
 
 ```sh
 brew tap powtac/wtm

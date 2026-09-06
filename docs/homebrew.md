@@ -5,7 +5,7 @@ in Homebrew Cask, not Homebrew Formula: a Formula is for command-line software b
 source; a Cask installs an application bundle.
 
 The source definition is [`packaging/homebrew/Casks/wtm.rb`](../packaging/homebrew/Casks/wtm.rb).
-It is intentionally pinned to the public `v0.4.2` release. Do not point a Cask at `main`,
+It is intentionally pinned to the public `v0.4.3` release. Do not point a Cask at `main`,
 an unpublished tag, or a mutable download URL.
 
 ## Published tap
@@ -49,7 +49,7 @@ brew uninstall --cask wtm
 2. Confirm the release asset and checksum from GitHub:
 
    ```sh
-   version=0.4.2
+   version=0.4.3
    gh release view "v$version" --repo powtac/wtm
    curl -fsSL "https://github.com/powtac/wtm/releases/download/v$version/WTM-$version.sha256"
    ```
