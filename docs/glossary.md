@@ -19,7 +19,7 @@ download service, inference host, or client configuration manager.
 | Top of the list | List controls | `Scan Now`/`Rescan`, search, and filters. |
 | Below list controls | Scan status or scan summary | Live progress while scanning, or the last completed/cancelled scan result. |
 | Above the table | Storage controls | Shared/unknown storage categories and the total for the active inventory scope. |
-| Native preferences window | Settings | The five top-level panes: `General`, `Sources`, `Integrations`, `Security`, and `Advanced`. |
+| Native preferences window | Settings | The four top-level panes: `General`, `Sources`, `Integrations`, and `Security`. |
 
 ## Inventory sidebar scopes
 
@@ -73,7 +73,7 @@ Models`; it does not run another scan.
 | `Stored` | Model data is present on local storage and was inventoried. It does not claim runtime compatibility or successful inference. |
 | `Incomplete` | Required or expected evidence is partial, missing, or still downloading. |
 | `Model Issue` | The installation has a model-specific problem recorded by the adapter. |
-| `Offline` | The installation is known from inventory but its source or volume is currently unavailable. |
+| `Offline` (Installation: Offline) | The installation is known from inventory but its source or volume is currently unavailable. |
 
 ### Source access states
 
@@ -83,7 +83,7 @@ Models`; it does not run another scan.
 | `Allowed` | The current source root and its consent-bound identity are valid. |
 | `Limited` | Access is intentionally narrower than a normal full source approval. |
 | `Denied` | The current user permissions do not allow reading the source. |
-| `Offline` | The source volume or path is unavailable. |
+| `Offline` (Source: Offline) | The source volume or path is unavailable. |
 | `Stale` | The saved approval no longer proves the current source identity; access must be granted again. |
 
 ### Runtime evidence
@@ -122,11 +122,10 @@ synonym for either one.
 
 | Pane | Contains |
 | --- | --- |
-| `General` | Scan on Launch, update checks, menu-bar projection, login item, and the `Old after` threshold. |
+| `General` | Scan on Launch, update checks, menu-bar projection, login item, the `Old after` threshold, ephemeral inventory explanation, and reset-to-defaults. |
 | `Sources` | Enabled source roots, manual/MLX folder selection, and mounted-volume information. |
-| `Integrations` | `Runtime Tools`, `Storage Providers`, and reviewed `Clients`. |
+| `Integrations` | `Runtime Tools`, `Storage Providers`, reviewed `Clients`, and extension guidance. |
 | `Security` | Per-source access renewal/removal and the bounded action audit. |
-| `Advanced` | Ephemeral inventory explanation, extension guidance, and reset-to-defaults. |
 
 ## Adapter roles
 
@@ -140,18 +139,22 @@ synonym for either one.
 | `ClientAdapter` | A reviewed, short-lived handoff to a consuming application or endpoint. |
 | `Storage Provider` | The Settings role for registered storage discovery adapters. It is not a runtime or client. |
 
-## Remaining inconsistencies
+## Terminology conventions
 
-These are real implementation/documentation mismatches found while creating
-this glossary. They are recorded here so users do not infer the wrong meaning.
+- **Offline:** qualify the subject in help and documentation as `Installation: Offline`
+  (an inventoried installation is unavailable) or `Source: Offline` (a scan root or
+  volume is unavailable). The contextual UI labels remain `Offline`.
+- **Format:** this field describes the installation's storage representation. GGUF and
+  Safetensors identify file formats; `Ollama` identifies a provider-backed manifest/blob
+  representation, not a separate weight-file format. `MLX` identifies a structurally
+  recognized MLX-LM directory representation. The code type remains `ModelFormat`.
+- **Runtime:** `Runtime Verification` presents evidence in model details; `Runtime Tools`
+  contains executable definitions in Settings; `RuntimeAdapter` is the implementation
+  contract for compatibility, test plans, health checks, and inference. These roles
+  are distinct and retain their own names.
+- **Scan counts:** use `model installations found` in scan status, logs, and documentation.
+  Each count represents local installations, not deduplicated model identities.
+  `All Models` remains the short sidebar label for the scope containing all installations.
 
-| Location | Inconsistency | Canonical direction |
-| --- | --- | --- |
-| `Offline` | The same word is used for an installation state and a source access state. | Keep the labels but qualify them in help/docs as `Installation: Offline` versus `Source: Offline`. |
-| Format values | `Ollama` is exposed as a `ModelFormat`, although Ollama is primarily a storage/provider convention rather than a file format. | Prefer `Representation` or `Storage representation` for that field, or explain why provider-backed Ollama variants use the value. |
-| Runtime terminology | The detail pane says `Runtime Verification`, Settings says `Runtime Tools`, and the architecture says `RuntimeAdapter`. | Keep all three only when the role is explicit: verification = evidence, tool = executable definition, adapter = implementation. |
-| Scan result counts | The log says `installations`, the UI says `found`, and the sidebar says `models`. | Use `model installations found` in logs and docs; reserve `model` for the logical identity. |
-
-The glossary describes the current behavior and does not silently redefine it.
-Behavioral changes should update this file, the website glossary, the relevant
-requirements/ADR, and tests together.
+Changes to these conventions must keep the app, this glossary, and the website glossary
+aligned. Behavioral changes also require the relevant requirements/ADR and tests.

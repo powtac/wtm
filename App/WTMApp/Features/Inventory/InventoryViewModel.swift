@@ -1131,7 +1131,7 @@ final class InventoryViewModel {
       activeScan?.completedSourceCount = completed
       activeScan?.totalSourceCount = total
       logger.info(
-        "Inventory scan source finished sourceID=\(sourceID, privacy: .public) installations=\(self.installations.count, privacy: .public)"
+        "Inventory scan source finished sourceID=\(sourceID, privacy: .public) model installations found=\(self.installations.count, privacy: .public)"
       )
       recordScanMemory(milestone: "source-finished")
     case .finished(let scannedSourceIDs, let scannedAt):
@@ -1144,7 +1144,7 @@ final class InventoryViewModel {
       )
       recordScanMemory(milestone: "finished")
       logger.info(
-        "Inventory scan completed with \(self.installations.count, privacy: .public) installations; peakRSSMB=\(self.scanPeakResidentByteCount / 1_048_576, privacy: .public)"
+        "Inventory scan completed with \(self.installations.count, privacy: .public) model installations found; peakRSSMB=\(self.scanPeakResidentByteCount / 1_048_576, privacy: .public)"
       )
     }
   }

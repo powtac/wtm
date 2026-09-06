@@ -24,7 +24,7 @@
             <tr><th>Inventory sidebar</th><td>Scope selections such as All Models, Old, Incomplete, and Issues. Settings is a separate footer action.</td></tr>
             <tr><th>Model table</th><td>The latest ephemeral scan result. Rows are model installations, not necessarily runnable models.</td></tr>
             <tr><th>Detail pane</th><td>Facts and actions for the selected installation: artifacts, configurations, runtime verification, clients, and cleanup review.</td></tr>
-            <tr><th>Settings</th><td>The native preferences window with General, Sources, Integrations, Security, and Advanced panes.</td></tr>
+            <tr><th>Settings</th><td>The native preferences window with General, Sources, Integrations, and Security panes. Inventory Data and Defaults are in General; extension guidance is in Integrations.</td></tr>
           </tbody>
         </table>
       </section>
@@ -60,9 +60,9 @@
         <table>
           <thead><tr><th>Term</th><th>Definition</th></tr></thead>
           <tbody>
-            <tr><th>Allocated Size</th><td>Physical disk allocation attributed to an installation. It is the default size column and default sort key; largest appears first.</td></tr>
+            <tr><th>Allocated Size</th><td>Physical disk allocation attributed to an installation. It is available in model details; the list uses Inventory Share.</td></tr>
             <tr><th>Exact Bytes</th><td>The exact allocated byte count in the detail pane.</td></tr>
-            <tr><th>Share</th><td>Exclusively attributable bytes as a percentage of the active scanned inventory.</td></tr>
+            <tr><th>Inventory Share</th><td>Exclusively attributable bytes as a percentage of the active scanned inventory.</td></tr>
             <tr><th>Shared</th><td>Physical storage referenced by more than one installation.</td></tr>
             <tr><th>Unknown</th><td>Storage whose ownership cannot be established safely.</td></tr>
             <tr><th>Stored</th><td>Model data is present on local storage. It is not a runtime or inference claim.</td></tr>
@@ -90,8 +90,10 @@
         <h2>Terminology boundaries</h2>
         <p>WTM keeps storage, runtime, and client capabilities separate so the UI is not over-interpreted:</p>
         <ul>
-          <li><strong>Offline:</strong> the same label can describe a source or an installation.</li>
-          <li><strong>Runtime:</strong> execution or verification supported by WTM.</li>
+          <li><strong>Offline:</strong> qualify the subject as Installation: Offline (an inventoried installation is unavailable) or Source: Offline (a scan root or volume is unavailable). Contextual UI labels remain Offline.</li>
+          <li><strong>Format:</strong> storage representation. GGUF and Safetensors identify file formats; Ollama identifies a provider-backed manifest/blob representation, and MLX a structurally recognized MLX-LM directory representation.</li>
+          <li><strong>Scan counts:</strong> model installations found counts local installations, not deduplicated model identities. All Models is the short sidebar label for that scope.</li>
+          <li><strong>Runtime:</strong> Runtime Verification presents evidence in model details; Runtime Tools contains executable definitions in Settings; RuntimeAdapter is the implementation contract for compatibility, test plans, health checks, and inference.</li>
           <li><strong>Client handoff:</strong> a reviewed launch plan for a consuming application such as OpenClaw or Unsloth Studio.</li>
         </ul>
         <p>For the complete mapping, see the <a href="https://github.com/powtac/wtm/blob/main/docs/glossary.md">repository glossary</a>.</p>
