@@ -4,6 +4,23 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [0.4.3] - 2026-09-06
+
+### Fixed
+
+- Enable and validate Homebrew-installed llama.cpp without rejecting the standard
+  admin-group-writable Cellar directory.
+- Validate symlinked GGUF weights in Hugging Face caches and revalidate the approved
+  executable symlink before launching its canonical target.
+- Preserve relative shared-library lookup when staging llama.cpp for execution.
+- Explain how to start Ollama when its local API is unavailable for model cleanup.
+
+### Changed
+
+- Clarified inventory terminology and refreshed release documentation and screenshot tooling.
+- Added regression coverage for llama.cpp executable approval, GGUF symlinks, and real
+  inference, plus an opt-in real Ollama deletion test.
+
 ## [0.4.2] - 2026-08-30
 
 ### Fixed
