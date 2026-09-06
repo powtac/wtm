@@ -137,7 +137,7 @@ let package = Package(
       name: "WTMActionAdapterTests",
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMSecurity", "WTMActions",
-        "ActionOllama", "ActionHuggingFace", "ActionManual",
+        "ActionOllama", "ActionHuggingFace", "ActionManual", "AdapterOllama",
       ]
     ),
     .testTarget(

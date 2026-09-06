@@ -722,7 +722,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The provider’s local API is unavailable. No fallback file deletion was attempted."
+            "value" : "The provider’s local API is unavailable. For Ollama, start the Ollama app or run “ollama serve”, then retry cleanup."
           }
         }
       }
