@@ -97,3 +97,21 @@ func foundationLauncherUsesDirectArguments() async throws {
   #expect(status == 0)
   #expect(output.snapshot() == hostileValue)
 }
+
+@Test("Homebrew Cellar permits admin group writes, but not public or other group writes")
+func executableInspectorAcceptsHomebrewCellarPermissions() {
+  var info = stat()
+  info.st_uid = getuid()
+  info.st_gid = 80
+  info.st_mode = 0o775
+  let cellar = URL(filePath: "/opt/homebrew/Cellar")
+  #expect(ExecutableInspector.hasSafeAncestorPermissions(info, directory: cellar))
+  #expect(
+    !ExecutableInspector.hasSafeAncestorPermissions(info, directory: cellar.appending(path: "tool"))
+  )
+  info.st_mode = 0o777
+  #expect(!ExecutableInspector.hasSafeAncestorPermissions(info, directory: cellar))
+  info.st_mode = 0o775
+  info.st_gid = 20
+  #expect(!ExecutableInspector.hasSafeAncestorPermissions(info, directory: cellar))
+}

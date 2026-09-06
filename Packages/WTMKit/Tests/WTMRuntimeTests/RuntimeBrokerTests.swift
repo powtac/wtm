@@ -434,3 +434,29 @@ func preferredPortConflictsAreReported() throws {
     _ = try allocator.availablePort(preferred: candidate)
   }
 }
+
+@Test("Broker revalidates the approved executable symlink before canonical launch")
+func brokerAcceptsApprovedExecutableSymlink() async throws {
+  let link = FileManager.default.temporaryDirectory.appending(path: "wtm-tool-\(UUID().uuidString)")
+  defer { try? FileManager.default.removeItem(at: link) }
+  try FileManager.default.createSymbolicLink(
+    at: link, withDestinationURL: URL(filePath: "/usr/bin/true"))
+  let identity = try ExecutableInspector().inspect(link).identity
+  let adapter = FakeRuntimeAdapter(id: .llamaCpp, healthSucceeds: true, inferenceSucceeds: true)
+  let broker = RuntimeBroker(
+    registry: try RuntimeAdapterRegistry(adapters: [adapter]),
+    launcher: FakeProcessLauncher(), endpointCorrelator: FakeEndpointCorrelator(result: true)
+  )
+  let installation = runtimeInstallation()
+  let plan = executablePlan(installation: installation, identity: identity)
+  let session = try await broker.start(
+    plan: plan, installation: installation, verifyInference: true)
+  #expect(session.inference?.succeeded == true)
+  _ = try await broker.stop(session.instance.id)
+  try FileManager.default.removeItem(at: link)
+  try FileManager.default.createSymbolicLink(
+    at: link, withDestinationURL: URL(filePath: "/usr/bin/false"))
+  await #expect(throws: RuntimeBrokerError.executableIdentityChanged) {
+    try await broker.start(plan: plan, installation: installation, verifyInference: true)
+  }
+}

@@ -107,12 +107,22 @@ public struct ExecutableInspector: Sendable {
         (information.st_mode & S_IFMT) == S_IFDIR
       else { throw ExecutableInspectionError.unsafeAncestor }
       guard information.st_uid == getuid() || information.st_uid == 0,
-        (information.st_mode & (S_IWGRP | S_IWOTH)) == 0
+        Self.hasSafeAncestorPermissions(information, directory: directory)
       else { throw ExecutableInspectionError.unsafeAncestor }
       let parent = directory.deletingLastPathComponent().standardizedFileURL
       if parent == directory { return }
       directory = parent
     }
+  }
+
+  static func hasSafeAncestorPermissions(_ information: stat, directory: URL) -> Bool {
+    guard information.st_mode & S_IWOTH == 0 else { return false }
+    if information.st_mode & S_IWGRP == 0 { return true }
+    // Homebrew's Cellar is admin-group writable on standard macOS installations.
+    // Keep this exception limited to the package-store root, never the executable.
+    return ["/opt/homebrew/Cellar", "/usr/local/Cellar"].contains(directory.path)
+      && information.st_gid == 80
+      && (information.st_uid == getuid() || information.st_uid == 0)
   }
 
   private func signingEvidence(for executableURL: URL) -> (

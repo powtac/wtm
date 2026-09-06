@@ -105,8 +105,10 @@ public actor RuntimeBroker {
       ownership = .providerManaged
       externalIdentifier = identifier
     case .executable(let invocation):
-      let inspection = try inspector.inspect(invocation.executableURL)
-      guard inspection.identity == invocation.approvedIdentity else {
+      let inspection = try inspector.inspect(invocation.approvedIdentity.requestedURL)
+      guard inspection.identity == invocation.approvedIdentity,
+        invocation.executableURL == inspection.identity.canonicalURL
+      else {
         throw RuntimeBrokerError.executableIdentityChanged
       }
       for identity in invocation.protectedPathIdentities {

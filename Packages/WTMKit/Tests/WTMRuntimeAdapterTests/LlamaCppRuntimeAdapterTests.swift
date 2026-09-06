@@ -278,3 +278,60 @@ private func appendLittleEndian(_ value: UInt64, to data: inout Data) {
     data.append(UInt8((value >> UInt64(shift)) & 0xff))
   }
 }
+
+@Test("llama.cpp validates Hugging Face-style symlinked GGUF weights")
+func llamaCppValidatesSymlinkedWeights() async throws {
+  let model = ggufInstallation()
+  defer { try? FileManager.default.removeItem(at: model.rootURL) }
+  let blob = model.rootURL.deletingPathExtension().appendingPathExtension("blob")
+  defer { try? FileManager.default.removeItem(at: blob) }
+  try FileManager.default.moveItem(at: model.rootURL, to: blob)
+  try FileManager.default.createSymbolicLink(at: model.rootURL, withDestinationURL: blob)
+  let (definition, approval) = try enabledLlamaDefinition()
+  let plan = try await LlamaCppRuntimeAdapter().makeTestPlan(
+    for: model,
+    context: RuntimeLaunchContext(port: 20_001, toolDefinition: definition, toolApproval: approval)
+  )
+  guard case .executable(let invocation) = plan.strategy else {
+    Issue.record("Expected executable plan")
+    return
+  }
+  #expect(invocation.protectedPathIdentities.first?.requestedURL == model.rootURL)
+  #expect(invocation.protectedPathIdentities.first?.canonicalURL == blob.resolvingSymlinksInPath())
+}
+
+@Test(
+  "Installed llama.cpp completes real inference",
+  .enabled(if: ProcessInfo.processInfo.environment["WTM_TEST_LLAMA_CPP"] == "1"))
+func liveLlamaCppInference() async throws {
+  let model = ggufInstallation()
+  defer { try? FileManager.default.removeItem(at: model.rootURL) }
+  let source = FileManager.default.homeDirectoryForCurrentUser.appending(
+    path: ".unsloth/.cache/stories260K.gguf")
+  try FileManager.default.removeItem(at: model.rootURL)
+  try FileManager.default.createSymbolicLink(at: model.rootURL, withDestinationURL: source)
+  let definition = LlamaCppToolConvention().definition(
+    executableURL: URL(filePath: "/opt/homebrew/bin/llama-server"), origin: .builtIn,
+    isEnabled: true
+  )
+  let validation = try ToolInvocationBuilder().inspect(definition)
+  let approval = ToolExecutionApproval(
+    definition: definition, executableIdentity: validation.executableIdentity, approvedAt: .now)
+  let adapter = LlamaCppRuntimeAdapter()
+  let plan = try await adapter.makeTestPlan(
+    for: model, context: RuntimeLaunchContext(toolDefinition: definition, toolApproval: approval))
+  let broker = RuntimeBroker(registry: try RuntimeAdapterRegistry(adapters: [adapter]))
+  let session: RuntimeSessionSnapshot
+  do {
+    session = try await broker.start(plan: plan, installation: model, verifyInference: true)
+  } catch {
+    for instance in await broker.allInstances() {
+      let snapshot = try await broker.snapshot(for: instance.id)
+      print(snapshot.logs.map(\.message).joined(separator: "\n"))
+    }
+    throw error
+  }
+  #expect(session.health?.succeeded == true)
+  #expect(session.inference?.succeeded == true)
+  _ = try await broker.stop(session.instance.id)
+}

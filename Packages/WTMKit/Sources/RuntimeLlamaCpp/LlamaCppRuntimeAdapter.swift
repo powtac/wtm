@@ -210,7 +210,10 @@ public struct LlamaCppRuntimeAdapter: RuntimeAdapter {
       $0.kind == .weights && $0.url.pathExtension.lowercased() == "gguf" && !$0.isPartial
     }.map(\.url)
     guard candidates.count == 1, let candidate = candidates.first else { return nil }
-    guard (try? ggufReader.inspect(at: candidate).containsModelWeights) == true else {
+    guard
+      (try? ggufReader.inspect(at: candidate.resolvingSymlinksInPath()).containsModelWeights)
+        == true
+    else {
       return nil
     }
     return candidate

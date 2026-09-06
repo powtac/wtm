@@ -143,9 +143,29 @@ final class StagedInvocation: @unchecked Sendable {
         withIntermediateDirectories: false,
         attributes: [.posixPermissions: 0o700]
       )
+      let binaryDirectory = directoryURL.appending(path: "bin", directoryHint: .isDirectory)
+      try FileManager.default.createDirectory(
+        at: binaryDirectory, withIntermediateDirectories: false,
+        attributes: [.posixPermissions: 0o700]
+      )
+      // Keep @loader_path/../lib working for installed command-line tools.
+      // Dependencies remain in their installed location, like absolute dylib references.
+      let installedBinaryDirectory = invocation.approvedIdentity.canonicalURL
+        .deletingLastPathComponent()
+      if installedBinaryDirectory.lastPathComponent == "bin" {
+        let libraries = installedBinaryDirectory.deletingLastPathComponent().appending(path: "lib")
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: libraries.path, isDirectory: &isDirectory),
+          isDirectory.boolValue
+        {
+          try FileManager.default.createSymbolicLink(
+            at: directoryURL.appending(path: "lib"), withDestinationURL: libraries
+          )
+        }
+      }
       executableURL = try Self.stageOrUseRootOwned(
         invocation.approvedIdentity,
-        in: directoryURL,
+        in: binaryDirectory,
         name: "executable",
         mode: 0o500
       )
