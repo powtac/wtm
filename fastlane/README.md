@@ -15,6 +15,30 @@ For _fastlane_ installation instructions, see [Installing _fastlane_](https://do
 
 ## Mac
 
+### mac screenshots
+
+```sh
+[bundle exec] fastlane mac screenshots
+```
+
+Generate product and settings screenshots from macOS UI tests
+
+### mac prepare_screenshots
+
+```sh
+[bundle exec] fastlane mac prepare_screenshots
+```
+
+Generate and prepare ten screenshots locally without uploading
+
+### mac upload_screenshots
+
+```sh
+[bundle exec] fastlane mac upload_screenshots
+```
+
+Upload the selected App Store-ready screenshots to the editable App Store version
+
 ### mac preflight
 
 ```sh

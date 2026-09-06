@@ -3414,7 +3414,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "WTM has no saved model index. Enable each source you want it to read, then start the scan. Results remain on this Mac, and this release cannot delete files or start processes."
+            "value" : "WTM has no saved model index. Enable each source you want it to read, then start the scan. Results remain on this Mac. Scanning does not delete files or start processes."
           }
         }
       }

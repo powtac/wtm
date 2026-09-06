@@ -1,6 +1,8 @@
 # GitHub Configuration
 
-The repository starts private and is designed to become public without rewriting history.
+The repository started private and is now public. The private-setup section below records
+the original configuration; current release acceptance is tracked in
+[Phase 5 Acceptance](phase-5-acceptance.md).
 
 ## Current public settings
 

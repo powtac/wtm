@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-08-25
+- Amended: 2026-09-05 — align download scheduling with Requirements section 18.
 
 ## Context
 
@@ -11,9 +12,10 @@ boundaries. OpenClaw and Unsloth use reviewed handoff plans around existing WTM 
 evidence; MLX-LM is a Python package whose server entry point resolves Python modules and
 can interpret either a local path or a Hub model identifier.
 
-The current code contains a `.mlx` format value, but that is only a vocabulary element. It
-does not recognize a documented MLX directory graph, establish completeness, bind an MLX
-runtime, or prove inference. A suffix or directory name is not sufficient model evidence.
+At the time of this decision, the code contained a `.mlx` format value, only a vocabulary
+element. It did not recognize a documented MLX directory graph, establish completeness,
+bind an MLX runtime, or prove inference. A suffix or directory name is not sufficient
+model evidence.
 
 Launching an `mlx_lm.server` script or `python -m mlx_lm.server` through the existing
 executable approval would bind only part of the executed code. Python import resolution,
@@ -26,8 +28,9 @@ local development and does not itself establish WTM's product security boundary.
 
 - MLX storage and runtime support are removed from Phase 4. Phase 4 contains the passive
   menu bar, launch-at-login setting, and reviewed OpenClaw and Unsloth client handoffs.
-- Phase 6 becomes `MLX Support`, delivered after the stable public-release gate. Phase 7
-  becomes the separately optional model-download phase.
+- Phase 6 becomes `MLX Support`. Its storage implementation is recorded in
+  [Phase 6 Acceptance](../phase-6-acceptance.md); final completion also depends on the
+  remaining Phase 5 gates. Model acquisition has no committed shipping phase.
 - Phase 6 is split internally into two ordered gates:
   1. a compiled, read-only MLX storage adapter with documented fixtures, explicit
      completeness evidence, configuration association, and conservative false-positive
@@ -45,10 +48,10 @@ local development and does not itself establish WTM's product security boundary.
   or remote code.
 - MLX runtime state follows ADR-025: numeric loopback, explicit preview, bounded redacted
   logs, separate health/inference evidence, and Stop limited to a WTM-owned process.
-- Model acquisition remains Phase 7. It cannot be smuggled into Phase 6 through library
+- Model acquisition remains backlog. It cannot be smuggled into Phase 6 through library
   convenience APIs.
-- There is no committed Phase 8. Further ideas remain backlog/research until a separate
-  scope decision, requirements, and release gate are accepted.
+- There is no committed shipping phase after Phase 6. Further ideas remain backlog/research
+  until a separate scope decision, requirements, and release gate are accepted.
 
 ## Consequences
 
@@ -59,15 +62,16 @@ local development and does not itself establish WTM's product security boundary.
 - Python interpreter, package, or protected-resource changes invalidate prior approval.
 - Users do not receive a misleading `Runnable` claim from a recognized suffix or installed
   command name.
-- Downloads move to Phase 7 and retain an independent license, authentication, integrity,
+- Downloads remain backlog and require an independent license, authentication, integrity,
   disk-space, cancellation, and supply-chain review.
 
 ## Requirements impact
 
 The integration matrix, phase mapping, roadmap, threat model, and phase gates move generic
-MLX support from Phase 4 to Phase 6. `FR-MLX-*` defines its observable boundary. `FR-DWN-*`
-moves to Phase 7. Phase 4 remains `Implemented` until manual integration evidence closes
-its gate; Phase 5 remains the next release milestone.
+MLX support from Phase 4 to Phase 6. `FR-MLX-*` defines its observable boundary. Download
+implementation requires separately accepted scope, requirements, and release gates.
+Phase 4 is completed; current Phase 5 and Phase 6 evidence is recorded in their acceptance
+documents and the roadmap.
 
 ## Validation
 

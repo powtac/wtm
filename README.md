@@ -13,7 +13,7 @@
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0-arm64.dmg)
+**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg)
 
 ## ✨ Features
 
@@ -123,6 +123,9 @@ bundle exec fastlane mac build output:/absolute/path/to/empty/release-assets
 The build lane requires the same signing and notarization environment as
 `scripts/build-distribution`; it does not publish a GitHub Release.
 
+Product screenshots can be generated and prepared locally with
+`bundle exec fastlane mac prepare_screenshots`; see the [screenshot guide](docs/screenshots.md).
+
 ## Extend WTM
 
 Read the [public extension guide](https://powtac.github.io/wtm/extend.html), the
@@ -140,34 +143,30 @@ Apache License 2.0. Test fixtures are generated placeholders and contain no mode
 
 ### Manual
 
-Download the current [WTM 0.4.0 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0-arm64.dmg),
+Download the current [WTM 0.4.2 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg),
 verify it as shown below, then open the `.dmg` and drag `WTM.app` to `Applications`. WTM
 requires macOS 15 or later on Apple Silicon.
 
 Verify the downloaded DMG before opening it:
 
 ```sh
-curl -fLO "https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0-arm64.dmg"
-curl -fL "https://github.com/powtac/wtm/releases/download/v0.4.0/WTM-0.4.0.sha256" -o checksums.sha256
+curl -fLO "https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2-arm64.dmg"
+curl -fL "https://github.com/powtac/wtm/releases/download/v0.4.2/WTM-0.4.2.sha256" -o checksums.sha256
 shasum -a 256 --ignore-missing -c checksums.sha256
 ```
 
 The checksum manifest must be in the same directory as the downloaded DMG. The commands
-above are pinned to the current public `v0.4.0` release.
+above are pinned to the current public `v0.4.2` release.
 
-### Homebrew Cask — not yet released
+### Homebrew Cask
 
-The Homebrew Cask definition is prepared in [`packaging/homebrew/Casks/wtm.rb`](packaging/homebrew/Casks/wtm.rb),
-but the `powtac/wtm` tap is not published yet. Homebrew installation is therefore not
-available; use the verified manual download above. The [Homebrew release guide](docs/homebrew.md)
-explains the publication and update process.
-
-When the tap is published, installation will be:
+The official [Homebrew tap](https://github.com/powtac/homebrew-wtm) is published and pins
+WTM 0.4.2 to the verified DMG checksum. Install with:
 
 ```sh
 brew tap powtac/wtm
 brew install --cask wtm
 ```
 
-Homebrew releases will be managed from the GitHub Release and pin the exact DMG checksum;
+Homebrew releases are managed from the GitHub Release and pin the exact DMG checksum;
 WTM does not distribute a formula or install model runtimes.

@@ -1,0 +1,56 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+if (( $# < 3 )); then
+  echo "Usage: $0 SOURCE_ROOT OUTPUT_ROOT LOCALE/SCREENSHOT.png [...]" >&2
+  exit 64
+fi
+
+source_root="${1:A}"
+output_root="${2:A}"
+shift 2
+
+[[ -d "$source_root" ]] || {
+  echo "Screenshot source directory does not exist: $source_root" >&2
+  exit 1
+}
+
+command -v magick >/dev/null 2>&1 || {
+  echo "ImageMagick is required. Install it with: brew install imagemagick" >&2
+  exit 69
+}
+
+mkdir -p "$output_root"
+typeset -A screenshot_signatures
+
+for relative_path in "$@"; do
+  source_path="$source_root/$relative_path"
+  output_path="$output_root/$relative_path"
+
+  [[ -f "$source_path" ]] || {
+    echo "Selected screenshot is missing: $source_path" >&2
+    exit 1
+  }
+
+  signature="$(magick identify -format '%#' "$source_path")"
+  if [[ -n "${screenshot_signatures[$signature]-}" ]]; then
+    echo "Identical screenshot content: $relative_path and ${screenshot_signatures[$signature]}. Check for a macOS capture overlay." >&2
+    exit 1
+  fi
+  screenshot_signatures[$signature]="$relative_path"
+
+  mkdir -p "${output_path:h}"
+
+  magick "$source_path" \
+    +repage \
+    -background '#0B1020' \
+    -alpha remove \
+    -alpha off \
+    -resize '1440x900>' \
+    -gravity center \
+    -extent 1440x900 \
+    "$output_path"
+done
+
+echo "Prepared $# App Store screenshot(s) at $output_root (1440x900, opaque PNG)."

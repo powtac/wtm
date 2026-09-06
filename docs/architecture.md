@@ -118,7 +118,7 @@ Phase 4 menu projections and client trust boundaries are governed by
 [ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
 Phase 5 release publication and private-to-public gates are governed by
 [ADR-027](decisions/ADR-027-fail-closed-public-release-chain.md).
-The MLX deferral, Phase 6 execution gate, and Phase 7 download separation are governed by
+The MLX deferral, Phase 6 execution gate, and separate download backlog are governed by
 [ADR-028](decisions/ADR-028-defer-mlx-to-a-dedicated-phase.md).
 
 `REQUIREMENTS.md` defines observable behaviour. An accepted ADR explains the constraint;

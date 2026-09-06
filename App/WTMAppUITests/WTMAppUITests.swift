@@ -7,6 +7,7 @@ final class WTMAppUITests: XCTestCase {
     application.launchEnvironment["WTM_UI_TEST_MODE"] = "1"
     application.launchEnvironment["WTM_DISABLE_AUTOMATIC_UPDATE_CHECK"] = "1"
     application.launchArguments += ["-ApplePersistenceIgnoreState", "YES"]
+    application.launchArguments += ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
     application.launch()
 
     // A previous crashed local run can leave macOS' recovery alert in front of the app.
@@ -63,6 +64,7 @@ final class WTMAppUITests: XCTestCase {
     let sourceToggle = application.descendants(matching: .any)["source-toggle-default:models"]
     XCTAssertTrue(sourceToggle.exists)
     XCTAssertFalse(sourceToggle.label.isEmpty, "Source toggle needs a VoiceOver label")
+    snapshot("01-source-setup")
   }
 
   @MainActor
@@ -94,6 +96,7 @@ final class WTMAppUITests: XCTestCase {
 
     let modelName = application.staticTexts["Fixture-Q4_K_M"].firstMatch
     XCTAssertTrue(modelName.waitForExistence(timeout: 10))
+    snapshot("02-model-inventory")
     XCTAssertTrue(application.descendants(matching: .any)["app-version"].exists)
     NSPasteboard.general.clearContents()
     modelName.rightClick()
@@ -144,6 +147,7 @@ final class WTMAppUITests: XCTestCase {
     review.click()
 
     XCTAssertTrue(application.staticTexts["Planned Operations"].waitForExistence(timeout: 5))
+    snapshot("03-cleanup-preview")
     let deletionModel =
       application.descendants(matching: .any)["deletion-preview-model-Fixture-Q4_K_M"]
     XCTAssertTrue(deletionModel.waitForExistence(timeout: 5))
@@ -210,6 +214,128 @@ final class WTMAppUITests: XCTestCase {
     XCTAssertTrue(application.buttons["Start and Verify"].exists)
     XCTAssertTrue(application.staticTexts["WTM can stop only this process instance."].exists)
     application.buttons["Cancel"].click()
+  }
+
+  @MainActor
+  func testSettingsSectionsForScreenshots() throws {
+    continueAfterFailure = false
+    let homeURL = FileManager.default.temporaryDirectory.appending(
+      path: "wtm-ui-settings-\(UUID().uuidString)",
+      directoryHint: .isDirectory
+    )
+    let modelsURL = homeURL.appending(path: ".models", directoryHint: .isDirectory)
+    try FileManager.default.createDirectory(at: modelsURL, withIntermediateDirectories: true)
+    try modelFixtureData().write(to: modelsURL.appending(path: "Settings-Fixture-Q4_K_M.gguf"))
+    defer { try? FileManager.default.removeItem(at: homeURL) }
+
+    let application = XCUIApplication()
+    application.launchEnvironment["WTM_SETTINGS_NAMESPACE"] =
+      "de.powtac.whatthemodel.ui-tests.settings.\(UUID().uuidString)"
+    application.launchEnvironment["WTM_UI_TEST_HOME_DIRECTORY"] = homeURL.path
+    launch(application)
+    defer { application.terminate() }
+
+    let sourceToggle = application.descendants(matching: .any)["source-toggle-default:models"]
+    XCTAssertTrue(sourceToggle.waitForExistence(timeout: 5))
+    sourceToggle.click()
+    application.buttons["Start Scan"].click()
+    XCTAssertTrue(
+      application.staticTexts["Settings-Fixture-Q4_K_M"].waitForExistence(timeout: 10)
+    )
+
+    let settings = application.buttons["sidebar-settings-button"]
+    XCTAssertTrue(settings.waitForExistence(timeout: 10))
+    settings.click()
+
+    captureSettingsSection(
+      application, tab: "General", header: "Scanning", name: "settings-general-scanning"
+    )
+    captureSettingsSection(
+      application, tab: "General", header: "Model Age", name: "settings-general-age"
+    )
+    captureSettingsSection(
+      application, tab: "General", header: "Updates", name: "settings-general-updates"
+    )
+    captureSettingsSection(
+      application, tab: "General", header: "Menu Bar", name: "settings-general-menu-bar"
+    )
+    captureSettingsSection(
+      application, tab: "General", header: "Inventory Data", name: "settings-general-inventory"
+    )
+    captureSettingsSection(
+      application, tab: "General", header: "Defaults", name: "settings-general-defaults"
+    )
+
+    captureSettingsSection(
+      application, tab: "Sources", header: "Enabled Sources", name: "settings-sources-enabled"
+    )
+    captureSettingsSection(
+      application, tab: "Sources", header: "Mounted Drives", name: "settings-sources-volumes"
+    )
+
+    captureSettingsSection(
+      application,
+      tab: "Integrations",
+      header: "Runtime Tools",
+      name: "settings-integrations-runtimes"
+    )
+    captureSettingsSection(
+      application,
+      tab: "Integrations",
+      header: "Storage Providers",
+      name: "settings-integrations-storage"
+    )
+    captureSettingsSection(
+      application, tab: "Integrations", header: "Clients", name: "settings-integrations-clients"
+    )
+    captureSettingsSection(
+      application,
+      tab: "Integrations",
+      header: "Extending WTM",
+      name: "settings-integrations-extension"
+    )
+
+    captureSettingsSection(
+      application, tab: "Security", header: "Scan Access", name: "settings-security-access"
+    )
+    captureSettingsSection(
+      application, tab: "Security", header: "Cleanup Audit", name: "settings-security-audit"
+    )
+  }
+
+  @MainActor
+  private func captureSettingsSection(
+    _ application: XCUIApplication,
+    tab: String,
+    header: String,
+    name: String
+  ) {
+    let tabButton = application.buttons[tab].firstMatch
+    XCTAssertTrue(tabButton.waitForExistence(timeout: 5), "Missing settings tab: \(tab)")
+    tabButton.click()
+    let section = application.descendants(matching: .any).matching(
+      NSPredicate(format: "label == %@", header)
+    ).firstMatch
+    XCTAssertTrue(section.waitForExistence(timeout: 5), "Missing settings section: \(header)")
+
+    for _ in 0..<8 where !section.isHittable {
+      application.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -500)
+    }
+    XCTAssertTrue(section.isHittable, "Settings section is not visible: \(header)")
+    let scrollView = application.scrollViews.firstMatch
+    let offset = section.frame.minY - scrollView.frame.minY - 20
+    if offset > 40 {
+      scrollView.scroll(byDeltaX: 0, deltaY: -offset)
+    }
+    snapshot(name)
+  }
+
+  @MainActor
+  private func snapshot(_ name: String) {
+    let attachment = XCTAttachment(screenshot: XCUIApplication().windows.firstMatch.screenshot())
+    attachment.name = "WTM--\(name)--"
+    attachment.lifetime = .keepAlways
+    add(attachment)
   }
 
   private func modelFixtureData() -> Data {

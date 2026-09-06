@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Run one command, retain its log, and report a bounded completion summary."""
+
+import collections
+import fcntl
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+
+def main():
+    if len(sys.argv) < 3:
+        print(f"Usage: {sys.argv[0]} LOG_FILE COMMAND [ARG ...]", file=sys.stderr)
+        return 64
+
+    log_path = Path(sys.argv[1]).resolve()
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    started = time.monotonic()
+    with Path(str(log_path) + ".lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(f"Already running for log: {log_path}", file=sys.stderr)
+            return 75
+
+        with log_path.open("w") as output:
+            try:
+                process = subprocess.Popen(
+                    sys.argv[2:], stdout=output, stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
+            except OSError as error:
+                output.write(f"Could not start command: {error}\n")
+                result = 127
+            else:
+                def forward_signal(signum, _frame):
+                    try:
+                        os.killpg(process.pid, signum)
+                    except ProcessLookupError:
+                        pass
+
+                signal.signal(signal.SIGINT, forward_signal)
+                signal.signal(signal.SIGTERM, forward_signal)
+                print(f"Running pid={process.pid}; log={log_path}", flush=True)
+                result = process.wait()
+                if result < 0:
+                    result = 128 - result
+
+        elapsed = time.monotonic() - started
+        print(f"Finished exit={result}; elapsed={elapsed:.1f}s; log={log_path}")
+        if result:
+            print("Last 20 log lines (up to 300 characters each):")
+            with log_path.open(errors="replace") as output:
+                for line in collections.deque(output, maxlen=20):
+                    print(line.rstrip("\r\n")[:300])
+        return result
+
+
+if __name__ == "__main__":
+    sys.exit(main())

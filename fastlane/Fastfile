@@ -1,4 +1,5 @@
 require "fileutils"
+require "json"
 
 REPOSITORY_ROOT = File.expand_path("..", __dir__)
 
@@ -20,7 +21,99 @@ end
 
 default_platform(:mac)
 
+APP_STORE_SCREENSHOT_NAMES = [
+  "en-US/01-source-setup.png",
+  "en-US/02-model-inventory.png",
+  "en-US/03-cleanup-preview.png",
+  "en-US/settings-general-scanning.png",
+  "en-US/settings-general-updates.png",
+  "en-US/settings-sources-enabled.png",
+  "en-US/settings-integrations-runtimes.png",
+  "en-US/settings-integrations-storage.png",
+  "en-US/settings-security-access.png",
+  "en-US/settings-security-audit.png"
+].freeze
+
 platform :mac do
+  desc "Generate product and settings screenshots from macOS UI tests"
+  lane :screenshots do |options|
+    output = File.join(REPOSITORY_ROOT, "build/screenshots")
+    result = File.join(REPOSITORY_ROOT, "build/screenshots.xcresult")
+    attachments = File.join(REPOSITORY_ROOT, "build/screenshot-attachments")
+    [output, result, attachments].each { |path| FileUtils.rm_rf(path) }
+    FileUtils.mkdir_p(File.join(output, "en-US"))
+
+    # Another WTM build with the same bundle identifier can prevent test activation.
+    system("/usr/bin/pkill", "-x", "WTM")
+
+    run_tests(
+      project: File.join(REPOSITORY_ROOT, "WTM.xcodeproj"),
+      scheme: "WTM",
+      destination: "platform=macOS,arch=arm64",
+      code_coverage: false,
+      only_testing: options[:only_testing] || "WTMAppUITests",
+      derived_data_path: File.join(REPOSITORY_ROOT, "build/screenshot-derived-data"),
+      output_directory: File.join(REPOSITORY_ROOT, "build/screenshot-logs"),
+      buildlog_path: File.join(REPOSITORY_ROOT, "build/screenshot-logs"),
+      result_bundle_path: result,
+      result_bundle: true
+    )
+    sh("xcrun", "xcresulttool", "export", "attachments", "--path", result, "--output-path", attachments)
+    manifest = JSON.parse(File.read(File.join(attachments, "manifest.json")))
+    exported = []
+    manifest.each do |test|
+      test.fetch("attachments").each do |attachment|
+        name = attachment.fetch("suggestedHumanReadableName")[/WTM--([a-z0-9-]+)--/, 1]
+        next unless name
+
+        UI.user_error!("Duplicate screenshot: #{name}") if exported.include?(name)
+        FileUtils.cp(
+          File.join(attachments, attachment.fetch("exportedFileName")),
+          File.join(output, "en-US", "#{name}.png")
+        )
+        exported << name
+      end
+    end
+    UI.user_error!("No WTM screenshot attachments found") if exported.empty?
+    UI.success("Exported #{exported.length} screenshots to #{output}")
+  end
+
+  desc "Generate and prepare ten screenshots locally without uploading"
+  lane :prepare_screenshots do
+    screenshots
+
+    source_root = File.join(REPOSITORY_ROOT, "build/screenshots")
+    upload_root = File.join(REPOSITORY_ROOT, "build/app-store-screenshots")
+    FileUtils.rm_rf(upload_root)
+    FileUtils.mkdir_p(upload_root)
+
+    run_repository_script(
+      "prepare-app-store-screenshots",
+      source_root,
+      upload_root,
+      *APP_STORE_SCREENSHOT_NAMES
+    )
+  end
+
+  desc "Upload the selected App Store-ready screenshots to the editable App Store version"
+  lane :upload_screenshots do |options|
+    prepare_screenshots
+
+    deliver_options = {
+      app_identifier: ENV.fetch("WTM_BUNDLE_IDENTIFIER", "de.powtac.whatthemodel"),
+      platform: "osx",
+      screenshots_path: File.join(REPOSITORY_ROOT, "build/app-store-screenshots"),
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_app_version_update: true,
+      overwrite_screenshots: true,
+      run_precheck_before_submit: false,
+      force: true
+    }
+    deliver_options[:api_key_path] = options[:api_key_path] if options[:api_key_path]
+    deliver(**deliver_options)
+  end
+
   desc "Check that the macOS distribution toolchain is available"
   lane :preflight do
     run_repository_script("build-distribution", "--preflight")

@@ -5,23 +5,14 @@ in Homebrew Cask, not Homebrew Formula: a Formula is for command-line software b
 source; a Cask installs an application bundle.
 
 The source definition is [`packaging/homebrew/Casks/wtm.rb`](../packaging/homebrew/Casks/wtm.rb).
-It is intentionally pinned to the public `v0.4.0` release. Do not point a Cask at `main`,
+It is intentionally pinned to the public `v0.4.2` release. Do not point a Cask at `main`,
 an unpublished tag, or a mutable download URL.
 
-## Publish the tap
+## Published tap
 
-Create a public GitHub repository named `homebrew-wtm`. Homebrew maps the user-facing tap
-name `powtac/wtm` to `powtac/homebrew-wtm`. Copy the Cask into that repository as
-`Casks/wtm.rb`, then validate it from the tap checkout:
-
-```sh
-brew update
-brew audit --new --cask --tap powtac/wtm
-brew install --cask powtac/wtm/wtm
-brew uninstall --cask wtm
-```
-
-Users then install the tap explicitly:
+The official public repository is [powtac/homebrew-wtm](https://github.com/powtac/homebrew-wtm),
+published on 2026-09-05. Homebrew maps the tap name `powtac/wtm` to that repository.
+The Cask is stored there as `Casks/wtm.rb`; this repository retains the source copy.
 
 ```sh
 brew tap powtac/wtm
@@ -31,6 +22,25 @@ brew install --cask wtm
 An explicit third-party tap is deliberate: tap code can run with the user's privileges.
 Users should trust only the requested Cask, not an unrelated whole tap.
 
+## Verification — 2026-09-05
+
+- `brew audit --strict --online --cask powtac/wtm/wtm` passes.
+- Installation to an isolated `--appdir` succeeds; the installed application passes strict
+  code-signature and notarized Gatekeeper checks. Uninstall removes that test application.
+  The existing `/Applications/WTM.app` is not replaced by the smoke test.
+- `brew livecheck --cask --json powtac/wtm/wtm` reports current/latest 0.4.2, not outdated.
+- `brew audit --new` reports only the GitHub notability threshold (fewer than 30 forks,
+  30 watchers, and 75 stars). That blocks upstream submission, not this independent tap.
+  Do not describe the upstream admission check as passed.
+
+For a future update, validate from the installed tap:
+
+```sh
+brew audit --strict --online --cask powtac/wtm/wtm
+brew install --cask powtac/wtm/wtm
+brew uninstall --cask wtm
+```
+
 ## Release procedure
 
 1. Run the normal WTM release gates and publish the signed, notarized GitHub Release from
@@ -39,7 +49,7 @@ Users should trust only the requested Cask, not an unrelated whole tap.
 2. Confirm the release asset and checksum from GitHub:
 
    ```sh
-   version=0.4.0
+   version=0.4.2
    gh release view "v$version" --repo powtac/wtm
    curl -fsSL "https://github.com/powtac/wtm/releases/download/v$version/WTM-$version.sha256"
    ```
