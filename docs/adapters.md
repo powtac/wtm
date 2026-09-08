@@ -7,6 +7,11 @@ its own protocol and release phase.
 The [current adapter implementations](../Packages/WTMKit/Sources/) are the source of truth
 for the adapters shipped by this checkout.
 
+The [versioned integration catalog](integrations/catalog.json) records the first-wave
+research and capability status. This checkout adds [LM Studio read-only GGUF inventory](integrations/lm-studio.md).
+GPT4All, Jan, LocalAI and Open WebUI still require their provider contract fixtures and
+implementations; listing them does not enable capabilities.
+
 ## Adapter types
 
 ### Storage provider adapter

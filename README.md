@@ -52,6 +52,8 @@ See [Requirements (German, normative)](REQUIREMENTS.md) and the
 
 The current build adds explicit runtime verification, a passive menu bar inventory,
 reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
+The unreleased checkout additionally supports [LM Studio GGUF inventory](docs/integrations/lm-studio.md).
+The [integration catalog](docs/integrations/catalog.json) distinguishes implemented and planned roles.
 
 The [product glossary](docs/glossary.md) defines the app's UI sections and canonical
 inventory vocabulary. The same glossary is available on the [public website](https://powtac.github.io/wtm/glossary.html).

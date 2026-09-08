@@ -1,5 +1,16 @@
 # Threat Model
 
+## LM Studio storage review — 2026-09-08
+
+The LM Studio adapter reuses the shared consent-bound directory walker and GGUF reader. It adds no
+network, process, configuration mutation, or deletion authority. Import directory names
+do not prove a Hub repository or provider process identity. Only a validated GGUF v2/v3
+header in the documented import layout receives the GGUF format; split files and
+unrecognized layouts remain Unknown. Physical identifiers are retained for shared-byte
+accounting. Unknown candidates keep a provider ID with no deletion adapter, preventing
+fallback from granting manual cleanup. Contract tests cover malformed files and path
+escapes; no claim of full tensor validation or LM Studio runtime verification is made.
+
 ## Assets
 
 - User model files and provider caches

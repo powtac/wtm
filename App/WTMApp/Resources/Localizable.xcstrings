@@ -2005,6 +2005,17 @@
         }
       }
     },
+    "provider.lm-studio" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LM Studio"
+          }
+        }
+      }
+    },
     "provider.mlx" : {
       "extractionState" : "stale",
       "localizations" : {

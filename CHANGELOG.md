@@ -4,6 +4,24 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [0.5.0] - 2026-09-08
+
+### Added
+
+- Read-only LM Studio GGUF inventory with an opt-in source suggestion, scoped file
+  inspection, and conservative fallback for unknown layouts and split models.
+- Versioned integration catalog for LM Studio, GPT4All, Jan, LocalAI, and Open WebUI.
+
+### Changed
+
+- Updated adapter, architecture, security, and release documentation to describe
+  LM Studio inventory boundaries and verified v0.4.3 distribution evidence.
+
+### Tests
+
+- Added LM Studio coverage for supported imports, malformed and split models,
+  partial files, shared file identities, and symlinks outside approved sources.
+
 ## [0.4.3] - 2026-09-06
 
 ### Fixed

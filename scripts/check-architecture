@@ -40,7 +40,7 @@ if [[ -n "$process_files" && "$process_files" != "Packages/WTMKit/Sources/WTMRun
   exit 1
 fi
 
-if search -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterMLX Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
+if search -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterMLX Packages/WTMKit/Sources/AdapterLMStudio Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
   echo "A source-mutation API entered the read-only inventory graph." >&2
   exit 1
 fi

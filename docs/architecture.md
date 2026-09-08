@@ -8,7 +8,7 @@ absent.
 ```text
 WTM app (composition and presentation only)
   -> WTMInventory -> WTMAdapterContracts, WTMDomain, WTMSecurity
-  -> AdapterOllama, AdapterHuggingFace, AdapterManual, AdapterMLX
+  -> AdapterOllama, AdapterHuggingFace, AdapterManual, AdapterMLX, AdapterLMStudio
   -> WTMActions -> WTMAdapterContracts, WTMDomain, WTMSecurity
   -> ActionOllama, ActionHuggingFace, ActionManual
   -> WTMRuntime -> WTMAdapterContracts, WTMDomain

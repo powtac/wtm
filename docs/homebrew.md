@@ -22,7 +22,15 @@ brew install --cask wtm
 An explicit third-party tap is deliberate: tap code can run with the user's privileges.
 Users should trust only the requested Cask, not an unrelated whole tap.
 
-## Verification — 2026-09-05
+## Verification — 2026-09-08
+
+Version 0.4.3's public tap, local source Cask and published DMG digest match.
+`brew audit --strict --online --cask powtac/wtm/wtm` passes. Installation to
+`build/homebrew-release-smoke` passes strict/deep signature verification, Gatekeeper and
+staple validation. Uninstall removes that test application. Full local logs:
+`build/homebrew-release-audit.log` and `build/homebrew-release-smoke.log`.
+
+## Historical verification — 2026-09-05
 
 - `brew audit --strict --online --cask powtac/wtm/wtm` passes.
 - Installation to an isolated `--appdir` succeeds; the installed application passes strict

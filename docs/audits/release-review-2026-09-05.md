@@ -1,5 +1,9 @@
 # Release review — 2026-09-05
 
+Historical v0.4.2 evidence. See the [2026-09-08 follow-up](release-review-2026-09-08.md)
+for v0.4.3. Screenshot work was subsequently cancelled by the user; the attempts below
+do not represent an outstanding capture task or an accepted screenshot set.
+
 ## Scope and result
 
 The published release is **v0.4.2**, build 13, source commit

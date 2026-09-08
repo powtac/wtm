@@ -10,7 +10,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | 2 — Safe Actions | Completed | Revalidated plans, provider actions, Trash, audit, targeted verification, recovery tests, and fresh notarized distribution are verified |
 | 3 — Runtimes | Completed | Evidence-gated runtime checks, owned process lifecycle, tool definitions, automated gates, and fresh notarized distribution are verified |
 | 4 — Integrations | Completed | Native menu bar, independent login item, reviewed OpenClaw/Unsloth handoffs, manual UI evidence, and notarized distribution evidence are verified |
-| 5 — Stable Public Release | Implemented | Public v0.4.2, Pages, protected release environment, notarized DMG, SBOM, checksum, attestation, and 2026-08-30 security disposition are verified; 2026-09-05 artifact/history review passes |
+| 5 — Stable Public Release | Implemented | Public v0.4.3, exact-source CI, protected release workflow, checksums, attestation and Homebrew tap are verified in the 2026-09-08 audit; history review is recorded on 2026-09-05; the normative/manual-gate disposition remains unresolved |
 | 6 — MLX Support | Implemented | Compiled read-only MLX-LM storage inventory is verified; runtime remains deliberately blocked by the interpreter/package trust gate in ADR-028 |
 
 The normative scope and acceptance criteria are in
@@ -28,5 +28,10 @@ an `.mlx` suffix is not an inventory adapter and Python execution introduces a s
 interpreter/package boundary. The storage-only implementation and its evidence are recorded
 in [Phase 6 Acceptance](phase-6-acceptance.md). No later shipping phase is
 committed; later ideas remain backlog until separately accepted.
-VoiceOver output verification and final brand/trademark disposition are tracked as
-future/backlog work, not phase-gate items.
+VoiceOver output verification and final brand/trademark disposition are currently listed
+as backlog in the acceptance document, while REQUIREMENTS.md still calls them release
+gates. Phase 5 stays Implemented until this discrepancy is explicitly resolved.
+
+The first follow-on adapter is [LM Studio read-only GGUF inventory](integrations/lm-studio.md),
+implemented in this checkout and not yet released. Remaining roles are recorded in the
+[versioned integration catalog](integrations/catalog.json).

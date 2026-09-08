@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "reviewedAt": "2026-09-08",
+  "entries": [
+    {
+      "id": "lm-studio",
+      "name": "LM Studio",
+      "roles": ["storage", "runtime"],
+      "projectURL": "https://lmstudio.ai/",
+      "documentationURL": "https://lmstudio.ai/docs/app/advanced/import-model",
+      "platformEvidenceURL": "https://lmstudio.ai/docs/app/system-requirements",
+      "platformStatus": "Apple Silicon; macOS 14+ documented",
+      "capabilities": {"storage": "read-only GGUF import layout", "runtime": "planned"},
+      "detectionConvention": "User-approved models root; publisher/model/file.gguf and validated GGUF v2/v3 header. No API discovery.",
+      "evidenceStatus": "compiled storage adapter with synthetic contract tests; provider runtime unverified",
+      "fallback": "Unknown and issue for unrecognized layout, split GGUF, or Safetensors; incomplete for recognized partial artifacts"
+    },
+    {
+      "id": "gpt4all",
+      "name": "GPT4All",
+      "roles": ["storage", "runtime"],
+      "projectURL": "https://www.nomic.ai/gpt4all",
+      "documentationURL": "https://docs.gpt4all.io/gpt4all_desktop/models.html",
+      "platformEvidenceURL": "https://docs.gpt4all.io/gpt4all_help/faq.html",
+      "platformStatus": "macOS and Apple Silicon Metal documented",
+      "capabilities": {"storage": "planned", "runtime": "planned"},
+      "detectionConvention": "Explicit desktop download directory or Python SDK model path; remote catalog membership is not local installation evidence.",
+      "evidenceStatus": "official documentation reviewed; local provider-index and API contract fixtures pending",
+      "fallback": "Manual folder inventory only; no GPT4All ownership or runtime attribution"
+    },
+    {
+      "id": "jan",
+      "name": "Jan",
+      "roles": ["storage", "runtime"],
+      "projectURL": "https://jan.ai/",
+      "documentationURL": "https://www.jan.ai/docs/desktop/data-folder",
+      "platformEvidenceURL": "https://www.jan.ai/docs/desktop/install/mac",
+      "platformStatus": "macOS and Apple Silicon documented",
+      "capabilities": {"storage": "planned", "runtime": "planned"},
+      "detectionConvention": "Configurable Jan data root, llamacpp/models and mlx/models, model.yml metadata; legacy model.json assumptions are insufficient.",
+      "evidenceStatus": "official documentation reviewed; versioned YAML, partial-download and API contract fixtures pending",
+      "fallback": "Manual folder inventory only; no Jan ownership or runtime attribution"
+    },
+    {
+      "id": "localai",
+      "name": "LocalAI",
+      "roles": ["runtime"],
+      "projectURL": "https://localai.io/",
+      "documentationURL": "https://localai.io/docs/getting-started/",
+      "platformEvidenceURL": "https://localai.io/docs/reference/binaries/",
+      "platformStatus": "Native macOS ARM64 binaries documented; backend-specific validation required",
+      "capabilities": {"runtime": "planned"},
+      "detectionConvention": "Explicit numeric loopback endpoint, reviewed model mapping and separate provider/process identity. OpenAI API compatibility does not identify LocalAI.",
+      "evidenceStatus": "official documentation reviewed; health, model-list, authentication and ownership fixtures pending",
+      "fallback": "Unsupported runtime; no automatic probing, launch, installation or Stop"
+    },
+    {
+      "id": "open-webui",
+      "name": "Open WebUI",
+      "roles": ["client"],
+      "projectURL": "https://openwebui.com/",
+      "documentationURL": "https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/",
+      "platformEvidenceURL": "https://docs.openwebui.com/getting-started/quick-start/",
+      "platformStatus": "macOS host documented; browser client independent of inference hardware",
+      "capabilities": {"client": "planned"},
+      "detectionConvention": "Explicit local UI endpoint and verified provider/model mapping; a connection does not imply local model ownership.",
+      "evidenceStatus": "official documentation reviewed; authenticated handoff and model-mapping fixtures pending",
+      "fallback": "Unsupported handoff; never a storage source or an owned inference process"
+    }
+  ]
+}

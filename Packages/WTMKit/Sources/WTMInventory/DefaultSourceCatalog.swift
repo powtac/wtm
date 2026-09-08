@@ -3,7 +3,7 @@ import WTMDomain
 
 /// Built-in source suggestions. Suggestions are deliberately disabled until the user approves them.
 public struct DefaultSourceCatalog: Sendable {
-  public static let version = 2
+  public static let version = 3
 
   public init() {}
 
@@ -35,6 +35,12 @@ public struct DefaultSourceCatalog: Sendable {
         displayName: "Models Folder",
         providerID: .manual,
         rootURL: homeDirectory.appending(path: ".models", directoryHint: .isDirectory)
+      ),
+      ScanSource(
+        id: "default:lm-studio",
+        displayName: "LM Studio",
+        providerID: .lmStudio,
+        rootURL: homeDirectory.appending(path: ".lmstudio/models", directoryHint: .isDirectory)
       ),
     ]
   }

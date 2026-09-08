@@ -2,6 +2,7 @@ import ActionHuggingFace
 import ActionManual
 import ActionOllama
 import AdapterHuggingFace
+import AdapterLMStudio
 import AdapterMLX
 import AdapterManual
 import AdapterOllama
@@ -24,6 +25,7 @@ enum AppComposition {
       OllamaStorageAdapter(),
       try HuggingFaceStorageAdapter(),
       MLXStorageAdapter(),
+      LMStudioStorageAdapter(),
       ManualFolderAdapter(),
     ])
     let coordinator = registry.map { InventoryCoordinator(registry: $0) }
