@@ -1,5 +1,11 @@
 # Release review — 2026-09-05
 
+> Scope update — 2026-09-09: VoiceOver and brand/trademark work were subsequently
+> removed from release gates by the project owner; see [backlog.md](../../backlog.md)
+> and [ADR-031](../decisions/ADR-031-deferred-manual-acceptance.md). The findings and
+> gate classifications below record the scope at the time of this audit.
+
+
 Historical v0.4.2 evidence. See the [2026-09-08 follow-up](release-review-2026-09-08.md)
 for v0.4.3. Screenshot work was subsequently cancelled by the user; the attempts below
 do not represent an outstanding capture task or an accepted screenshot set.

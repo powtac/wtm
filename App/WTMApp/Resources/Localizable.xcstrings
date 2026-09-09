@@ -1,6 +1,106 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "connection.configure" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure local connection"
+          }
+        }
+      }
+    },
+    "connection.explanation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter the local service URL and its exact model ID for this installation. Saving does not contact or start the service. The mapping is user-supplied; it does not prove provider or file identity."
+          }
+        }
+      }
+    },
+    "connection.endpoint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Endpoint (http://127.0.0.1:port)"
+          }
+        }
+      }
+    },
+    "connection.model" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Model ID in the service"
+          }
+        }
+      }
+    },
+    "connection.save" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save connection"
+          }
+        }
+      }
+    },
+    "connection.disconnect" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnect"
+          }
+        }
+      }
+    },
+    "connection.error" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection could not be saved. Use a numeric-loopback HTTP URL with an explicit port, no path or credentials, and a nonempty model ID."
+          }
+        }
+      }
+    },
+    "connection.saved" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection saved. Check or prepare a handoff to continue."
+          }
+        }
+      }
+    },
+    "connection.browser-url" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browser destination"
+          }
+        }
+      }
+    },
+    "client.preview.browser-detail" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This opens the configured local WebUI in your browser with the selected model ID. No prompt is submitted. Browser sign-in and provider configuration remain in Open WebUI."
+          }
+        }
+      }
+    },
     "·" : {
 
     },

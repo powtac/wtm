@@ -3,7 +3,7 @@ import WTMDomain
 
 /// Built-in source suggestions. Suggestions are deliberately disabled until the user approves them.
 public struct DefaultSourceCatalog: Sendable {
-  public static let version = 3
+  public static let version = 4
 
   public init() {}
 
@@ -42,6 +42,14 @@ public struct DefaultSourceCatalog: Sendable {
         providerID: .lmStudio,
         rootURL: homeDirectory.appending(path: ".lmstudio/models", directoryHint: .isDirectory)
       ),
+      ScanSource(
+        id: "default:gpt4all", displayName: "GPT4All", providerID: .gpt4All,
+        rootURL: homeDirectory.appending(
+          path: "Library/Application Support/nomic.ai/GPT4All", directoryHint: .isDirectory)),
+      ScanSource(
+        id: "default:jan", displayName: "Jan", providerID: .jan,
+        rootURL: homeDirectory.appending(
+          path: "Library/Application Support/Jan/data", directoryHint: .isDirectory)),
     ]
   }
 }

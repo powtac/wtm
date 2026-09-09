@@ -13,7 +13,7 @@
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg)
+**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.5.0/WTM-0.5.0-arm64.dmg)
 
 ## ✨ Features
 
@@ -52,7 +52,9 @@ See [Requirements (German, normative)](REQUIREMENTS.md) and the
 
 The current build adds explicit runtime verification, a passive menu bar inventory,
 reviewed OpenClaw and Unsloth handoffs, and opt-in read-only MLX-LM storage discovery.
-The unreleased checkout additionally supports [LM Studio GGUF inventory](docs/integrations/lm-studio.md).
+Version 0.5.0 adds [LM Studio GGUF inventory](docs/integrations/lm-studio.md).
+The unreleased checkout adds GPT4All and Jan storage, LocalAI runtime tests, and Open WebUI
+browser handoff; scope and limitations are in the [integration catalog](docs/integrations/catalog.json).
 The [integration catalog](docs/integrations/catalog.json) distinguishes implemented and planned roles.
 
 The [product glossary](docs/glossary.md) defines the app's UI sections and canonical
@@ -145,20 +147,20 @@ Apache License 2.0. Test fixtures are generated placeholders and contain no mode
 
 ### Manual
 
-Download the current [WTM 0.4.3 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg),
+Download the current [WTM 0.5.0 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.5.0/WTM-0.5.0-arm64.dmg),
 verify it as shown below, then open the `.dmg` and drag `WTM.app` to `Applications`. WTM
 requires macOS 15 or later on Apple Silicon.
 
 Verify the downloaded DMG before opening it:
 
 ```sh
-curl -fLO "https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3-arm64.dmg"
-curl -fL "https://github.com/powtac/wtm/releases/download/v0.4.3/WTM-0.4.3.sha256" -o checksums.sha256
+curl -fLO "https://github.com/powtac/wtm/releases/download/v0.5.0/WTM-0.5.0-arm64.dmg"
+curl -fL "https://github.com/powtac/wtm/releases/download/v0.5.0/WTM-0.5.0.sha256" -o checksums.sha256
 shasum -a 256 --ignore-missing -c checksums.sha256
 ```
 
 The checksum manifest must be in the same directory as the downloaded DMG. The commands
-above are pinned to the current public `v0.4.3` release.
+above are pinned to the current public `v0.5.0` release.
 
 ### Homebrew Cask
 

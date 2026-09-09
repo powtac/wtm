@@ -8,9 +8,11 @@ The [current adapter implementations](../Packages/WTMKit/Sources/) are the sourc
 for the adapters shipped by this checkout.
 
 The [versioned integration catalog](integrations/catalog.json) records the first-wave
-research and capability status. This checkout adds [LM Studio read-only GGUF inventory](integrations/lm-studio.md).
-GPT4All, Jan, LocalAI and Open WebUI still require their provider contract fixtures and
-implementations; listing them does not enable capabilities.
+capability status. LM Studio GGUF inventory shipped in v0.5.0. This checkout adds
+[GPT4All](integrations/gpt4all.md) and [Jan](integrations/jan.md) read-only storage,
+[LocalAI](integrations/localai.md) provider-managed runtime tests, and
+[Open WebUI](integrations/open-webui.md) browser handoff. These four additions are unreleased;
+their remaining roles are explicitly listed as planned.
 
 ## Adapter types
 
@@ -48,7 +50,7 @@ shared, unknown-ownership, credential, identity, and secret-like files. See
 ### Runtime adapter
 
 Provider-specific readiness, immutable test plans, local health verification, and minimal
-model inference. Phase 3 ships two compiled runtime adapters:
+model inference. Phase 3 introduced two compiled runtime adapters:
 
 - Ollama uses `/api/tags`, `/api/ps`, and a bounded non-streaming `/api/generate` request on
   numeric loopback. It does not expose Stop because the daemon does not provide a
@@ -56,6 +58,10 @@ model inference. Phase 3 ships two compiled runtime adapters:
 - llama.cpp accepts GGUF installations and produces a reviewed `llama-server` plan bound to
   `127.0.0.1`, an allocated port, and one exact model path. `RuntimeBroker`, not the adapter,
   starts and stops the owned process.
+
+LocalAI adds opt-in health, exact model-list and one-token inference checks against an
+explicitly configured loopback service. User model mappings do not prove provider/file
+identity; authentication, server launch and Stop are unavailable.
 
 Runtime adapters never receive shell strings and never launch processes directly. They
 return typed plans to the central broker. Compatibility, health, inference, and ownership
@@ -82,7 +88,11 @@ executable, interpreter, and script identities immediately before direct process
   and Cloudflare disabled. It does not install packages, orchestrate training, or expose a
   public endpoint.
 
-Client adapters receive no shell or Terminal authority. Their processes are WTM-owned,
+Open WebUI uses a separate browser strategy: the broker validates the previewed numeric-loopback
+URL and exactly one model-selection parameter before the app opens it in the browser. It
+requires fresh inference evidence, starts no process, and does not submit a prompt.
+
+Client adapters receive no shell or Terminal authority. Processes started by WTM are WTM-owned,
 bounded, redacted, ephemeral, and terminated during bounded app shutdown. See
 [ADR-026](decisions/ADR-026-passive-menu-bar-and-reviewed-client-handoffs.md).
 

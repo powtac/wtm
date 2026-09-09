@@ -392,12 +392,13 @@ func defaultSourcesAreSafeAndDeterministic() {
   let home = testHomeURL
   let sources = DefaultSourceCatalog().suggestions(homeDirectory: home)
 
-  #expect(DefaultSourceCatalog.version == 3)
+  #expect(DefaultSourceCatalog.version == 4)
   #expect(
     sources.map(\.id)
       == [
-        "default:ollama", "default:hugging-face", "default:unsloth", "default:models",
-        "default:lm-studio",
+        "default:ollama", "default:hugging-face",
+        "default:unsloth", "default:models",
+        "default:lm-studio", "default:gpt4all", "default:jan",
       ]
   )
   #expect(sources[2].rootURL.path == home.appending(path: ".unsloth").path)

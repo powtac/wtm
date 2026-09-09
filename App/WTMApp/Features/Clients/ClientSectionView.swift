@@ -39,6 +39,10 @@ private struct ClientAdapterRowView: View {
         .accessibilityLabel(Text("Prepare handoff to \(clientID.displayName)"))
         .accessibilityValue(Text(availability.summary))
       }
+      if model.localServices[clientID.rawValue] != nil {
+        LocalConnectionEditor(
+          model: model, serviceID: clientID.rawValue, installationID: installation.id)
+      }
       Text(availability.summary)
         .font(.caption)
         .foregroundStyle(availability.isAvailable ? Color.secondary : Color.orange)
@@ -49,6 +53,7 @@ private struct ClientAdapterRowView: View {
 extension ClientAdapterID {
   var displayName: String {
     switch self {
+    case .openWebUI: "Open WebUI"
     case .openClaw: "OpenClaw"
     case .unsloth: "Unsloth Studio"
     default: rawValue

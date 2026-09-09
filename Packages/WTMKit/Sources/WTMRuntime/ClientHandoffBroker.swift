@@ -141,6 +141,28 @@ public actor ClientHandoffBroker {
     return makeSnapshot(sessionID: sessionID)
   }
 
+  /// Validates the exact browser destination immediately before the application opens it.
+  public func browserURL(plan: ClientHandoffPlan, installation: ModelInstallation) throws -> URL {
+    guard plan.expiresAt > .now else { throw ClientHandoffBrokerError.expiredPlan }
+    guard plan.installationID == installation.id else {
+      throw ClientHandoffBrokerError.installationMismatch
+    }
+    try LocalModelConnectionPolicy().validate(
+      LocalModelConnection(endpoint: plan.endpoint, modelReference: plan.modelReference))
+    guard case .openURL(let url) = plan.strategy,
+      var components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+      components.queryItems == [URLQueryItem(name: "model", value: plan.modelReference)],
+      components.fragment == nil, components.path == "/"
+    else { throw ClientHandoffBrokerError.invalidEndpoint }
+    components.queryItems = nil
+    guard var base = URLComponents(url: plan.endpoint, resolvingAgainstBaseURL: false) else {
+      throw ClientHandoffBrokerError.invalidEndpoint
+    }
+    base.path = "/"
+    guard components.url == base.url else { throw ClientHandoffBrokerError.invalidEndpoint }
+    return url
+  }
+
   public func stopAllOwned() async {
     let activeProcesses = sessions.values.compactMap { session in
       session.exitStatus == nil ? session.process : nil

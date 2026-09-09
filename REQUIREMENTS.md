@@ -12,7 +12,7 @@
 | Öffentliche Inhalte | Englisch; einzige Ausnahme ist dieses normative deutsche `REQUIREMENTS.md` |
 | Normativer Stil | MUST / SHOULD / MAY gemäß RFC 2119 und RFC 8174 |
 
-> Akzeptierter Entwicklungsname: **What The Model**. **WTM** ist der Kurzname; Produktkategorie und Untertitel: **Local LLM Inventory for macOS**. Der Entwicklungsname ist keine markenrechtliche Freigabe. Der Public-Release-Name bleibt vom Gate in Abschnitt 11.7 abhängig.
+> Akzeptierter Entwicklungsname: **What The Model**. **WTM** ist der Kurzname; Produktkategorie und Untertitel: **Local LLM Inventory for macOS**.
 
 > **Sprachentscheidung:** Dieses deutschsprachige `REQUIREMENTS.md` ist die normative Produktspezifikation und wird im GitHub-Repository versioniert. App, Website, README, technische Dokumentation, ADRs, Issues, Pull Requests, Releases und Community-Kommunikation bleiben vollständig Englisch. Eine zweite normative englische Requirements-Kopie wird nicht gepflegt.
 
@@ -108,6 +108,7 @@ Lokale Installationen dienen ausschließlich als Test- und Nutzungsumgebung. Pfa
 | [ADR-012](docs/decisions/ADR-012-data-only-extension-manifests.md) | Nutzererweiterungen sind schema-validierte Daten, kein nachladbarer Code | Konfigurierbarkeit darf keine neue Capability oder Codeausführung definieren. |
 | [ADR-013](docs/decisions/ADR-013-github-native-delivery.md) | GitHub-native Entwicklung und Distribution | Issues, Pull Requests, Actions, Releases, Security und Pages bilden den öffentlichen Projektworkflow. |
 | [ADR-014](docs/decisions/ADR-014-private-first-public-ready.md) | Private-first, public-ready | Private Historie darf eine spätere Veröffentlichung nicht blockieren. |
+| [ADR-031](docs/decisions/ADR-031-deferred-manual-acceptance.md) | Abgrenzung optionaler Abnahmen | Zurückgestellte Arbeiten liegen außerhalb der verbindlichen Release-Gates. |
 | [ADR-015](docs/decisions/ADR-015-product-language-policy.md) | English-only Product mit deutscher Requirements-Ausnahme | App und öffentliche Inhalte sind Englisch; ausschließlich dieses normative Dokument bleibt Deutsch. |
 | [ADR-016](docs/decisions/ADR-016-consent-bound-sources-and-volume-identity.md) | Quellen sind zustimmungsgebunden und über Volume-ID plus relativen Pfad abgesichert | Pfadstrings allein sind weder Autorisierung noch stabile Datenträgeridentität. |
 | [ADR-017](docs/decisions/ADR-017-streaming-full-rescan-generations.md) | Launch-Scan und Rescan sind gestreamte, voneinander isolierte Full-Scan-Generationen | Frühe Ergebnisse dürfen keine Duplikate oder verspätete Events alter Scans erzeugen. |
@@ -565,6 +566,9 @@ Die folgende Liste ist eine priorisierte Research- und Integrations-Backlog, kei
 | Client / UI | AnythingLLM | [anythingllm.com](https://anythingllm.com/) | [AnythingLLM Docs](https://docs.anythingllm.com/) | Mittlere Priorität als Workspace-/RAG-Client mit LocalAI-, LM-Studio-, Ollama- und KoboldCpp-Anbindungen. |
 | Client / UI | Continue | [continue.dev](https://www.continue.dev/) | [Model providers](https://docs.continue.dev/customize/models) | Mittlere Priorität als Entwicklerclient; lokale Modelle werden über Provider-/Endpoint-Konfiguration referenziert. |
 
+Die explizite lokale Dienstkonfiguration und Browser-Übergabe sind in
+[ADR-030](docs/decisions/ADR-030-explicit-local-service-connections.md) konkretisiert.
+
 - **FR-FUT-008 (P1):** Die erste zukünftige Implementierungswelle SHOULD LM Studio, GPT4All, Jan, LocalAI und Open WebUI abdecken; llamafile, KoboldCpp, TextGen und LiteLLM folgen als klar abgegrenzte Runtime-/Gateway-Kandidaten.
 - **FR-FUT-009 (P1):** vLLM und SGLang werden wegen ihrer Serverrelevanz beobachtet, aber erst nach nachgewiesener Apple-Silicon-Tauglichkeit als lokale WTM-Runtime priorisiert. TGI erhält wegen Maintenance Mode keinen neuen macOS-Supportpfad ohne neue offizielle Lagebewertung.
 - **FR-FUT-010 (P0):** Jeder zukünftige Adapter benötigt eigene Fixtures, Contract Tests, Capability-Matrix, Security Review und eine dokumentierte Rückfallklasse; eine Katalogaufnahme allein ist kein Implementierungs- oder Release-Gate.
@@ -621,15 +625,13 @@ Die englischen Produktbegriffe sind normativ: `Stored` bezeichnet Datenträgerpr
 
 ### 11.4 Accessibility
 
-- Vollständig mit VoiceOver und Tastatur bedienbar.
+- Vollständig mit Tastatur bedienbar.
 - Fokusreihenfolge entspricht visueller Hierarchie.
-- VoiceOver-Reihenfolge und Gruppierung MUST Sidebar-Scope, Collection-Aktionen und Auswahlaktionen als getrennte Bereiche vermitteln.
 - Keine ausschließlich farbcodierten Zustände.
 - Dynamische Systemschrift, ausreichender Kontrast und Unterstützung von Reduce Motion/Transparency.
 - Custom Icons benötigen Accessibility-Labels; dekorative Elemente werden ausgeblendet.
-- VoiceOver kündigt Scanstart, Quellenwechsel, Abbruch, Abschluss und blockierende Fehler an, aber nicht jede gelesene Datei. Wiederholte Fortschrittsmeldungen werden gedrosselt.
 - Klickziele erfüllen Apples macOS-Mindestgrößen; destruktive Primäraktionen erhalten ausreichenden Abstand.
-- Accessibility Inspector und VoiceOver-Test sind Release-Gates.
+- Accessibility Inspector ist ein Release-Gate.
 
 ### 11.5 Logo und App Icon
 
@@ -835,7 +837,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 
 ### 15.2 Manuelle Release-Gates
 
-- VoiceOver und Accessibility Inspector ohne kritische Befunde.
+- Accessibility Inspector ohne kritische Befunde.
 - Light/Dark, reduzierte Bewegung, hohe Kontraste und verschiedene Systemsprachen.
 - Getrenntes externes Volume, offline Volume, Read-only-Quelle und gebrochene Symlinks.
 - Mehrere zusätzliche HDDs/SSDs, Unmount während eines Scans und Wiedererkennung nach erneutem Mounten.
@@ -848,7 +850,7 @@ Die App darf `nicht erkannt`, `nicht installiert`, `nicht kompatibel`, `nicht ge
 - Erster Start mit Empty State und `Start Scan`, Folgestart ohne früheren Modellbestand und mit vollständigem Auto-Scan sowie deaktivierter Launch-Scan-Einstellung.
 - Prominente Scan-/Rescan- und Filteraktionen im Listenbereich ohne Auswahl; getrennte Finder- und Cleanup-Aktionen im rechten Detailbereich mit und ohne ausgewähltes Modell.
 - Null Treffer durch Sidebar, Suche und strukturierte Filter zeigen `No Models Match This View`; `Show All Models` stellt das vorhandene Inventar ohne erneuten Scan wieder dar.
-- Aktiver Scan mit Text, Fortschrittsindikator, wechselnden Quellen, gekürzten Home-/Volume-Pfaden, VoiceOver-Ausgabe und funktionierendem `Cancel Scan`.
+- Aktiver Scan mit Text, Fortschrittsindikator, wechselnden Quellen, gekürzten Home-/Volume-Pfaden und funktionierendem `Cancel Scan`.
 - Settings-Erweiterungen, Reset auf Defaults, ungültige/neue Schemas und Export ohne persönliche Pfade.
 - Settings-Aufruf über Sidebar-Footer, App-Menü und `Command-,`; alle drei Wege öffnen dasselbe native Settings-Fenster und verändern keinen Inventarfilter.
 - Gatekeeper-Test auf sauberem Mac-Benutzerkonto.
@@ -940,7 +942,7 @@ Das Repository MUST enthalten:
 
 - **GH-PUB-001:** README MUST dynamische Badges für CI, Tests/Coverage, Latest Release, macOS, Swift und Lizenz enthalten. Badges verlinken auf ihre überprüfbare Quelle und dürfen keinen manuellen Fantasiestatus zeigen.
 - **GH-PUB-002:** Optionale Badges für offene Issues und Downloads sind erst nach öffentlicher Aktivierung zulässig.
-- **GH-PUB-003:** Vor Veröffentlichung MUST ein History-/Secret-/PII-Audit, Lizenzreview, Fixture-Review, Markencheck und Security Review abgeschlossen sein.
+- **GH-PUB-003:** Vor Veröffentlichung MUST ein History-/Secret-/PII-Audit, Lizenzreview, Fixture-Review und Security Review abgeschlossen sein.
 - **GH-PUB-004:** Beim Umschalten auf public werden Pages, öffentliche Issue Forms, Dependabot-/Security-Funktionen, Artifact Attestations und Community-Links in einem dokumentierten Launch-Runbook aktiviert.
 - **GH-PUB-005:** Der private Free-Plan hat begrenzte Actions-Minuten; öffentliche Standardrunner sind kostenlos. Planannahmen werden vor Aktivierung jeder kostenrelevanten Pipeline erneut geprüft und dokumentiert.
 

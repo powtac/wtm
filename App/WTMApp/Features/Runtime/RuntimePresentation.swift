@@ -65,6 +65,7 @@ extension RuntimeAdapterID {
   var localizedName: String {
     switch self {
     case .ollama: "Ollama"
+    case .localAI: "LocalAI"
     case .llamaCpp: "llama.cpp"
     default: rawValue
     }

@@ -10,6 +10,8 @@ extension ProviderID {
     case .ollama: String(localized: "provider.ollama")
     case .huggingFace: String(localized: "provider.hugging-face")
     case .mlx: String(localized: "provider.mlx")
+    case .gpt4All: "GPT4All"
+    case .jan: "Jan"
     case .lmStudio: String(localized: "provider.lm-studio")
     case .manual: String(localized: "provider.manual")
     default: rawValue

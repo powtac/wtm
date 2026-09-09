@@ -13,6 +13,7 @@ public struct RuntimeAdapterID: RawRepresentable, Hashable, Codable, Sendable,
 }
 
 extension RuntimeAdapterID {
+  public static let localAI = RuntimeAdapterID(rawValue: "localai")
   public static let ollama = RuntimeAdapterID(rawValue: "ollama")
   public static let llamaCpp = RuntimeAdapterID(rawValue: "llama-cpp")
 }

@@ -45,7 +45,8 @@ Artifact attestation is enabled only after the repository is public.
 ## Public launch
 
 Before changing visibility, run a history, secret, personal-data, fixture-license,
-trademark, and security audit. Then enable Pages, public issue forms, Dependabot, code
+and security audit. Brand/trademark disposition is tracked separately in
+[backlog.md](../backlog.md). Then enable Pages, public issue forms, Dependabot, code
 scanning, secret scanning, push protection, and artifact attestations where the GitHub plan
 supports them. Discussions and Projects remain disabled unless separately approved.
 

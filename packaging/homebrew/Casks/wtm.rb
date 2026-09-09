@@ -1,6 +1,6 @@
 cask "wtm" do
-  version "0.4.3"
-  sha256 "25654c764f1891a24e59e61cdb816cf7077f4beda7fcf1a7fecdbee8e779a1f4"
+  version "0.5.0"
+  sha256 "1b7b5400fd11de5dfd06806ddfbb567afe6d90722b8282b3b39e9a0fdeb206c1"
 
   url "https://github.com/powtac/wtm/releases/download/v#{version}/WTM-#{version}-arm64.dmg"
   name "What The Model"

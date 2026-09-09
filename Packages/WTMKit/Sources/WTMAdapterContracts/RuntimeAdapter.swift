@@ -78,9 +78,16 @@ public protocol RuntimeAdapter: Sendable {
   ) async -> RuntimeProbeResult
 
   func stopProviderInstance(_ instance: RuntimeInstance) async throws
+  func inferenceCheck(plan: RuntimeTestPlan, installation: ModelInstallation, prompt: String) async
+    -> RuntimeProbeResult
 }
 
 extension RuntimeAdapter {
+  public func inferenceCheck(plan: RuntimeTestPlan, installation: ModelInstallation, prompt: String)
+    async -> RuntimeProbeResult
+  {
+    await inferenceCheck(endpoint: plan.endpoint, installation: installation, prompt: prompt)
+  }
   public func stopProviderInstance(_ instance: RuntimeInstance) async throws {
     throw RuntimeAdapterError.providerStopUnsupported
   }

@@ -8,12 +8,14 @@ struct ClientPlanPreview: Identifiable {
 }
 
 enum ClientUIError: Error {
+  case connectionFailed
   case unavailable
   case planFailed
   case launchFailed
 
   var message: String {
     switch self {
+    case .connectionFailed: String(localized: "connection.error")
     case .unavailable: String(localized: "client.error.unavailable")
     case .planFailed: String(localized: "client.error.plan-failed")
     case .launchFailed: String(localized: "client.error.launch-failed")

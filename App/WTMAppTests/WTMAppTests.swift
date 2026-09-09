@@ -1526,3 +1526,68 @@ private final class ControlledInventoryScanner: InventoryScanning, @unchecked Se
     }
   }
 }
+
+@MainActor
+@Test("Connection edits are scoped, reject remote endpoints and invalidate previews")
+func localConnectionEditsRevalidateAndInvalidate() throws {
+  let store = try JSONLocalConnectionStore()
+  let adapter = ConnectionPreviewFixture()
+  let model = InventoryViewModel(
+    coordinator: nil, initialSources: [],
+    sourceSettingsStore: FixtureSourceSettingsStore(snapshot: nil),
+    folderSelector: NilFolderSelector(), fileRevealer: NoopFileRevealer(),
+    volumeCatalog: EmptyVolumeCatalog(),
+    clientRegistry: try ClientAdapterRegistry(adapters: [adapter]),
+    localConnections: store, localServices: [adapter.id.rawValue: adapter.displayName])
+  let installation = ageFixture(timestamp: nil)
+  let endpoint = try #require(URL(string: "http://127.0.0.1:3000"))
+  let connection = LocalModelConnection(endpoint: endpoint, modelReference: "exact-model")
+  try model.saveLocalConnection(
+    connection, serviceID: adapter.id.rawValue, installationID: installation.id)
+  model.prepareClientHandoff(adapter.id, for: installation)
+  #expect(model.clientPlanPreview != nil)
+  let remote = try #require(URL(string: "http://example.com:3000"))
+  #expect(throws: (any Error).self) {
+    try model.saveLocalConnection(
+      LocalModelConnection(endpoint: remote, modelReference: "wrong"),
+      serviceID: adapter.id.rawValue, installationID: installation.id)
+  }
+  #expect(
+    model.localConnection(serviceID: adapter.id.rawValue, installationID: installation.id)
+      == connection)
+  #expect(
+    model.localConnection(serviceID: adapter.id.rawValue, installationID: "another-model") == nil)
+  #expect(model.clientPlanPreview != nil)
+  try model.saveLocalConnection(
+    nil, serviceID: adapter.id.rawValue, installationID: installation.id)
+  #expect(model.clientPlanPreview == nil)
+  #expect(
+    model.localConnection(serviceID: adapter.id.rawValue, installationID: installation.id) == nil)
+  try model.saveLocalConnection(
+    connection, serviceID: adapter.id.rawValue, installationID: installation.id)
+  model.prepareClientHandoff(adapter.id, for: installation)
+  model.resetToDefaults()
+  #expect(model.clientPlanPreview == nil)
+  #expect(
+    model.localConnection(serviceID: adapter.id.rawValue, installationID: installation.id) == nil)
+}
+
+private struct ConnectionPreviewFixture: ClientAdapter {
+  let id = ClientAdapterID.openWebUI
+  let displayName = "Fixture"
+  let version = "1"
+  func availability(for installation: ModelInstallation, context: ClientHandoffContext)
+    -> ClientAvailability
+  {
+    .available(summary: "Fixture")
+  }
+  func makeHandoffPlan(for installation: ModelInstallation, context: ClientHandoffContext) throws
+    -> ClientHandoffPlan
+  {
+    let endpoint = try #require(URL(string: "http://127.0.0.1:3000"))
+    return ClientHandoffPlan(
+      adapterID: id, installationID: installation.id, modelReference: "exact-model",
+      createdAt: context.now, expiresAt: context.now.addingTimeInterval(60),
+      endpoint: endpoint, strategy: .openURL(endpoint))
+  }
+}

@@ -4,6 +4,24 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+### Added
+
+- Opt-in read-only GPT4All GGUF inventory and Jan `model.yml`/GGUF inventory, with
+  conservative handling of partial files, unsupported layouts, and malformed metadata.
+- LocalAI health, exact model-list and one-token inference checks using explicit local
+  endpoint/model mappings; provider launch and Stop remain unavailable.
+- Open WebUI browser handoff with a reviewed model-selection URL and fresh inference
+  evidence; browser-managed login and no automatically submitted prompt.
+- Bounded local connection settings with Reset to Defaults support, stale-preview
+  invalidation, and contract tests for
+  storage boundaries, HTTP failures, response limits, URL injection and persistence.
+
+### Changed
+
+- Move VoiceOver support/acceptance and final brand/trademark disposition out of current
+  requirements and release gates into `backlog.md`, per the project owner. Close Phase 5
+  under the revised scope without claiming the deferred checks passed.
+
 ## [0.5.0] - 2026-09-08
 
 ### Added

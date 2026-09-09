@@ -1,4 +1,5 @@
 import Foundation
+import RuntimeLocalAI
 import Synchronization
 import Testing
 
@@ -41,6 +42,59 @@ private final class RuntimeURLProtocolStub: URLProtocol, @unchecked Sendable {
 
 @Suite(.serialized)
 struct RuntimeHTTPContractTests {
+  @Test("LocalAI uses readiness, exact model-list IDs and one-token chat without credentials")
+  func localAIHTTPContract() async throws {
+    let captured = Mutex<[CapturedRuntimeRequest]>([])
+    RuntimeURLProtocolStub.handler = { request in
+      #expect(request.value(forHTTPHeaderField: "Authorization") == nil)
+      #expect(request.value(forHTTPHeaderField: "Cookie") == nil)
+      captured.withLock {
+        $0.append(
+          CapturedRuntimeRequest(
+            method: request.httpMethod ?? "GET", path: request.url?.path ?? "",
+            body: requestBody(request)))
+      }
+      let body: String
+      switch request.url?.path {
+      case "/readyz": body = "OK"
+      case "/v1/models": body = #"{"data":[{"id":"Exact-ID"}]}"#
+      default: body = #"{"choices":[{"message":{"content":"O"}}]}"#
+      }
+      return (try response(for: request, status: 200), Data(body.utf8))
+    }
+    defer { RuntimeURLProtocolStub.handler = nil }
+    let transport = try LocalAIHTTPTransport(
+      endpoint: runtimeHTTPURL(port: 8080), configuration: stubConfiguration())
+    try await transport.health()
+    #expect(try await transport.models() == ["Exact-ID"])
+    #expect(try await transport.generate(model: "Exact-ID", prompt: "OK?") == "O")
+    let requests = captured.withLock { $0 }
+    #expect(requests.map(\.path) == ["/readyz", "/v1/models", "/v1/chat/completions"])
+    let body = try #require(JSONSerialization.jsonObject(with: requests[2].body) as? [String: Any])
+    #expect(body["max_tokens"] as? Int == 1)
+    #expect(body["stream"] as? Bool == false)
+    #expect(body["model"] as? String == "Exact-ID")
+  }
+
+  @Test("LocalAI rejects authentication failures, redirects and oversized responses")
+  func localAIHTTPFailures() async throws {
+    for status in [401, 302, 500] {
+      RuntimeURLProtocolStub.handler = { request in
+        (try response(for: request, status: status), Data())
+      }
+      let transport = try LocalAIHTTPTransport(
+        endpoint: runtimeHTTPURL(port: 8080), configuration: stubConfiguration())
+      await #expect(throws: (any Error).self) { try await transport.health() }
+    }
+    RuntimeURLProtocolStub.handler = { request in
+      (try response(for: request, status: 200), Data(repeating: 65, count: 1_048_577))
+    }
+    defer { RuntimeURLProtocolStub.handler = nil }
+    let transport = try LocalAIHTTPTransport(
+      endpoint: runtimeHTTPURL(port: 8080), configuration: stubConfiguration())
+    await #expect(throws: (any Error).self) { try await transport.health() }
+  }
+
   @Test("Ollama runtime HTTP uses tags, ps, and a bounded non-streaming generate request")
   func ollamaRuntimeHTTPContract() async throws {
     let captured = Mutex<[CapturedRuntimeRequest]>([])

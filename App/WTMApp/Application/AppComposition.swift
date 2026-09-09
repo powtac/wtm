@@ -1,15 +1,20 @@
 import ActionHuggingFace
 import ActionManual
 import ActionOllama
+import AdapterGPT4All
 import AdapterHuggingFace
+import AdapterJan
 import AdapterLMStudio
 import AdapterMLX
 import AdapterManual
 import AdapterOllama
+import AppKit
 import ClientOpenClaw
+import ClientOpenWebUI
 import ClientUnsloth
 import Foundation
 import RuntimeLlamaCpp
+import RuntimeLocalAI
 import RuntimeOllama
 import WTMActions
 import WTMAdapterContracts
@@ -26,6 +31,8 @@ enum AppComposition {
       try HuggingFaceStorageAdapter(),
       MLXStorageAdapter(),
       LMStudioStorageAdapter(),
+      GPT4AllStorageAdapter(),
+      JanStorageAdapter(),
       ManualFolderAdapter(),
     ])
     let coordinator = registry.map { InventoryCoordinator(registry: $0) }
@@ -71,13 +78,25 @@ enum AppComposition {
         )
       )
     }
-    var runtimeAdapters: [any RuntimeAdapter] = [LlamaCppRuntimeAdapter()]
+    let localConnections = try? JSONLocalConnectionStore(
+      url: applicationSupportDirectory.appending(path: "local-connections.json"))
+    var runtimeAdapters: [any RuntimeAdapter] = [
+      LlamaCppRuntimeAdapter(),
+      LocalAIRuntimeAdapter(connection: {
+        localConnections?.connection(
+          serviceID: RuntimeAdapterID.localAI.rawValue, installationID: $0)
+      }),
+    ]
     if let ollamaURL, let ollamaRuntimeAdapter = try? OllamaRuntimeAdapter(endpoint: ollamaURL) {
       runtimeAdapters.append(ollamaRuntimeAdapter)
     }
     let runtimeRegistry = try? RuntimeAdapterRegistry(adapters: runtimeAdapters)
     let runtimeBroker = runtimeRegistry.map { RuntimeBroker(registry: $0) }
     let clientRegistry = try? ClientAdapterRegistry(adapters: [
+      OpenWebUIClientAdapter(connection: {
+        localConnections?.connection(
+          serviceID: ClientAdapterID.openWebUI.rawValue, installationID: $0)
+      }),
       OpenClawClientAdapter.discovered(homeDirectory: homeDirectory),
       UnslothClientAdapter.discovered(homeDirectory: homeDirectory),
     ])
@@ -127,6 +146,12 @@ enum AppComposition {
       runtimeBroker: runtimeBroker,
       clientRegistry: clientRegistry,
       clientBroker: clientBroker,
+      localConnections: localConnections,
+      localServices: [
+        RuntimeAdapterID.localAI.rawValue: "LocalAI",
+        ClientAdapterID.openWebUI.rawValue: "Open WebUI",
+      ],
+      openClientURL: { NSWorkspace.shared.open($0) },
       launchAtLoginManager: MacLaunchAtLoginManager(),
       toolSettingsStore: JSONToolSettingsStore(
         settingsURL: applicationSupportDirectory.appending(

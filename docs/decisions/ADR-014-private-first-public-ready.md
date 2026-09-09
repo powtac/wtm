@@ -2,6 +2,8 @@
 
 - Status: Accepted
 - Date: 2026-08-24
+- Partially superseded: 2026-09-09 — the trademark-review prerequisite is deferred by
+  [ADR-031](ADR-031-deferred-manual-acceptance.md); all other provisions remain applicable.
 
 ## Context
 

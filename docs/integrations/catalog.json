@@ -1,17 +1,23 @@
 {
   "schemaVersion": 1,
-  "revision": 1,
-  "reviewedAt": "2026-09-08",
+  "revision": 2,
+  "reviewedAt": "2026-09-09",
   "entries": [
     {
       "id": "lm-studio",
       "name": "LM Studio",
-      "roles": ["storage", "runtime"],
+      "roles": [
+        "storage",
+        "runtime"
+      ],
       "projectURL": "https://lmstudio.ai/",
       "documentationURL": "https://lmstudio.ai/docs/app/advanced/import-model",
       "platformEvidenceURL": "https://lmstudio.ai/docs/app/system-requirements",
       "platformStatus": "Apple Silicon; macOS 14+ documented",
-      "capabilities": {"storage": "read-only GGUF import layout", "runtime": "planned"},
+      "capabilities": {
+        "storage": "read-only GGUF import layout",
+        "runtime": "planned"
+      },
       "detectionConvention": "User-approved models root; publisher/model/file.gguf and validated GGUF v2/v3 header. No API discovery.",
       "evidenceStatus": "compiled storage adapter with synthetic contract tests; provider runtime unverified",
       "fallback": "Unknown and issue for unrecognized layout, split GGUF, or Safetensors; incomplete for recognized partial artifacts"
@@ -19,54 +25,74 @@
     {
       "id": "gpt4all",
       "name": "GPT4All",
-      "roles": ["storage", "runtime"],
+      "roles": [
+        "storage",
+        "runtime"
+      ],
       "projectURL": "https://www.nomic.ai/gpt4all",
       "documentationURL": "https://docs.gpt4all.io/gpt4all_desktop/models.html",
       "platformEvidenceURL": "https://docs.gpt4all.io/gpt4all_help/faq.html",
       "platformStatus": "macOS and Apple Silicon Metal documented",
-      "capabilities": {"storage": "planned", "runtime": "planned"},
-      "detectionConvention": "Explicit desktop download directory or Python SDK model path; remote catalog membership is not local installation evidence.",
-      "evidenceStatus": "official documentation reviewed; local provider-index and API contract fixtures pending",
-      "fallback": "Manual folder inventory only; no GPT4All ownership or runtime attribution"
+      "capabilities": {
+        "storage": "read-only GGUF inventory; unreleased",
+        "runtime": "planned"
+      },
+      "detectionConvention": "Explicit approved download root; validated GGUF v2/v3. incomplete- prefix and .incomplete suffix denote partial files. Remote .rmodel configurations are excluded.",
+      "evidenceStatus": "GPT4All v3.10.0 source convention reviewed; synthetic header, partial, legacy, shared-identity and symlink contract tests pass",
+      "fallback": "Legacy .bin and split GGUF remain Unknown; no runtime, deletion or remote-config capability"
     },
     {
       "id": "jan",
       "name": "Jan",
-      "roles": ["storage", "runtime"],
+      "roles": [
+        "storage",
+        "runtime"
+      ],
       "projectURL": "https://jan.ai/",
       "documentationURL": "https://www.jan.ai/docs/desktop/data-folder",
       "platformEvidenceURL": "https://www.jan.ai/docs/desktop/install/mac",
       "platformStatus": "macOS and Apple Silicon documented",
-      "capabilities": {"storage": "planned", "runtime": "planned"},
-      "detectionConvention": "Configurable Jan data root, llamacpp/models and mlx/models, model.yml metadata; legacy model.json assumptions are insufficient.",
-      "evidenceStatus": "official documentation reviewed; versioned YAML, partial-download and API contract fixtures pending",
-      "fallback": "Manual folder inventory only; no Jan ownership or runtime attribution"
+      "capabilities": {
+        "storage": "read-only model.yml and GGUF inventory; unreleased",
+        "runtime": "planned"
+      },
+      "detectionConvention": "Approved Jan data root; llamacpp/models only. Bounded flat model.yml scalar subset binds same-directory GGUF path and expected size.",
+      "evidenceStatus": "Official data-folder schema reviewed 2026-09-09; synthetic manifest, malformed header, missing weights, traversal and unsupported YAML tests pass",
+      "fallback": "Unknown or issue for unsupported manifests and incomplete weights; legacy JSON, advanced YAML and Jan MLX layout unsupported"
     },
     {
       "id": "localai",
       "name": "LocalAI",
-      "roles": ["runtime"],
+      "roles": [
+        "runtime"
+      ],
       "projectURL": "https://localai.io/",
-      "documentationURL": "https://localai.io/docs/getting-started/",
+      "documentationURL": "https://localai.io/docs/basics/troubleshooting/",
       "platformEvidenceURL": "https://localai.io/docs/reference/binaries/",
       "platformStatus": "Native macOS ARM64 binaries documented; backend-specific validation required",
-      "capabilities": {"runtime": "planned"},
-      "detectionConvention": "Explicit numeric loopback endpoint, reviewed model mapping and separate provider/process identity. OpenAI API compatibility does not identify LocalAI.",
-      "evidenceStatus": "official documentation reviewed; health, model-list, authentication and ownership fixtures pending",
-      "fallback": "Unsupported runtime; no automatic probing, launch, installation or Stop"
+      "capabilities": {
+        "runtime": "explicit provider-managed GGUF test; unreleased"
+      },
+      "detectionConvention": "User supplies numeric-loopback root endpoint and exact model ID per installation. /readyz and /v1/models establish unauthenticated reachability; one-token /v1/chat/completions separately checks inference.",
+      "evidenceStatus": "Synthetic adapter and HTTP contracts pass, including stale mapping, auth/status failure and bounded response; live LocalAI backend not verified",
+      "fallback": "No implicit endpoint, provider identity, file identity, auth secrets, launch, download or Stop; unsupported configurations fail closed"
     },
     {
       "id": "open-webui",
       "name": "Open WebUI",
-      "roles": ["client"],
+      "roles": [
+        "client"
+      ],
       "projectURL": "https://openwebui.com/",
-      "documentationURL": "https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/",
+      "documentationURL": "https://docs.openwebui.com/features/chat-conversations/chat-features/url-params/",
       "platformEvidenceURL": "https://docs.openwebui.com/getting-started/quick-start/",
       "platformStatus": "macOS host documented; browser client independent of inference hardware",
-      "capabilities": {"client": "planned"},
-      "detectionConvention": "Explicit local UI endpoint and verified provider/model mapping; a connection does not imply local model ownership.",
-      "evidenceStatus": "official documentation reviewed; authenticated handoff and model-mapping fixtures pending",
-      "fallback": "Unsupported handoff; never a storage source or an owned inference process"
+      "capabilities": {
+        "client": "reviewed browser model-selection handoff; unreleased"
+      },
+      "detectionConvention": "User supplies local UI root and model reference. Fresh WTM inference evidence for the installation is required; reviewed browser URL has exactly one encoded model parameter.",
+      "evidenceStatus": "Synthetic freshness, URL injection, expiration and broker validation tests pass; live authenticated WebUI session not verified",
+      "fallback": "Browser manages login; UI/backend mapping remains user-supplied. No auto-submitted prompt, storage ownership, server launch or process Stop"
     }
   ]
 }

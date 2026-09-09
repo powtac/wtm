@@ -11,6 +11,33 @@ accounting. Unknown candidates keep a provider ID with no deletion adapter, prev
 fallback from granting manual cleanup. Contract tests cover malformed files and path
 escapes; no claim of full tensor validation or LM Studio runtime verification is made.
 
+## First-wave adapter boundary review — 2026-09-09
+
+GPT4All and Jan add no mutation, network or process authority. GPT4All ignores remote
+`.rmodel` configurations, including possible credentials; partial markers and legacy/split
+weights cannot become complete GGUF installations. Jan only traverses `llamacpp/models`,
+uses bounded flat metadata, and binds weight paths to enumerated same-directory entries.
+Unknown schema and path escapes fail closed; no hash or tensor verification is claimed.
+
+LocalAI requires explicit user mapping and separate health/model-list/inference evidence.
+Plans bind endpoint and model ID across preview and execution. Numeric loopback, root-only
+URLs, blocked redirects, no ambient credentials/cookies/proxies, response size and time
+limits constrain the HTTP boundary. A local listener can impersonate the API; success is
+explicitly unauthenticated and cannot prove provider ownership or scanned-file identity.
+No Stop or server-launch authority is granted.
+
+Open WebUI receives only one encoded model parameter through a broker-validated browser
+URL. Its preview cannot outlive the inference evidence; connection edits invalidate
+previews. The browser owns authentication, history and subsequent navigation. WTM does
+not verify WebUI's backend association or control browser redirects. Model IDs may appear
+in browser history; prompts and credentials are absent from the handoff.
+
+Versioned connection settings stay local, are capped at 1 MiB and contain no credential
+fields. They are not runtime evidence or exported tool manifests. Unknown versions and
+failed writes do not overwrite the prior configuration. Synthetic contract and App tests
+exercise these controls; this focused boundary review is not a new repository-wide scan.
+See [ADR-030](decisions/ADR-030-explicit-local-service-connections.md).
+
 ## Assets
 
 - User model files and provider caches

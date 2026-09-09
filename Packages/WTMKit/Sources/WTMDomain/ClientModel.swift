@@ -14,6 +14,7 @@ public struct ClientAdapterID: RawRepresentable, Identifiable, Hashable, Codable
 }
 
 extension ClientAdapterID {
+  public static let openWebUI = ClientAdapterID(rawValue: "open-webui")
   public static let openClaw = ClientAdapterID(rawValue: "openclaw")
   public static let unsloth = ClientAdapterID(rawValue: "unsloth")
 }

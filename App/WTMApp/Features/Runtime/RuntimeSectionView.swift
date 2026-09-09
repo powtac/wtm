@@ -38,6 +38,10 @@ struct RuntimeSectionView: View {
         }
       }
 
+      if model.localServices[runtimeID.rawValue] != nil {
+        LocalConnectionEditor(
+          model: model, serviceID: runtimeID.rawValue, installationID: installation.id)
+      }
       if let readiness = model.readiness(for: installation, runtimeID: runtimeID) {
         Grid(alignment: .leading, horizontalSpacing: 12, verticalSpacing: 4) {
           statusRow("runtime.integrity", value: readiness.integrity.value.displayName)

@@ -19,7 +19,7 @@ fi
 
 process_pattern='Process[[:space:]]*\('
 
-if search -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp)' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMRuntime 2>/dev/null; then
+if search -n 'import (Adapter|Action|RuntimeOllama|RuntimeLlamaCpp|RuntimeLocalAI|ClientOpenClaw|ClientUnsloth|ClientOpenWebUI)' Packages/WTMKit/Sources/WTMDomain Packages/WTMKit/Sources/WTMAdapterContracts Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMRuntime 2>/dev/null; then
   echo "Core targets must not import concrete adapters." >&2
   exit 1
 fi
@@ -40,7 +40,7 @@ if [[ -n "$process_files" && "$process_files" != "Packages/WTMKit/Sources/WTMRun
   exit 1
 fi
 
-if search -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterMLX Packages/WTMKit/Sources/AdapterLMStudio Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
+if search -n 'FileHandle\s*\(forWriting|Data\([^)]*\)\.write|FileManager\.default\.(removeItem|moveItem|replaceItem|trashItem)' App/WTMApp Packages/WTMKit/Sources/AdapterOllama Packages/WTMKit/Sources/AdapterHuggingFace Packages/WTMKit/Sources/AdapterMLX Packages/WTMKit/Sources/AdapterLMStudio Packages/WTMKit/Sources/AdapterGPT4All Packages/WTMKit/Sources/AdapterJan Packages/WTMKit/Sources/AdapterManual Packages/WTMKit/Sources/WTMInventory Packages/WTMKit/Sources/WTMSecurity; then
   echo "A source-mutation API entered the read-only inventory graph." >&2
   exit 1
 fi
@@ -60,7 +60,7 @@ network_files="$(search -l 'URLSession' Packages/WTMKit/Sources App/WTMApp || tr
 if [[ -n "$network_files" ]]; then
   while IFS= read -r network_file; do
     case "$network_file" in
-      Packages/WTMKit/Sources/ActionOllama/*|Packages/WTMKit/Sources/RuntimeOllama/*|Packages/WTMKit/Sources/RuntimeLlamaCpp/*) ;;
+      Packages/WTMKit/Sources/ActionOllama/*|Packages/WTMKit/Sources/RuntimeOllama/*|Packages/WTMKit/Sources/RuntimeLlamaCpp/*|Packages/WTMKit/Sources/RuntimeLocalAI/*) ;;
       App/WTMApp/Application/UpdateService.swift) ;;
       *)
         echo "URLSession entered an unreviewed target: $network_file" >&2

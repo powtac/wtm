@@ -106,6 +106,10 @@ final class InventoryViewModel {
   private let runtimeRegistry: RuntimeAdapterRegistry?
   private let runtimeBroker: RuntimeBroker?
   private let clientRegistry: ClientAdapterRegistry?
+  let localServices: [String: String]
+  private let localConnections: JSONLocalConnectionStore?
+  private let openClientURL: @MainActor (URL) -> Bool
+  private var localConnectionRevision = 0
   private let clientBroker: ClientHandoffBroker?
   private let launchAtLoginManager: (any LaunchAtLoginManaging)?
   private let toolSettingsStore: (any ToolSettingsStoring)?
@@ -139,6 +143,9 @@ final class InventoryViewModel {
     runtimeBroker: RuntimeBroker? = nil,
     clientRegistry: ClientAdapterRegistry? = nil,
     clientBroker: ClientHandoffBroker? = nil,
+    localConnections: JSONLocalConnectionStore? = nil,
+    localServices: [String: String] = [:],
+    openClientURL: @escaping @MainActor (URL) -> Bool = { _ in false },
     launchAtLoginManager: (any LaunchAtLoginManaging)? = nil,
     toolSettingsStore: (any ToolSettingsStoring)? = nil,
     initialToolDefinitions: [ToolDefinition] = [],
@@ -160,6 +167,9 @@ final class InventoryViewModel {
     self.runtimeBroker = runtimeBroker
     self.clientRegistry = clientRegistry
     self.clientBroker = clientBroker
+    self.localConnections = localConnections
+    self.localServices = localServices
+    self.openClientURL = openClientURL
     self.launchAtLoginManager = launchAtLoginManager
     self.toolSettingsStore = toolSettingsStore
     self.initialToolDefinitions = initialToolDefinitions
@@ -546,6 +556,7 @@ final class InventoryViewModel {
     guard let adapter = clientRegistry?.adapter(for: clientID) else {
       return .unavailable(reason: String(localized: "client.error.unavailable"))
     }
+    _ = localConnectionRevision
     return adapter.availability(for: installation, context: clientContext())
   }
 
@@ -579,16 +590,39 @@ final class InventoryViewModel {
     clientTask?.cancel()
     clientTask = Task { [weak self, clientBroker] in
       do {
-        let snapshot = try await clientBroker.start(
-          plan: preview.plan,
-          installation: preview.installation
-        )
-        self?.clientSessions[snapshot.id] = snapshot
+        if case .openURL = preview.plan.strategy {
+          let url = try await clientBroker.browserURL(
+            plan: preview.plan, installation: preview.installation)
+          guard self?.openClientURL(url) == true else { throw ClientUIError.launchFailed }
+        } else {
+          let snapshot = try await clientBroker.start(
+            plan: preview.plan, installation: preview.installation)
+          self?.clientSessions[snapshot.id] = snapshot
+        }
       } catch {
         self?.clientError = .launchFailed
       }
       self?.clientTask = nil
     }
+  }
+
+  func localConnection(serviceID: String, installationID: String) -> LocalModelConnection? {
+    _ = localConnectionRevision
+    return localConnections?.connection(serviceID: serviceID, installationID: installationID)
+  }
+
+  func saveLocalConnection(
+    _ value: LocalModelConnection?, serviceID: String, installationID: String
+  ) throws {
+    guard !isRunningRuntimeAction, !isCheckingRuntime, !isPreparingRuntime, clientTask == nil,
+      localServices[serviceID] != nil, let localConnections
+    else { throw ClientUIError.unavailable }
+    if let value { try LocalModelConnectionPolicy().validate(value) }
+    try localConnections.set(value, serviceID: serviceID, installationID: installationID)
+    localConnectionRevision += 1
+    runtimeReadiness = [:]
+    runtimePlanPreview = nil
+    clientPlanPreview = nil
   }
 
   func dismissClientError() {
@@ -889,7 +923,17 @@ final class InventoryViewModel {
   }
 
   func resetToDefaults() {
-    guard !isDeleting else { return }
+    guard !isDeleting, !isRunningRuntimeAction, !isCheckingRuntime, !isPreparingRuntime,
+      clientTask == nil
+    else { return }
+    do {
+      try localConnections?.removeAll()
+    } catch {
+      clientError = .connectionFailed
+      return
+    }
+    localConnectionRevision += 1
+    clientPlanPreview = nil
     if isScanning { cancelScan() }
 
     installations = []

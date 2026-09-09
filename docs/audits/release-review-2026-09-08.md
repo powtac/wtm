@@ -1,5 +1,11 @@
 # Release review — 2026-09-08
 
+> Scope update — 2026-09-09: VoiceOver and brand/trademark work were subsequently
+> removed from release gates by the project owner; see [backlog.md](../../backlog.md)
+> and [ADR-031](../decisions/ADR-031-deferred-manual-acceptance.md). The findings and
+> gate classifications below record the scope at the time of this audit.
+
+
 ## Published version
 
 [WTM v0.4.3](https://github.com/powtac/wtm/releases/tag/v0.4.3) was published on

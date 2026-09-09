@@ -6,6 +6,11 @@ let package = Package(
   name: "WTMKit",
   platforms: [.macOS(.v15)],
   products: [
+    .library(name: "AdapterGPT4All", targets: ["AdapterGPT4All"]),
+    .library(name: "AdapterJan", targets: ["AdapterJan"]),
+    .library(name: "RuntimeLocalAI", targets: ["RuntimeLocalAI"]),
+    .library(name: "ClientOpenWebUI", targets: ["ClientOpenWebUI"]),
+
     .library(name: "WTMDomain", targets: ["WTMDomain"]),
     .library(name: "WTMAdapterContracts", targets: ["WTMAdapterContracts"]),
     .library(name: "WTMInventory", targets: ["WTMInventory"]),
@@ -27,6 +32,14 @@ let package = Package(
     .library(name: "ActionManual", targets: ["ActionManual"]),
   ],
   targets: [
+    .target(
+      name: "AdapterGPT4All", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]),
+    .target(name: "AdapterJan", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]),
+    .target(
+      name: "RuntimeLocalAI", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]),
+    .target(
+      name: "ClientOpenWebUI", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime"]),
+
     .target(name: "WTMDomain"),
     .target(name: "WTMAdapterContracts", dependencies: ["WTMDomain"]),
     .target(name: "WTMSecurity", dependencies: ["WTMDomain"]),
@@ -109,7 +122,7 @@ let package = Package(
         "AdapterOllama",
         "AdapterHuggingFace",
         "AdapterMLX",
-        "AdapterLMStudio",
+        "AdapterLMStudio", "AdapterGPT4All", "AdapterJan",
         "AdapterManual",
         "WTMInventory",
       ],
@@ -129,14 +142,14 @@ let package = Package(
       name: "WTMRuntimeAdapterTests",
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMRuntime", "RuntimeOllama",
-        "RuntimeLlamaCpp",
+        "RuntimeLlamaCpp", "RuntimeLocalAI",
       ]
     ),
     .testTarget(
       name: "WTMClientAdapterTests",
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMRuntime", "ClientOpenClaw",
-        "ClientUnsloth",
+        "ClientUnsloth", "ClientOpenWebUI",
       ]
     ),
     .testTarget(

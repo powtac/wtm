@@ -10,13 +10,16 @@ struct ClientPlanPreviewView: View {
     VStack(alignment: .leading, spacing: 16) {
       Label("client.preview.warning", systemImage: "arrow.up.forward.app")
         .font(.title2.bold())
-      Text("client.preview.detail")
+      Text(browserHandoff ? "client.preview.browser-detail" : "client.preview.detail")
         .foregroundStyle(.secondary)
 
       Form {
         LabeledContent("client.preview.client", value: preview.clientName)
         LabeledContent("client.preview.model", value: preview.plan.modelReference)
         LabeledContent("runtime.endpoint", value: preview.plan.endpoint.absoluteString)
+        if case .openURL(let url) = preview.plan.strategy {
+          LabeledContent("connection.browser-url", value: url.absoluteString)
+        }
         if case .executable(let handoff) = preview.plan.strategy {
           LabeledContent("runtime.plan.path", value: handoff.invocation.executableURL.path)
           LabeledContent("runtime.plan.arguments") {
@@ -40,5 +43,10 @@ struct ClientPlanPreviewView: View {
     }
     .padding(24)
     .frame(width: 620)
+  }
+
+  private var browserHandoff: Bool {
+    if case .openURL = preview.plan.strategy { return true }
+    return false
   }
 }

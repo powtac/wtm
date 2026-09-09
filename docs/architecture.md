@@ -8,12 +8,12 @@ absent.
 ```text
 WTM app (composition and presentation only)
   -> WTMInventory -> WTMAdapterContracts, WTMDomain, WTMSecurity
-  -> AdapterOllama, AdapterHuggingFace, AdapterManual, AdapterMLX, AdapterLMStudio
+  -> AdapterOllama, AdapterHuggingFace, AdapterManual, AdapterMLX, AdapterLMStudio, AdapterGPT4All, AdapterJan
   -> WTMActions -> WTMAdapterContracts, WTMDomain, WTMSecurity
   -> ActionOllama, ActionHuggingFace, ActionManual
   -> WTMRuntime -> WTMAdapterContracts, WTMDomain
-  -> RuntimeOllama, RuntimeLlamaCpp
-  -> ClientOpenClaw, ClientUnsloth
+  -> RuntimeOllama, RuntimeLlamaCpp, RuntimeLocalAI
+  -> ClientOpenClaw, ClientUnsloth, ClientOpenWebUI
   -> WTMPersistence
 ```
 
@@ -55,8 +55,9 @@ distinct installation paths and volumes remain separate.
 - WTM stops only a process handle it created in the current app session. On app termination,
   it briefly delays termination to stop remaining WTM-owned processes; it never infers
   ownership from a port, process name, or model ID.
-- Captured output is bounded, redacted, and in memory only. Runtime endpoints, state,
-  sessions, and logs are not restored after relaunch.
+- Captured output is bounded, redacted, and in memory only. Observed runtime endpoints,
+  state, sessions, and logs are not restored after relaunch. Explicit user connection
+  settings persist without validation evidence under ADR-030.
 - Tool manifests use a closed versioned schema. Imports receive a new identity, are fully
   previewed, remain disabled, replace the existing override for that runtime, and inherit no
   approval. Exports are disabled and omit validation evidence and home-directory paths.
@@ -77,6 +78,17 @@ confirmation, and bounded privacy-preserving audit entries.
   evidence. Unsloth uses a reviewed API-only loopback plan with tools and public tunnels
   disabled. Neither integration installs packages or orchestrates training.
 
+## First-wave local services
+
+GPT4All and Jan are read-only, consent-bound storage adapters with no cleanup adapter.
+LocalAI checks a user-configured model ID over numeric loopback; reachability does not
+prove provider identity or file equivalence. Its plan binds the approved mapping and its
+broker grants no process ownership. Open WebUI uses a separately validated browser URL
+with exactly one model-selection parameter, no automatic prompt, and fresh inference
+evidence. The browser retains authentication responsibility. Both integrations are opt-in;
+configuration does not probe a service. See
+[ADR-030](decisions/ADR-030-explicit-local-service-connections.md).
+
 ## Deferred capability boundaries
 
 Phase 6 MLX support ships as a compiled read-only storage adapter. A Python-based runtime
@@ -88,12 +100,14 @@ capability requires a separate threat model and release decision.
 ## Persisted and ephemeral state
 
 Versioned JSON under Application Support persists only operational source settings, user
-preferences, tool definitions, and identity-bound tool approvals. Source URLs use macOS
+preferences, tool definitions, identity-bound tool approvals, and explicit local service
+connections. Connection settings contain endpoint/model references but no credentials;
+their installation IDs may include local paths and are never exported. Source URLs use macOS
 bookmark data and external-volume UUID plus relative path. A stored runtime override
 suppresses the discovered convention default for the same runtime, preventing duplicate
 tool entries after relaunch.
 
-Installations, artifacts, historical scan results, runtime sessions, endpoints, process
+Installations, artifacts, historical scan results, runtime sessions, observed endpoints, process
 handles, inference output, and runtime logs are ephemeral. Provider files and live local
 APIs remain the source of truth.
 

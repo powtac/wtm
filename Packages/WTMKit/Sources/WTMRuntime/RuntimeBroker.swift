@@ -159,7 +159,7 @@ public actor RuntimeBroker {
       var inference: RuntimeProbeResult?
       if verifyInference {
         inference = await adapter.inferenceCheck(
-          endpoint: plan.endpoint,
+          plan: plan,
           installation: installation,
           prompt: prompt
         )
