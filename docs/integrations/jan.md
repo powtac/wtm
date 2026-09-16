@@ -1,6 +1,6 @@
 # Jan storage
 
-Status: implemented in this checkout, unreleased. Runtime and cleanup are not implemented.
+Status: included in WTM 0.5.1. Runtime and cleanup are not implemented.
 
 Approve the Jan data root, suggested at `~/Library/Application Support/Jan/data`. The
 adapter walks only `llamacpp/models`; it does not inventory chats, logs or extensions.

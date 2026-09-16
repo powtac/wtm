@@ -3,6 +3,7 @@
 - Status: Accepted
 - Date: 2026-08-25
 - Amended: 2026-09-05 — align download scheduling with Requirements section 18.
+- Amended: 2026-09-09 — Phase 5 prerequisite closed under ADR-031; optional runtime gate started.
 
 ## Context
 
@@ -29,8 +30,8 @@ local development and does not itself establish WTM's product security boundary.
 - MLX storage and runtime support are removed from Phase 4. Phase 4 contains the passive
   menu bar, launch-at-login setting, and reviewed OpenClaw and Unsloth client handoffs.
 - Phase 6 becomes `MLX Support`. Its storage implementation is recorded in
-  [Phase 6 Acceptance](../phase-6-acceptance.md); final completion also depends on the
-  remaining Phase 5 gates. Model acquisition has no committed shipping phase.
+  [Phase 6 Acceptance](../phase-6-acceptance.md). Its Phase 5 prerequisite is now closed
+  under ADR-031. Model acquisition has no committed shipping phase.
 - Phase 6 is split internally into two ordered gates:
   1. a compiled, read-only MLX storage adapter with documented fixtures, explicit
      completeness evidence, configuration association, and conservative false-positive

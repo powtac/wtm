@@ -54,6 +54,31 @@ public struct RuntimePathIdentity: Hashable, Codable, Sendable {
   }
 }
 
+public struct RuntimeSealedBundle: Hashable, Codable, Sendable {
+  public let bundleURL: URL
+  public let identifier: String
+  public let codeDirectoryHash: String
+  public let executableName: String
+
+  public init(bundleURL: URL, identifier: String, codeDirectoryHash: String, executableName: String)
+  {
+    self.bundleURL = bundleURL
+    self.identifier = identifier
+    self.codeDirectoryHash = codeDirectoryHash
+    self.executableName = executableName
+  }
+}
+
+public struct RuntimeModelDirectory: Hashable, Codable, Sendable {
+  public let sourceURL: URL
+  public let resources: [RuntimePathIdentity]
+
+  public init(sourceURL: URL, resources: [RuntimePathIdentity]) {
+    self.sourceURL = sourceURL
+    self.resources = resources
+  }
+}
+
 public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
   public let executableURL: URL
   public let arguments: [String]
@@ -62,6 +87,8 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
   public let approvedIdentity: ExecutableIdentity
   public let protectedResourceIdentities: [ExecutableIdentity]
   public let protectedPathIdentities: [RuntimePathIdentity]
+  public let sealedBundle: RuntimeSealedBundle?
+  public let modelDirectory: RuntimeModelDirectory?
 
   public init(
     executableURL: URL,
@@ -70,7 +97,9 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
     environment: [String: String] = [:],
     approvedIdentity: ExecutableIdentity,
     protectedResourceIdentities: [ExecutableIdentity] = [],
-    protectedPathIdentities: [RuntimePathIdentity] = []
+    protectedPathIdentities: [RuntimePathIdentity] = [],
+    sealedBundle: RuntimeSealedBundle? = nil,
+    modelDirectory: RuntimeModelDirectory? = nil
   ) {
     self.executableURL = executableURL
     self.arguments = arguments
@@ -79,6 +108,8 @@ public struct RuntimeExecutableInvocation: Hashable, Codable, Sendable {
     self.approvedIdentity = approvedIdentity
     self.protectedResourceIdentities = protectedResourceIdentities
     self.protectedPathIdentities = protectedPathIdentities
+    self.sealedBundle = sealedBundle
+    self.modelDirectory = modelDirectory
   }
 }
 

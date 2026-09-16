@@ -1,6 +1,6 @@
 # GPT4All storage
 
-Status: implemented in this checkout, unreleased. Runtime and cleanup are not implemented.
+Status: included in WTM 0.5.1. Runtime and cleanup are not implemented.
 
 Enable the suggested `~/Library/Application Support/nomic.ai/GPT4All` source or select the
 actual download root. Only explicit source approval enables scanning. The adapter reads

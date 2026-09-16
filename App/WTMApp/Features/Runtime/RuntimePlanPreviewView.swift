@@ -33,6 +33,10 @@ struct RuntimePlanPreviewView: View {
         case .executable(let invocation):
           Section("runtime.plan.executable") {
             LabeledContent("runtime.plan.path", value: invocation.executableURL.path)
+            if let bundle = invocation.sealedBundle {
+              LabeledContent("runtime.plan.bundle-seal", value: bundle.codeDirectoryHash)
+              Text("runtime.plan.model-snapshot").font(.caption).foregroundStyle(.secondary)
+            }
             if let validation = preview.validation {
               LabeledContent("runtime.plan.signature", value: validation.signingStatus.rawValue)
               if let version = validation.version {

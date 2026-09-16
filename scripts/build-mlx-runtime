@@ -1,0 +1,18 @@
+#!/bin/zsh
+set -euo pipefail
+root="${0:A:h:h}"
+cd "$root"
+command -v uv >/dev/null
+out="$root/build/mlx-runtime"
+identity="${WTM_MLX_SIGNING_IDENTITY:--}"
+key="$(/usr/bin/shasum -a 256 runtime/mlx/requirements.lock runtime/mlx/server.py runtime/mlx/runtime.spec | /usr/bin/shasum -a 256) $identity"
+if [[ -f "$out/build-key" && "$(<"$out/build-key")" == "$key" ]] && /usr/bin/codesign --verify --deep --strict "$out/WTM MLX Runtime.app" 2>/dev/null; then
+  exit 0
+fi
+mkdir -p "$out"
+uv venv --python 3.13 "$root/build/mlx-freeze-env"
+uv pip sync --python "$root/build/mlx-freeze-env/bin/python" --require-hashes runtime/mlx/requirements.lock
+export WTM_MLX_SIGNING_IDENTITY="$identity"
+"$root/build/mlx-freeze-env/bin/python" -I -m PyInstaller --noconfirm --clean --distpath "$out" --workpath "$root/build/mlx-freeze-work" runtime/mlx/runtime.spec
+/usr/bin/codesign --verify --deep --strict "$out/WTM MLX Runtime.app"
+print -r -- "$key" > "$out/build-key"

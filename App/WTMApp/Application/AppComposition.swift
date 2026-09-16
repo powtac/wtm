@@ -15,6 +15,7 @@ import ClientUnsloth
 import Foundation
 import RuntimeLlamaCpp
 import RuntimeLocalAI
+import RuntimeMLX
 import RuntimeOllama
 import WTMActions
 import WTMAdapterContracts
@@ -82,6 +83,7 @@ enum AppComposition {
       url: applicationSupportDirectory.appending(path: "local-connections.json"))
     var runtimeAdapters: [any RuntimeAdapter] = [
       LlamaCppRuntimeAdapter(),
+      MLXRuntimeAdapter(),
       LocalAIRuntimeAdapter(connection: {
         localConnections?.connection(
           serviceID: RuntimeAdapterID.localAI.rawValue, installationID: $0)
@@ -118,7 +120,17 @@ enum AppComposition {
     #else
       discoveredLlamaCppDefinition = llamaCppConvention.discoveredDefinition()
     #endif
+    let mlxDefinition = MLXRuntimeAdapter.definition(
+      bundleURL: Bundle.main.bundleURL.appending(path: "Contents/Helpers/WTM MLX Runtime.app"))
     let runtimeToolTemplates = [
+      RuntimeToolTemplate(
+        runtimeAdapterID: .mlx, displayName: "WTM MLX Runtime",
+        defaultDefinition: mlxDefinition,
+        makeDefinition: { executable in
+          MLXRuntimeAdapter.definition(
+            bundleURL: executable.deletingLastPathComponent()
+              .deletingLastPathComponent().deletingLastPathComponent())
+        }),
       RuntimeToolTemplate(
         runtimeAdapterID: .llamaCpp,
         displayName: "llama.cpp Server",
@@ -126,7 +138,7 @@ enum AppComposition {
         makeDefinition: { executableURL in
           llamaCppConvention.definition(executableURL: executableURL, origin: .userCreated)
         }
-      )
+      ),
     ]
     return InventoryViewModel(
       coordinator: coordinator,
@@ -159,7 +171,7 @@ enum AppComposition {
           directoryHint: .notDirectory
         )
       ),
-      initialToolDefinitions: discoveredLlamaCppDefinition.map { [$0] } ?? [],
+      initialToolDefinitions: (discoveredLlamaCppDefinition.map { [$0] } ?? []) + [mlxDefinition],
       runtimeToolTemplates: runtimeToolTemplates,
       executableSelector: MacExecutableSelector(),
       toolManifestDocument: JSONToolManifestDocument()

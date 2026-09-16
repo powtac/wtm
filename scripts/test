@@ -15,6 +15,7 @@ load_local_environment "$repository_root"
 ./scripts/check-website
 ./scripts/check-release
 bash -n script/build_and_run.sh
+python3 -I -S scripts/tests/test_mlx_environment_probe.py
 swift test --package-path Packages/WTMKit
 xcodebuild \
   -project WTM.xcodeproj \

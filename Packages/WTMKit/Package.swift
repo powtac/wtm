@@ -6,6 +6,7 @@ let package = Package(
   name: "WTMKit",
   platforms: [.macOS(.v15)],
   products: [
+    .library(name: "RuntimeMLX", targets: ["RuntimeMLX"]),
     .library(name: "AdapterGPT4All", targets: ["AdapterGPT4All"]),
     .library(name: "AdapterJan", targets: ["AdapterJan"]),
     .library(name: "RuntimeLocalAI", targets: ["RuntimeLocalAI"]),
@@ -32,6 +33,9 @@ let package = Package(
     .library(name: "ActionManual", targets: ["ActionManual"]),
   ],
   targets: [
+    .target(
+      name: "RuntimeMLX",
+      dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMRuntime", "WTMSecurity"]),
     .target(
       name: "AdapterGPT4All", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]),
     .target(name: "AdapterJan", dependencies: ["WTMDomain", "WTMAdapterContracts", "WTMSecurity"]),
@@ -142,7 +146,7 @@ let package = Package(
       name: "WTMRuntimeAdapterTests",
       dependencies: [
         "WTMDomain", "WTMAdapterContracts", "WTMRuntime", "RuntimeOllama",
-        "RuntimeLlamaCpp", "RuntimeLocalAI",
+        "RuntimeLlamaCpp", "RuntimeLocalAI", "RuntimeMLX",
       ]
     ),
     .testTarget(

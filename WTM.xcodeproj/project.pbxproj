@@ -27,6 +27,7 @@
 		A00000000000000000000085 /* AdapterLMStudio in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000084 /* AdapterLMStudio */; };
 		A0000000000000000000008D /* ClientOpenWebUI in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000008C /* ClientOpenWebUI */; };
 		A0000000000000000000008B /* RuntimeLocalAI in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000008A /* RuntimeLocalAI */; };
+		A0000000000000000000008F /* RuntimeMLX in Frameworks */ = {isa = PBXBuildFile; productRef = A0000000000000000000008E /* RuntimeMLX */; };
 		A00000000000000000000089 /* AdapterJan in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000088 /* AdapterJan */; };
 		A00000000000000000000087 /* AdapterGPT4All in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000086 /* AdapterGPT4All */; };
 /* End PBXBuildFile section */
@@ -90,6 +91,7 @@
 				A00000000000000000000085 /* AdapterLMStudio in Frameworks */,
 				A0000000000000000000008D /* ClientOpenWebUI in Frameworks */,
 				A0000000000000000000008B /* RuntimeLocalAI in Frameworks */,
+				A0000000000000000000008F /* RuntimeMLX in Frameworks */,
 				A00000000000000000000089 /* AdapterJan in Frameworks */,
 				A00000000000000000000087 /* AdapterGPT4All in Frameworks */,
 				A00000000000000000000027 /* WTMActions in Frameworks */,
@@ -183,6 +185,7 @@
 				A00000000000000000000084 /* AdapterLMStudio */,
 				A0000000000000000000008C /* ClientOpenWebUI */,
 				A0000000000000000000008A /* RuntimeLocalAI */,
+				A0000000000000000000008E /* RuntimeMLX */,
 				A00000000000000000000088 /* AdapterJan */,
 				A00000000000000000000086 /* AdapterGPT4All */,
 				A00000000000000000000017 /* WTMActions */,
@@ -584,6 +587,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
 			productName = RuntimeLocalAI;
+		};
+		A0000000000000000000008E /* RuntimeMLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0000000000000000000000E /* XCLocalSwiftPackageReference "Packages/WTMKit" */;
+			productName = RuntimeMLX;
 		};
 		A00000000000000000000088 /* AdapterJan */ = {
 			isa = XCSwiftPackageProductDependency;

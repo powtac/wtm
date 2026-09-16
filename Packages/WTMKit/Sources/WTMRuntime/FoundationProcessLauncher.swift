@@ -40,8 +40,8 @@ public struct FoundationProcessLauncher: RuntimeProcessLaunching, Sendable {
     let standardError = Pipe()
     process.executableURL = staged.executableURL
     process.arguments = staged.arguments
-    process.currentDirectoryURL = invocation.currentDirectoryURL
-    process.environment = invocation.environment
+    process.currentDirectoryURL = staged.currentDirectoryURL
+    process.environment = staged.environment
     process.standardOutput = standardOutput
     process.standardError = standardError
     process.standardInput = FileHandle.nullDevice
@@ -123,6 +123,8 @@ private final class FoundationRuntimeProcessHandle: RuntimeProcessHandle, @unche
 final class StagedInvocation: @unchecked Sendable {
   let executableURL: URL
   let arguments: [String]
+  let currentDirectoryURL: URL?
+  let environment: [String: String]
   private let directoryURL: URL
   private let lock = NSLock()
   private var removed = false
@@ -143,6 +145,53 @@ final class StagedInvocation: @unchecked Sendable {
         withIntermediateDirectories: false,
         attributes: [.posixPermissions: 0o700]
       )
+      if let bundle = invocation.sealedBundle {
+        let inspector = SignedRuntimeBundleInspector()
+        try inspector.validate(bundle)
+        guard
+          invocation.executableURL
+            == bundle.bundleURL.appending(path: "Contents/MacOS/" + bundle.executableName),
+          invocation.environment.keys.allSatisfy({ ["LANG", "LC_ALL"].contains($0) }),
+          let model = invocation.modelDirectory, !model.resources.isEmpty,
+          model.resources.count <= 4096,
+          invocation.arguments.filter({ $0 == model.sourceURL.path }).count == 1
+        else { throw RuntimeProcessLaunchError.protectedResourceNotReferenced }
+        let copiedBundle = directoryURL.appending(path: "Runtime.app")
+        try FileManager.default.copyItem(at: bundle.bundleURL, to: copiedBundle)
+        try inspector.validate(bundle, at: copiedBundle)
+        let modelRoot = directoryURL.appending(path: "model")
+        try FileManager.default.createDirectory(
+          at: modelRoot, withIntermediateDirectories: false,
+          attributes: [.posixPermissions: 0o700])
+        var names = Set<String>()
+        var total: Int64 = 0
+        for resource in model.resources {
+          let name = resource.requestedURL.lastPathComponent
+          guard
+            resource.requestedURL.deletingLastPathComponent().standardizedFileURL
+              == model.sourceURL.standardizedFileURL,
+            !name.isEmpty, name != ".", name != "..", names.insert(name).inserted,
+            resource.mode & UInt32(S_IFMT) == UInt32(S_IFREG), resource.byteCount >= 0,
+            resource.byteCount <= 274_877_906_944 - total
+          else { throw RuntimeProcessLaunchError.protectedPathIdentityChanged }
+          total += resource.byteCount
+          try FileMetadataReader().validate(resource)
+          _ = try Self.copyVerified(resource, to: modelRoot.appending(path: name), mode: 0o400)
+          try FileMetadataReader().validate(resource)
+        }
+        executableURL = copiedBundle.appending(path: "Contents/MacOS/" + bundle.executableName)
+        arguments = invocation.arguments.map { $0 == model.sourceURL.path ? modelRoot.path : $0 }
+        currentDirectoryURL = directoryURL
+        environment = invocation.environment.merging([
+          "HOME": directoryURL.path, "TMPDIR": directoryURL.path,
+        ]) { _, new in new }
+        return
+      }
+      guard invocation.modelDirectory == nil else {
+        throw RuntimeProcessLaunchError.protectedResourceNotReferenced
+      }
+      currentDirectoryURL = invocation.currentDirectoryURL
+      environment = invocation.environment
       let binaryDirectory = directoryURL.appending(path: "bin", directoryHint: .isDirectory)
       try FileManager.default.createDirectory(
         at: binaryDirectory, withIntermediateDirectories: false,

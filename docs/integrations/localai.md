@@ -1,6 +1,6 @@
 # LocalAI runtime
 
-Status: implemented in this checkout, unreleased. Provider-managed tests only.
+Status: included in WTM 0.5.1. Provider-managed tests only.
 
 Select a stored GGUF installation, expand Configure Local Connection in its LocalAI section,
 and save the local API root and exact API model ID. Start LocalAI separately. Saving does

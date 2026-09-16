@@ -1,6 +1,6 @@
 # Open WebUI client
 
-Status: implemented in this checkout, unreleased. Browser handoff only.
+Status: included in WTM 0.5.1. Browser handoff only.
 
 For a stored installation, configure the local WebUI root and its exact WebUI model ID.
 Complete a WTM runtime inference test for that installation, then preview the client handoff.

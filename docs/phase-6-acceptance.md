@@ -32,7 +32,14 @@ WTM_REAL_MLX_SOURCE="$HOME/.cache/huggingface/hub" \
 
 ## Acceptance result
 
-The Phase 6 storage-only implementation is complete. Roadmap status remains `Implemented`
-until the remaining Phase 5 release gates are closed. MLX runtime is not an acceptance gap:
-FR-MLX-008 requires storage-only whenever the Python interpreter and package graph cannot be
-revalidated fail-closed.
+Phase 5 is Completed under [ADR-031](decisions/ADR-031-deferred-manual-acceptance.md);
+its former manual-gate dependency is closed. The Phase 6 storage gate is complete.
+
+On 2026-09-09 the project owner requested starting the optional Phase 6 runtime gate.
+Phase 6 is now In progress for that additional scope. The first milestone is an offline
+interpreter/package preflight and review of the upstream loading and server contracts,
+recorded in [MLX runtime gate](integrations/mlx-runtime.md).
+
+MLX execution remains unavailable until FR-MLX-004 through FR-MLX-007 are verified.
+FR-MLX-008 continues to require storage-only behavior whenever execution identity cannot be
+fully revalidated; starting this work does not waive that boundary.

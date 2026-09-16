@@ -66,6 +66,7 @@ extension RuntimeAdapterID {
     switch self {
     case .ollama: "Ollama"
     case .localAI: "LocalAI"
+    case .mlx: "MLX"
     case .llamaCpp: "llama.cpp"
     default: rawValue
     }

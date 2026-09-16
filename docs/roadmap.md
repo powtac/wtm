@@ -11,7 +11,7 @@ automated tests, manual gates, and distribution evidence are complete.
 | 3 — Runtimes | Completed | Evidence-gated runtime checks, owned process lifecycle, tool definitions, automated gates, and fresh notarized distribution are verified |
 | 4 — Integrations | Completed | Native menu bar, independent login item, reviewed OpenClaw/Unsloth handoffs, manual UI evidence, and notarized distribution evidence are verified |
 | 5 — Stable Public Release | Completed | Public v0.5.0 and its Homebrew distribution are verified in the 2026-09-09 audit; prior exact-source CI and protected release evidence are in the 2026-09-08 audit; scope revised by ADR-031; deferred acceptance work is in backlog.md |
-| 6 — MLX Support | Implemented | Compiled read-only MLX-LM storage inventory is verified; runtime remains deliberately blocked by the interpreter/package trust gate in ADR-028 |
+| 6 — MLX Support | In progress | Storage gate complete and Phase 5 dependency closed; optional runtime gate started on 2026-09-09 with offline environment and upstream contract review; execution remains disabled under ADR-028 |
 
 The normative scope and acceptance criteria are in
 [Requirements (German, normative)](../REQUIREMENTS.md). Translations are convenience
@@ -33,8 +33,8 @@ in [backlog.md](../backlog.md), removed from requirements and release gates by t
 owner on 2026-09-09. [ADR-031](decisions/ADR-031-deferred-manual-acceptance.md) records
 the revised scope; Phase 5 is Completed without claiming either deferred check passed.
 
-LM Studio read-only GGUF inventory shipped in v0.5.0. This checkout implements the remaining
+LM Studio read-only GGUF inventory shipped in v0.5.0. WTM v0.5.1 includes the remaining
 first-wave roles: GPT4All and Jan read-only storage, LocalAI runtime tests, and Open WebUI
-browser handoff. They are unreleased and verified with synthetic contracts; live provider
-validation remains unverified. Additional runtime roles and unsupported layouts remain
+browser handoff. They are verified with synthetic contracts; live provider validation
+remains unverified. Additional runtime roles and unsupported layouts remain
 explicitly planned in the [versioned integration catalog](integrations/catalog.json).

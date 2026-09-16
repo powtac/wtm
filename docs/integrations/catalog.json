@@ -34,7 +34,7 @@
       "platformEvidenceURL": "https://docs.gpt4all.io/gpt4all_help/faq.html",
       "platformStatus": "macOS and Apple Silicon Metal documented",
       "capabilities": {
-        "storage": "read-only GGUF inventory; unreleased",
+        "storage": "read-only GGUF inventory; WTM 0.5.1",
         "runtime": "planned"
       },
       "detectionConvention": "Explicit approved download root; validated GGUF v2/v3. incomplete- prefix and .incomplete suffix denote partial files. Remote .rmodel configurations are excluded.",
@@ -53,7 +53,7 @@
       "platformEvidenceURL": "https://www.jan.ai/docs/desktop/install/mac",
       "platformStatus": "macOS and Apple Silicon documented",
       "capabilities": {
-        "storage": "read-only model.yml and GGUF inventory; unreleased",
+        "storage": "read-only model.yml and GGUF inventory; WTM 0.5.1",
         "runtime": "planned"
       },
       "detectionConvention": "Approved Jan data root; llamacpp/models only. Bounded flat model.yml scalar subset binds same-directory GGUF path and expected size.",
@@ -71,7 +71,7 @@
       "platformEvidenceURL": "https://localai.io/docs/reference/binaries/",
       "platformStatus": "Native macOS ARM64 binaries documented; backend-specific validation required",
       "capabilities": {
-        "runtime": "explicit provider-managed GGUF test; unreleased"
+        "runtime": "explicit provider-managed GGUF test; WTM 0.5.1"
       },
       "detectionConvention": "User supplies numeric-loopback root endpoint and exact model ID per installation. /readyz and /v1/models establish unauthenticated reachability; one-token /v1/chat/completions separately checks inference.",
       "evidenceStatus": "Synthetic adapter and HTTP contracts pass, including stale mapping, auth/status failure and bounded response; live LocalAI backend not verified",
@@ -88,7 +88,7 @@
       "platformEvidenceURL": "https://docs.openwebui.com/getting-started/quick-start/",
       "platformStatus": "macOS host documented; browser client independent of inference hardware",
       "capabilities": {
-        "client": "reviewed browser model-selection handoff; unreleased"
+        "client": "reviewed browser model-selection handoff; WTM 0.5.1"
       },
       "detectionConvention": "User supplies local UI root and model reference. Fresh WTM inference evidence for the installation is required; reviewed browser URL has exactly one encoded model parameter.",
       "evidenceStatus": "Synthetic freshness, URL injection, expiration and broker validation tests pass; live authenticated WebUI session not verified",

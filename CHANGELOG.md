@@ -4,6 +4,14 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [0.5.1] - 2026-09-16
+
+### Development
+
+- Close the Phase 6 storage prerequisite after Phase 5 acceptance and start the optional
+  MLX runtime gate with an offline environment probe and four negative/metadata tests.
+  MLX runtime execution remains disabled pending the interpreter/package trust boundary.
+
 ### Added
 
 - Opt-in read-only GPT4All GGUF inventory and Jan `model.yml`/GGUF inventory, with
