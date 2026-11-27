@@ -534,6 +534,21 @@ private struct UpdateFixtureFetcher: UpdateReleaseFetching {
   }
 }
 
+@MainActor
+private final class UpdateFixtureInstaller: UpdateInstalling {
+  private(set) var attempts: [UpdateRelease] = []
+  var fails = false
+
+  func install(
+    _ release: UpdateRelease,
+    prepareForRelaunch: @MainActor () async -> Bool
+  ) async throws -> Bool {
+    attempts.append(release)
+    if fails { throw URLError(.cannotLoadFromNetwork) }
+    return await prepareForRelaunch()
+  }
+}
+
 private func updateVersion(_ value: String) -> SemanticVersion {
   guard let version = SemanticVersion(value) else { fatalError("Invalid fixture version") }
   return version
@@ -613,31 +628,71 @@ func updateCheckerDistinguishesFailureStates() async {
 }
 
 @MainActor
-@Test("Automatic update checks use a seven-day cache")
-func automaticUpdateChecksUseSevenDayCache() async {
+@Test("Each app launch checks for and installs the newest stable update by default")
+func automaticUpdateInstallsOnLaunch() async {
   let defaults = updateDefaults()
-  let firstChecker = UpdateChecker(
+  let installer = UpdateFixtureInstaller()
+  let stable = updateRelease("1.0.1")
+  let fetcher = UpdateFixtureFetcher(
+    response: .releases([stable, updateRelease("2.0.0-rc.1", isPrerelease: true)])
+  )
+  let checker = UpdateChecker(
     currentVersion: updateVersion("1.0.0"),
-    fetcher: UpdateFixtureFetcher(response: .releases([updateRelease("1.0.1")])),
+    fetcher: fetcher,
+    installer: installer,
     defaults: defaults
   )
-  let checkedAt = Date(timeIntervalSince1970: 1_800_000_000)
-  await firstChecker.check(now: checkedAt)
+  #expect(checker.automaticallyInstallsUpdates)
+  await checker.check()
+  #expect(installer.attempts.isEmpty)
 
-  let secondChecker = UpdateChecker(
+  let nextLaunch = UpdateChecker(
     currentVersion: updateVersion("1.0.0"),
-    fetcher: UpdateFixtureFetcher(response: .invalidMetadata),
+    fetcher: fetcher,
+    installer: installer,
     defaults: defaults
   )
-  #expect(!secondChecker.shouldAutomaticallyCheck)
-  await secondChecker.checkAutomaticallyIfDue(
-    now: checkedAt.addingTimeInterval(UpdateChecker.automaticCheckInterval - 1)
+  #expect(await nextLaunch.installUpdateOnLaunch { true })
+  #expect(await !nextLaunch.installUpdateOnLaunch { true })
+  #expect(installer.attempts == [stable])
+}
+
+@MainActor
+@Test("Opting out survives relaunch and leaves manual update checks available")
+func automaticUpdateOptOutPersists() async {
+  let defaults = updateDefaults()
+  let release = updateRelease("1.0.1")
+  let installer = UpdateFixtureInstaller()
+  UpdateChecker(defaults: defaults).automaticallyInstallsUpdates = false
+  let checker = UpdateChecker(
+    currentVersion: updateVersion("1.0.0"),
+    fetcher: UpdateFixtureFetcher(response: .releases([release])),
+    installer: installer,
+    defaults: defaults
   )
-  #expect(secondChecker.state == .idle)
-  await secondChecker.checkAutomaticallyIfDue(
-    now: checkedAt.addingTimeInterval(UpdateChecker.automaticCheckInterval)
+  #expect(!checker.automaticallyInstallsUpdates)
+  #expect(await !checker.installUpdateOnLaunch { true })
+  #expect(checker.state == .idle)
+  await checker.check()
+  #expect(checker.state == .updateAvailable(release))
+  #expect(installer.attempts.isEmpty)
+}
+
+@MainActor
+@Test("A failed automatic installation keeps the release available for manual download")
+func automaticUpdateFailurePreservesRelease() async {
+  let release = updateRelease("1.0.1")
+  let installer = UpdateFixtureInstaller()
+  installer.fails = true
+  let checker = UpdateChecker(
+    currentVersion: updateVersion("1.0.0"),
+    fetcher: UpdateFixtureFetcher(response: .releases([release])),
+    installer: installer,
+    defaults: updateDefaults()
   )
-  #expect(secondChecker.state == .failed)
+  #expect(await !checker.installUpdateOnLaunch { true })
+  #expect(checker.updateInstallationFailed)
+  #expect(checker.state == .updateAvailable(release))
 }
 
 @Test("Model ages use whole hours and days and keep unknown explicit")

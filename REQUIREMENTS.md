@@ -508,14 +508,14 @@ App-Updates betreffen ausschließlich WTM-Binaries. Provider- und Modelldownload
 
 - **FR-UPD-001 (P0):** WTM MUST den stabilen Updatekanal gegen die offiziellen GitHub Releases des Repositorys `powtac/wtm` prüfen. Vorabversionen werden standardmäßig nicht als Update angeboten.
 - **FR-UPD-002 (P0):** Ein manueller `Check for Updates…` MUST im App-Menü, im About-Fenster und in `Settings > General` erreichbar sein. Alle Einstiege nutzen dieselbe kanonische Repository-/Release-URL.
-- **FR-UPD-003 (P0):** WTM MUST höchstens einmal innerhalb von sieben Tagen automatisch prüfen. Der automatische Check darf beim App-Start oder während einer aktiven Sitzung erfolgen, aber keinen zusätzlichen Hintergrunddienst, Login-Item oder dauerhaft laufenden Prozess voraussetzen.
+- **FR-UPD-003 (P0):** WTM MUST bei jedem App-Start einmal automatisch auf Updates prüfen, wenn `Settings > General > Updates > Automatically install updates at startup` aktiviert ist. Die Einstellung ist standardmäßig aktiv und wird lokal gespeichert.
 - **FR-UPD-004 (P0):** Der Update-Check MUST mindestens `Up to Date`, `Update Available`, `No Release Available`, `Offline` und `Check Failed` unterscheiden. Ein Netzwerk- oder API-Fehler darf nicht als `Up to Date` erscheinen.
 - **FR-UPD-005 (P0):** Bei einem verfügbaren Update MUST die UI aktuelle Version, verfügbare Version, Veröffentlichungsdatum, Release Notes sowie die Aktionen `View Release on GitHub` und `Download Latest Release` anzeigen. Beide Aktionen öffnen die passende offizielle GitHub-Release-Seite; der Fallback ist `https://github.com/powtac/wtm/releases/latest`.
-- **FR-UPD-006 (P0):** Der Download einer neuen WTM-Version erfolgt in Phase 5 ausschließlich über die offizielle GitHub-Release-Seite. Automatische Installation, In-App-Ersetzung oder stiller Binary-Download sind nicht Bestandteil dieser Phase.
+- **FR-UPD-006 (P0):** Bei einem neueren stabilen Release MUST WTM das offizielle Apple-Silicon-DMG von GitHub laden, SHA-256, Developer-ID-Signaturen, Versionsnummer und die macOS-Ausführungsrichtlinie prüfen und die bestehende App atomar ersetzen. Nach dem Austausch startet WTM neu. Wenn die Prüfung oder Installation fehlschlägt, bleibt der manuelle Download verfügbar.
 - **FR-UPD-007 (P0):** Update-Anfragen dürfen keine Inventardaten, Modellnamen, lokalen Pfade, Hardwaredaten, Benutzerkennungen oder Telemetrie übertragen. Der Check bleibt mit deaktivierter Telemetrie und ohne Account nutzbar.
 - **FR-UPD-008 (P1):** Die UI MUST einen manuellen erneuten Check, den letzten Prüfzeitpunkt und die verwendete Releasequelle anzeigen. Offline- und Rate-Limit-Zustände erhalten eine verständliche nächste Aktion.
 - **FR-UPD-009 (P0):** Repository-, Release- und Downloadlinks in About, Settings, App-Menü, Website, README und Release Notes MUST auf die jeweils passende offizielle GitHub-Seite zeigen und dürfen keine veralteten oder hardcodierten Alternativquellen verwenden.
-- **FR-UPD-010 (P0):** Tests MUST mindestens SemVer-Vergleich, Stable-/Prerelease-Auswahl, gleichzeitige Version, ungültige Release-Metadaten, Offline-Fehler, Rate-Limit und den Sieben-Tage-Cache abdecken. UI-Smoke-Tests prüfen alle manuellen Einstiege und den externen Downloadlink.
+- **FR-UPD-010 (P0):** Tests MUST mindestens SemVer-Vergleich, Stable-/Prerelease-Auswahl, gleiche Version, ungültige Release-Metadaten, Offline-Fehler, Rate-Limit, automatische Installation beim Start und gespeichertes Opt-out abdecken. UI-Smoke-Tests prüfen alle manuellen Einstiege und den externen Downloadlink.
 
 ### 9.14 Settings und Erweiterbarkeit
 
@@ -978,7 +978,7 @@ Die erste nutzbare Beta ist bewusst klein und scan-only. Sie ist fertig, wenn al
 | 2 — Safe Actions | Löschpläne, Papierkorb, Audit, Verifikation | Kontrolliertes Aufräumen |
 | 3 — Runtimes | Readiness, Ollama, llama.cpp, Tooldefinitionsschema | Kontrollierter Start/Stop |
 | 4 — Integrationen | OpenClaw, Unsloth, Menüleiste und Launch at Login | Erweiterter lokaler Workflow ohne Python-/MLX-Trust-Grenze |
-| 5 — Stable Public Release | vollständige DMG-Pipeline, GitHub Release, Pages, Community, Security-Aktivierung, About-/Downloadlinks und wöchentlicher Update-Check | Verifizierte stabile Veröffentlichung mit nachvollziehbarem Updatepfad |
+| 5 — Stable Public Release | vollständige DMG-Pipeline, GitHub Release, Pages, Community, Security-Aktivierung, About-/Downloadlinks und Updatepfad | Verifizierte stabile Veröffentlichung mit nachvollziehbarem Updatepfad |
 | 6 — MLX Support | Kompilierter MLX-Storage-Adapter; Runtime nur nach separatem Python-/Package-Security-Gate | MLX-Inventar zuerst, kontrollierte lokale Ausführung optional danach |
 
 ### 18.1 Implementierungsreihenfolge und Phase Gates

@@ -1,4 +1,5 @@
 import Foundation
+import OSLog
 import Observation
 
 struct SemanticVersion: Comparable, Equatable, Sendable, CustomStringConvertible {
@@ -159,7 +160,8 @@ protocol UpdateReleaseFetching: Sendable {
 
 struct GitHubReleaseFetcher: UpdateReleaseFetching {
   func fetchReleases() async throws -> [UpdateRelease] {
-    var request = URLRequest(url: UpdateChecker.apiURL)
+    var request = URLRequest(
+      url: UpdateChecker.apiURL, cachePolicy: .reloadIgnoringLocalCacheData)
     request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
     request.setValue("WTM", forHTTPHeaderField: "User-Agent")
     request.setValue("2022-11-28", forHTTPHeaderField: "X-GitHub-Api-Version")
@@ -202,28 +204,39 @@ final class UpdateChecker {
   nonisolated static let releasesURL = makeURL("https://github.com/powtac/wtm/releases/latest")
   nonisolated static let apiURL = makeURL("https://api.github.com/repos/powtac/wtm/releases")
   nonisolated static let licenseURL = makeURL("https://github.com/powtac/wtm/blob/main/LICENSE")
-  nonisolated static let automaticCheckInterval: TimeInterval = 7 * 24 * 60 * 60
 
   private nonisolated static let lastCheckKey = "updates.last-check"
+  private nonisolated static let automaticInstallKey = "updates.automatic-install"
 
   let currentVersion: SemanticVersion
   let releaseSourceURL = UpdateChecker.releasesURL
   private let fetcher: any UpdateReleaseFetching
+  private let installer: any UpdateInstalling
   private let defaults: UserDefaults
   private(set) var state: UpdateCheckState = .idle
   private(set) var lastCheckedAt: Date?
+  private(set) var isInstallingUpdate = false
+  private(set) var updateInstallationFailed = false
+  private var didCheckOnLaunch = false
   private var isRequestInFlight = false
+  var automaticallyInstallsUpdates: Bool {
+    didSet { defaults.set(automaticallyInstallsUpdates, forKey: Self.automaticInstallKey) }
+  }
 
   init(
     currentVersion: SemanticVersion = SemanticVersion(
       Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
     ) ?? .zero,
     fetcher: any UpdateReleaseFetching = GitHubReleaseFetcher(),
+    installer: any UpdateInstalling = GitHubUpdateInstaller(),
     defaults: UserDefaults = .standard
   ) {
     self.currentVersion = currentVersion
     self.fetcher = fetcher
+    self.installer = installer
     self.defaults = defaults
+    automaticallyInstallsUpdates =
+      defaults.object(forKey: Self.automaticInstallKey) as? Bool ?? true
     lastCheckedAt = defaults.object(forKey: Self.lastCheckKey) as? Date
   }
 
@@ -234,19 +247,35 @@ final class UpdateChecker {
 
   var currentVersionText: String { currentVersion.description }
 
-  var shouldAutomaticallyCheck: Bool {
-    guard let lastCheckedAt else { return true }
-    return Date.now.timeIntervalSince(lastCheckedAt) >= Self.automaticCheckInterval
-  }
+  func installUpdateOnLaunch(
+    prepareForRelaunch: @MainActor () async -> Bool
+  ) async -> Bool {
+    guard !didCheckOnLaunch else { return false }
+    didCheckOnLaunch = true
+    guard automaticallyInstallsUpdates, !isRequestInFlight else { return false }
+    await check()
+    guard case let .updateAvailable(release) = state, automaticallyInstallsUpdates,
+      !Task.isCancelled
+    else { return false }
 
-  func checkAutomaticallyIfDue(now: Date = .now) async {
-    guard !isRequestInFlight else { return }
-    if let lastCheckedAt,
-      now.timeIntervalSince(lastCheckedAt) < Self.automaticCheckInterval
-    {
-      return
+    isRequestInFlight = true
+    isInstallingUpdate = true
+    defer {
+      isInstallingUpdate = false
+      isRequestInFlight = false
     }
-    await check(now: now)
+    do {
+      return try await installer.install(release) {
+        guard self.automaticallyInstallsUpdates, !Task.isCancelled else { return false }
+        let ready = await prepareForRelaunch()
+        return ready && self.automaticallyInstallsUpdates && !Task.isCancelled
+      }
+    } catch {
+      updateInstallationFailed = true
+      Logger(subsystem: "de.powtac.whatthemodel", category: "updates").error(
+        "Automatic update failed: \(String(describing: error), privacy: .private)")
+      return false
+    }
   }
 
   func checkManually() {
@@ -259,6 +288,7 @@ final class UpdateChecker {
   func check(now: Date = .now) async {
     guard !isRequestInFlight else { return }
     isRequestInFlight = true
+    updateInstallationFailed = false
     state = .checking
     defer { isRequestInFlight = false }
 

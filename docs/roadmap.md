@@ -19,9 +19,9 @@ copies only and are not maintained by the project.
 
 Phase 4 evidence is recorded in [Phase 4 Acceptance](phase-4-acceptance.md). Phase 5's
 public launch and remaining acceptance gaps are recorded in
-[Phase 5 Acceptance](phase-5-acceptance.md). Phase 5 also owns the WTM application update path: a weekly, privacy-preserving
-check against the stable GitHub Release plus manual `Check for Updates…` and
-`Download Latest Release` links in About, Settings, the app menu, website, and README.
+[Phase 5 Acceptance](phase-5-acceptance.md). WTM installs verified stable GitHub Releases
+at startup by default. Settings controls automatic updates. Manual checks and download
+links remain available.
 Provider- and model acquisition are currently backlog and have no committed shipping phase.
 ADR-028 moves MLX into Phase 6 because recognizing
 an `.mlx` suffix is not an inventory adapter and Python execution introduces a separate

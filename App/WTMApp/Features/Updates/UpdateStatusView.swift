@@ -17,12 +17,22 @@ struct UpdateStatusView: View {
             checker.checkManually()
           }
           .accessibilityIdentifier("check-for-updates-button")
+          .disabled(checker.state == .checking || checker.isInstallingUpdate)
         }
       }
 
       Text(statusMessage)
         .foregroundStyle(.secondary)
         .fixedSize(horizontal: false, vertical: true)
+
+      if checker.isInstallingUpdate {
+        ProgressView("update.installing")
+          .controlSize(.small)
+      } else if checker.updateInstallationFailed {
+        Text("update.install-failed")
+          .foregroundStyle(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+      }
 
       if let release = availableRelease {
         VStack(alignment: .leading, spacing: 5) {

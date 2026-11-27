@@ -3235,6 +3235,16 @@
         }
       }
     },
+    "settings.updates.automatic-install": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatically install updates at startup"
+          }
+        }
+      }
+    },
     "settings.updates.section": {
       "extractionState": "stale",
       "localizations": {
@@ -3898,6 +3908,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Check for Updates…"
+          }
+        }
+      }
+    },
+    "update.install-failed": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic installation failed. You can download the update from GitHub."
+          }
+        }
+      }
+    },
+    "update.installing": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installing update…"
           }
         }
       }

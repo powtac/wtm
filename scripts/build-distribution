@@ -196,7 +196,7 @@ copied_app="$temporary_root/copied/WTM.app"
 mkdir -p "${copied_app:h}"
 /usr/bin/ditto "$mounted_app" "$copied_app"
 echo "Running DMG copy-and-launch smoke test..."
-"$copied_app/Contents/MacOS/WTM" > "$temporary_root/smoke.stdout" 2> "$temporary_root/smoke.stderr" &
+WTM_DISABLE_AUTOMATIC_UPDATE_CHECK=1 "$copied_app/Contents/MacOS/WTM" > "$temporary_root/smoke.stdout" 2> "$temporary_root/smoke.stderr" &
 smoke_pid=$!
 sleep 5
 kill -0 "$smoke_pid" 2>/dev/null || {

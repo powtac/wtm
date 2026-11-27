@@ -25,7 +25,16 @@ struct WTMApp: App {
           }
           await model.prepareForLaunch()
           if ProcessInfo.processInfo.environment["WTM_DISABLE_AUTOMATIC_UPDATE_CHECK"] != "1" {
-            await updateChecker.checkAutomaticallyIfDue()
+            Task {
+              let didRelaunch = await updateChecker.installUpdateOnLaunch {
+                guard !model.isDeleting else { return false }
+                await model.stopOwnedRuntimeSessionsForTermination()
+                return !model.isDeleting
+              }
+              if didRelaunch {
+                NSApplication.shared.terminate(nil)
+              }
+            }
           }
           if ProcessInfo.processInfo.environment["WTM_UI_TEST_SHOW_ABOUT"] == "1" {
             openWindow(id: "about")

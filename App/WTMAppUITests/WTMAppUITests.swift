@@ -256,6 +256,10 @@ final class WTMAppUITests: XCTestCase {
     captureSettingsSection(
       application, tab: "General", header: "Updates", name: "settings-general-updates"
     )
+    XCTAssertTrue(
+      application.descendants(matching: .any)["Automatically install updates at startup"]
+        .firstMatch.exists
+    )
     captureSettingsSection(
       application, tab: "General", header: "Menu Bar", name: "settings-general-menu-bar"
     )

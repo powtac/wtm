@@ -4,6 +4,13 @@ All notable changes follow Keep a Changelog. The project uses Semantic Versionin
 
 ## Unreleased
 
+## [5.1.0] - 2026-11-27
+
+### Added
+
+- Install verified stable GitHub releases at startup and relaunch WTM after the update.
+  Automatic updates are on by default and can be turned off in Settings > General > Updates.
+
 ## [0.5.1] - 2026-09-16
 
 ### Development

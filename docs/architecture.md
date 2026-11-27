@@ -26,10 +26,11 @@ The app target is the only composition root. It constructs discovery, action, an
 registries and injects them into `InventoryCoordinator`, `ActionExecutor`, and
 `RuntimeBroker`. Views neither enumerate or mutate the file system nor create a `Process`.
 
-The only app-level network request is `UpdateService`, which sends anonymous GitHub release
-metadata requests without inventory context, model names, local paths, hardware data,
-account identifiers, or telemetry. It accepts only official `powtac/wtm` release URLs and
-never downloads or installs a binary.
+The app updater fetches anonymous release metadata and assets from the official
+`powtac/wtm` repository without inventory context, model names, local paths, hardware data,
+account identifiers, or telemetry. `GitHubUpdateInstaller` verifies the DMG checksum and
+Developer ID signature before mounting it read-only. It verifies the copied app's signature,
+version, and macOS execution policy before swapping it into the installed app's location.
 
 Provider sources scan before generic manual sources. The inventory coordinator reconciles
 overlapping artifact paths so provider-backed identity replaces a generic cache view while
@@ -39,8 +40,8 @@ distinct installation paths and volumes remain separate.
 
 - `RuntimeAdapter` owns provider-specific compatibility, plan construction, local health
   contracts, and the minimal inference contract. It never owns an OS process handle.
-- `RuntimeBroker` is the sole process-lifecycle authority. Only its reviewed launcher may
-  use Foundation `Process`; the app, views, adapters, and persistence targets cannot.
+- `RuntimeBroker` owns managed runtime processes through its reviewed launcher.
+  The app updater can run the fixed macOS disk-image and execution-policy utilities.
 - Ollama uses its numeric-loopback API for readiness and one-token inference. WTM does not
   claim ownership of the daemon or expose a provider Stop action.
 - llama.cpp uses an absolute executable URL, a separate typed argument array, an explicit

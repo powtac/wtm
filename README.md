@@ -13,7 +13,7 @@
 models are present, where their files live, how much storage they occupy, whether a
 download is incomplete, and which provider metadata belongs to each installation.
 
-**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v0.5.1/WTM-0.5.1-arm64.dmg)
+**Download:** [WTM.app](https://github.com/powtac/wtm/releases/download/v5.1.0/WTM-5.1.0-arm64.dmg)
 
 ## ✨ Features
 
@@ -39,7 +39,7 @@ download is incomplete, and which provider metadata belongs to each installation
 - 🔌 Reviewed OpenClaw and Unsloth client handoffs without silent configuration changes
 - 📍 Passive menu bar status and independent Launch at Login setting
 - 🪶 Low memory footprint for responsive inventory scans and everyday use
-- 🔄 Automatic weekly update checks with manual download and installation through GitHub Releases
+- 🔄 Automatic updates from stable GitHub Releases at startup, enabled by default
 - 🔐 Signed, notarized, stapled releases with DMG verification, checksums, SBOM, and attestation
 - 🔒 Privacy-preserving release checks without inventory, model, path, hardware, or telemetry data
 
@@ -111,10 +111,10 @@ Stable releases are created only by an exact `vMAJOR.MINOR.PATCH` tag through th
 `release` Environment. The workflow signs, notarizes, staples, mounts, copies, and starts
 the DMG payload before it publishes a GitHub Release. See
 [GitHub configuration](docs/github-configuration.md) for the required Environment secrets.
-WTM checks that same official stable release channel at most once per seven days. Stable-
-release builds include a weekly privacy-preserving check against official GitHub Releases;
-WTM never auto-installs updates, opens a shell, automates Terminal, or downloads models.
-Installation remains manual.
+By default, WTM checks for a new stable release at startup. It verifies the downloaded DMG
+and the signed app before replacing the installed copy and relaunching. Turn off
+**Automatically install updates at startup** under **Settings > General > Updates**.
+**Check for Updates…** and manual downloads remain available.
 
 For local release preparation, Fastlane wraps the existing release gates:
 
@@ -148,20 +148,20 @@ Apache License 2.0. Test fixtures are generated placeholders and contain no mode
 
 ### Manual
 
-Download the current [WTM 0.5.1 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v0.5.1/WTM-0.5.1-arm64.dmg),
+Download the current [WTM 5.1.0 Apple Silicon DMG directly](https://github.com/powtac/wtm/releases/download/v5.1.0/WTM-5.1.0-arm64.dmg),
 verify it as shown below, then open the `.dmg` and drag `WTM.app` to `Applications`. WTM
 requires macOS 15 or later on Apple Silicon.
 
 Verify the downloaded DMG before opening it:
 
 ```sh
-curl -fLO "https://github.com/powtac/wtm/releases/download/v0.5.1/WTM-0.5.1-arm64.dmg"
-curl -fL "https://github.com/powtac/wtm/releases/download/v0.5.1/WTM-0.5.1.sha256" -o checksums.sha256
+curl -fLO "https://github.com/powtac/wtm/releases/download/v5.1.0/WTM-5.1.0-arm64.dmg"
+curl -fL "https://github.com/powtac/wtm/releases/download/v5.1.0/WTM-5.1.0.sha256" -o checksums.sha256
 shasum -a 256 --ignore-missing -c checksums.sha256
 ```
 
 The checksum manifest must be in the same directory as the downloaded DMG. The commands
-above are pinned to the current public `v0.5.1` release.
+above are pinned to the current public `v5.1.0` release.
 
 ### Homebrew Cask
 

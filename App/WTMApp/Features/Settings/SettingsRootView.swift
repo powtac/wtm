@@ -3,7 +3,7 @@ import WTMDomain
 
 struct SettingsRootView: View {
   @Bindable var model: InventoryViewModel
-  let updateChecker: UpdateChecker
+  @Bindable var updateChecker: UpdateChecker
   @AppStorage("menu-bar.enabled") private var isMenuBarEnabled = true
   @State private var confirmation: SettingsConfirmation?
 
@@ -89,6 +89,8 @@ struct SettingsRootView: View {
       }
 
       Section("settings.updates.section") {
+        Toggle(
+          "settings.updates.automatic-install", isOn: $updateChecker.automaticallyInstallsUpdates)
         UpdateStatusView(checker: updateChecker)
       }
 
@@ -396,6 +398,7 @@ struct SettingsRootView: View {
 
   private func resetToDefaults() {
     isMenuBarEnabled = true
+    updateChecker.automaticallyInstallsUpdates = true
     UserDefaults.standard.removeObject(forKey: "inventory.storage-display-mode")
     UserDefaults.standard.removeObject(forKey: "inventory.table-columns")
     model.setLaunchAtLogin(false)

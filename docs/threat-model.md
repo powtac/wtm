@@ -150,6 +150,7 @@ unattended handoff remain out of scope.
 | A partial workflow publishes `latest` | Keep the GitHub Release draft until every build, trust, backup, and attestation gate succeeds; publish only in the final step |
 | Signing credentials persist on a runner | Store credentials only in the protected release Environment, import into an ephemeral keychain, and delete it unconditionally |
 | Signed app and distributed DMG differ | Notarize/staple both layers, mount the final DMG, copy its app, then repeat code-signing, Gatekeeper, and process-start checks |
+| Automatic update downloads a modified or unrelated app | Require the published SHA-256, verify WTM's Developer ID before mounting and replacing, and check the staged app's exact version and macOS execution policy |
 | Release artifacts contain credentials | Reject credential file types and high-confidence secret patterns before upload; publish checksums, SPDX SBOM, and build metadata |
 | Private preparation accidentally becomes public | Require the exact repository, public visibility, exact SemVer tag, matching app version, and explicit Pages/release jobs |
 | Mutable third-party Actions alter the release | Pin Actions to full commit hashes and grant each job only explicit token permissions |
