@@ -1,0 +1,52 @@
+name: Dependabot merge
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  approve-and-merge:
+    if: >-
+      github.repository == 'powtac/wtm' &&
+      github.event.workflow_run.path == '.github/workflows/ci.yml' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.actor.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPOSITORY: ${{ github.repository }}
+      HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+    steps:
+      - name: Approve and merge the tested Dependabot commit
+        # The privileged job uses the default branch workflow and GitHub API data only.
+        shell: bash
+        run: |
+          pr="$(gh api --method GET "repos/$REPOSITORY/pulls" \
+            -f state=open -f base=main -f head="${REPOSITORY%%/*}:$HEAD_BRANCH" |
+            jq -r --arg repo "$REPOSITORY" --arg sha "$HEAD_SHA" '
+              .[] | select(.user.login == "dependabot[bot]" and .draft == false
+                and .head.repo.full_name == $repo and .head.sha == $sha) | .number
+            ')"
+          if [[ -z "$pr" ]]; then
+            echo "No open Dependabot PR matches the tested commit."
+            exit 0
+          fi
+          if [[ "$(gh pr view "$pr" --repo "$REPOSITORY" --json reviewDecision --jq .reviewDecision)" == "CHANGES_REQUESTED" ]]; then
+            echo "PR #$pr has outstanding change requests."
+            exit 0
+          fi
+          gh api --method POST "repos/$REPOSITORY/pulls/$pr/reviews" \
+            -f event=APPROVE -f commit_id="$HEAD_SHA" --jq '.state'
+          gh pr merge "$pr" --repo "$REPOSITORY" --merge --match-head-commit "$HEAD_SHA"
+          # A push made by GITHUB_TOKEN does not trigger a new workflow.
+          gh workflow run ci.yml --repo "$REPOSITORY" --ref main

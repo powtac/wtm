@@ -9,6 +9,11 @@ the original configuration; current release acceptance is tracked in
 As of 2026-08-25, `powtac/wtm` is public, GitHub Pages is deployed from GitHub Actions at
 `https://powtac.github.io/wtm/`, and Discussions and Projects are intentionally disabled.
 
+As of 2026-11-27, the repository allows GitHub Actions to approve pull requests, with
+read-only default workflow permissions. `Dependabot merge` approves and merges open,
+same-repository Dependabot PRs targeting `main` after successful CI for the exact head
+commit. It skips PRs with outstanding change requests and starts CI on `main` after merging.
+
 ## Initial private settings
 
 - Default branch: `main`
